@@ -215,6 +215,21 @@ function CalculateurPretInteret() {
       tauxAnnuel <= 100 &&
       nbPeriodes > 0;
 
+    /* Paiements pour chaque fréquence (avec mêmes capital, taux et terme).
+       Permet d'afficher les 3 montants côte à côte pour comparaison directe
+       et de confirmer visuellement que tout est calculé sur le total TAXES
+       INCLUSES du capital (voir étape 1, ligne 5). */
+    const paiementsParFrequence = FREQUENCES.map((f) => {
+      const nb = Math.round((saisie.termeMois * f.periodesAn) / 12);
+      return {
+        id: f.id,
+        label: f.label,
+        periodesAn: f.periodesAn,
+        nbPeriodes: nb,
+        paiement: calculerPaiement(totalAvecTaxes, tauxAnnuel, nb, f.periodesAn),
+      };
+    });
+
     return {
       montantAvantTaxes,
       protection,
@@ -231,6 +246,7 @@ function CalculateurPretInteret() {
       totalRembourse,
       interetsTotaux,
       frequence: freq,
+      paiementsParFrequence,
       valide,
     };
   }, [saisie]);
@@ -393,20 +409,29 @@ function CalculateurPretInteret() {
           </div>
 
           <div className="cpi-param-bloc">
-            <span className="cpi-param-label">Fréquence de paiement</span>
+            <span className="cpi-param-label">
+              Fréquence de paiement
+              <span className="cpi-param-aide-inline">· taxes incluses</span>
+            </span>
             <div className="cpi-freq-grille">
-              {FREQUENCES.map((f) => (
+              {calculs.paiementsParFrequence.map((p) => (
                 <button
-                  key={f.id}
+                  key={p.id}
                   type="button"
                   className={
                     "cpi-freq-btn" +
-                    (saisie.frequence === f.id ? " cpi-freq-actif" : "")
+                    (saisie.frequence === p.id ? " cpi-freq-actif" : "")
                   }
-                  onClick={() => handleSelectFrequence(f.id)}
+                  onClick={() => handleSelectFrequence(p.id)}
                 >
-                  <span className="cpi-freq-titre">{f.label}</span>
-                  <span className="cpi-freq-mention">{f.periodesAn} / an</span>
+                  <span className="cpi-freq-ligne-haut">
+                    <span className="cpi-freq-titre">{p.label}</span>
+                    <span className="cpi-freq-mention">{p.periodesAn} / an</span>
+                  </span>
+                  <span className="cpi-freq-montant">
+                    {calculs.valide ? formatMontant(p.paiement) : "—"}
+                  </span>
+                  <span className="cpi-freq-taxes">Taxes incluses</span>
                 </button>
               ))}
             </div>
@@ -434,12 +459,18 @@ function CalculateurPretInteret() {
               <span className="cpi-resultat-label">
                 Paiement {calculs.frequence.label.toLowerCase()}
               </span>
+              <span className="cpi-resultat-badge-taxes" aria-hidden="true">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+                Taxes du Québec incluses
+              </span>
               <span className="cpi-resultat-montant">
                 {calculs.valide ? formatMontant(calculs.paiement) : "—"}
               </span>
               <span className="cpi-resultat-mention">
                 {calculs.valide
-                  ? `${calculs.nbPeriodes} versements`
+                  ? `${calculs.nbPeriodes} versements · capital ${formatMontant(calculs.totalAvecTaxes)} (taxes incl.)`
                   : "Saisissez un montant et un taux"}
               </span>
 

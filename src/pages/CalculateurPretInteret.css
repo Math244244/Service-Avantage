@@ -407,15 +407,23 @@
   transition: all 0.15s ease;
   font-family: inherit;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 6px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2px;
   text-align: left;
+  font-variant-numeric: tabular-nums;
 }
 
 .cpi-freq-btn:hover {
   border-color: var(--rouge-principal);
   transform: translateY(-1px);
+}
+
+.cpi-freq-ligne-haut {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
 }
 
 .cpi-freq-titre {
@@ -425,11 +433,38 @@
 }
 
 .cpi-freq-mention {
-  font-size: 10px;
+  font-size: 9.5px;
   font-weight: 600;
   color: var(--texte-tertiaire);
   text-transform: uppercase;
   letter-spacing: 0.3px;
+}
+
+/* Montant calculé pour la fréquence : c'est l'info qui aide le client à
+   comparer Mensuel / 2 semaines / Hebdo d'un coup d'œil. */
+.cpi-freq-montant {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--texte-principal);
+  letter-spacing: -0.2px;
+  line-height: 1.1;
+}
+
+/* « Taxes incluses » discret en pied de bouton : rappel constant
+   que tous les chiffres affichés sont TTC. */
+.cpi-freq-taxes {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--rouge-principal);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.cpi-freq-taxes::before {
+  content: "✓";
+  font-weight: 900;
 }
 
 .cpi-freq-actif {
@@ -439,9 +474,15 @@
 }
 
 .cpi-freq-actif .cpi-freq-titre,
-.cpi-freq-actif .cpi-freq-mention {
+.cpi-freq-actif .cpi-freq-mention,
+.cpi-freq-actif .cpi-freq-montant {
   color: #fff !important;
 }
+
+.cpi-freq-actif .cpi-freq-taxes {
+  color: rgba(255, 255, 255, 0.95);
+}
+.cpi-freq-actif .cpi-freq-taxes::before { color: #fff; }
 
 /* ═══════════════════════════════════════════════════════════════
    ÉTAPE 3 — Résultats (split horizontal : paiement + stats)
@@ -521,6 +562,30 @@
   color: rgba(255, 255, 255, 0.85);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+
+/* Badge « Taxes du Québec incluses » : confirme visuellement que le
+   gros chiffre affiché est bien le paiement TTC du capital affiché en
+   étape 1. Posé juste au-dessus du montant pour ne pas être manqué. */
+.cpi-resultat-badge-taxes {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 6px;
+  padding: 4px 11px;
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  border-radius: 999px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+}
+.cpi-resultat-badge-taxes svg {
+  flex-shrink: 0;
 }
 
 .cpi-resultat-montant {
