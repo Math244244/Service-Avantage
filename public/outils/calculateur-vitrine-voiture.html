@@ -1,0 +1,2228 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculateur paiements auto — Avantage Plus</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800;900&display=swap">
+
+  <style>
+    /* ═══════════════════ DESIGN SYSTEM ═══════════════════ */
+    :root {
+      /* Couleur de marque */
+      --red: #d0021b;
+      --red-600: #b8021a;
+      --red-700: #9b0117;
+      --red-soft: #fff3f4;
+      --red-glow: rgba(208, 2, 27, 0.25);
+
+      /* Couleurs sophistiquées */
+      --navy: #0f172a;
+      --navy-2: #1e293b;
+      --slate: #334155;
+      --steel: #64748b;
+      --pearl: #f8fafc;
+
+      /* Accents premium */
+      --gold: #d4a017;
+      --gold-soft: #fef9e3;
+
+      /* Texte & lignes */
+      --ink: #0f172a;
+      --ink-2: #334155;
+      --muted: #64748b;
+      --line: #e2e8f0;
+      --line-2: #cbd5e1;
+
+      /* Surfaces */
+      --bg: #eef2f7;
+      --bg-2: #ffffff;
+      --bg-card: rgba(255, 255, 255, 0.85);
+      --ok: #059669;
+
+      /* Élévations & rayons */
+      --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.05);
+      --shadow-sm: 0 2px 4px rgba(15, 23, 42, 0.05), 0 1px 2px rgba(15, 23, 42, 0.04);
+      --shadow-md: 0 6px 18px rgba(15, 23, 42, 0.08), 0 2px 4px rgba(15, 23, 42, 0.04);
+      --shadow-lg: 0 16px 40px rgba(15, 23, 42, 0.12);
+      --shadow-red: 0 6px 18px rgba(208, 2, 27, 0.25);
+
+      --radius: 14px;
+      --radius-sm: 8px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(1100px 500px at 100% -10%, rgba(208, 2, 27, 0.08), transparent 60%),
+        radial-gradient(900px 500px at -10% 110%, rgba(15, 23, 42, 0.06), transparent 60%),
+        radial-gradient(700px 400px at 50% 50%, rgba(212, 160, 23, 0.04), transparent 70%),
+        var(--bg);
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+    body {
+      padding: 28px 20px 70px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 22px;
+    }
+
+    /* ═══════════════════ PANEL DE CONTRÔLE ═══════════════════ */
+    .control-panel {
+      width: 100%;
+      max-width: 8.5in;
+      background: var(--bg-card);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+    }
+    .control-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 16px 22px;
+      border-bottom: 1px solid var(--line);
+      background:
+        linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+      position: relative;
+    }
+    .control-head::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 4px;
+      background: linear-gradient(180deg, var(--red) 0%, var(--red-700) 100%);
+    }
+    .control-head-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding-left: 6px;
+    }
+    .brand-mark {
+      width: 38px; height: 38px;
+      display: inline-flex; align-items: center; justify-content: center;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--red) 0%, var(--red-700) 100%);
+      color: #fff;
+      box-shadow: var(--shadow-red);
+      flex-shrink: 0;
+    }
+    .brand-mark svg { width: 22px; height: 22px; }
+    .control-title {
+      font-family: 'Manrope', 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--navy);
+      letter-spacing: 0.4px;
+      text-transform: uppercase;
+      line-height: 1;
+    }
+    .control-sub {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 4px;
+      font-weight: 500;
+    }
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      font-size: 12px;
+      font-weight: 700;
+      font-family: inherit;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: transform 0.08s ease, box-shadow 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+      white-space: nowrap;
+    }
+    .btn svg { width: 15px; height: 15px; flex-shrink: 0; }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--red) 0%, var(--red-700) 100%);
+      color: #fff;
+      border-color: var(--red-700);
+      box-shadow: var(--shadow-red);
+    }
+    .btn-primary:hover {
+      background: linear-gradient(135deg, var(--red-600) 0%, var(--red-700) 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 22px rgba(208, 2, 27, 0.35);
+    }
+    .btn-secondary {
+      background: #fff;
+      color: var(--navy);
+      border-color: var(--line-2);
+    }
+    .btn-secondary:hover { background: var(--pearl); border-color: var(--steel); box-shadow: var(--shadow-sm); }
+    .btn-green {
+      background: #fff;
+      color: #16793a;
+      border-color: #c7eccc;
+      box-shadow: 0 1px 2px rgba(22, 121, 58, 0.06);
+    }
+    .btn-green:hover {
+      background: #ecfdf3;
+      border-color: #16793a;
+      color: #115e2c;
+      box-shadow: 0 4px 12px rgba(22, 121, 58, 0.18);
+    }
+    .btn-green-active {
+      background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+      color: #fff;
+      border-color: #15803d;
+      box-shadow: 0 6px 18px rgba(22, 121, 58, 0.35);
+    }
+    .btn-green-active:hover {
+      background: linear-gradient(135deg, #15803d 0%, #115e2c 100%);
+      color: #fff;
+      transform: translateY(-1px);
+      box-shadow: 0 8px 22px rgba(22, 121, 58, 0.45);
+    }
+    .btn-ghost {
+      background: transparent;
+      color: var(--muted);
+      font-size: 11px;
+      padding: 8px 14px;
+    }
+    .btn-ghost:hover { color: var(--red); background: var(--red-soft); }
+    .btn:active { transform: translateY(1px); }
+    .btn:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+    .btn[aria-busy="true"] { opacity: 0.6; pointer-events: none; }
+    .btn .spinner {
+      width: 14px; height: 14px;
+      border: 2px solid currentColor; border-top-color: transparent;
+      border-radius: 50%; display: none;
+      animation: spin 0.6s linear infinite;
+    }
+    .btn[aria-busy="true"] .spinner { display: inline-block; }
+    .btn[aria-busy="true"] svg { display: none; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Contrôles principaux — agencement en 2 lignes */
+    .control-main {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      padding: 22px 24px;
+    }
+    .field-rates { width: 100%; }
+    .field-row {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 20px;
+      align-items: end;
+    }
+    .rates-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+    .rate-cell {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      align-items: stretch;
+      min-width: 0;
+    }
+    .rate-cell .rate-lab {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.8px;
+      text-align: center;
+      color: var(--steel);
+      text-transform: uppercase;
+    }
+    .rate-cell .input-wrap input {
+      height: 50px;
+      font-size: 20px;
+      font-weight: 800;
+      padding-right: 30px;
+      padding-left: 12px;
+      text-align: center;
+      letter-spacing: -0.2px;
+    }
+    .rate-cell .input-suffix {
+      right: 12px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--red);
+    }
+    .rate-cell .input-wrap input:focus + .input-suffix { color: var(--red); }
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+    .field label {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--navy);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .field label .ico {
+      width: 22px; height: 22px;
+      display: inline-flex; align-items: center; justify-content: center;
+      border-radius: 6px;
+      background: linear-gradient(135deg, var(--red-soft) 0%, #ffe6e8 100%);
+      color: var(--red);
+      flex-shrink: 0;
+      box-shadow: inset 0 0 0 1px rgba(208, 2, 27, 0.15);
+    }
+    .field label .ico svg { width: 14px; height: 14px; }
+    .input-wrap {
+      position: relative;
+    }
+    .input-wrap input,
+    .input-wrap select {
+      width: 100%;
+      height: 48px;
+      padding: 0 44px 0 16px;
+      font-family: inherit;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--navy);
+      border: 1.5px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+      font-variant-numeric: tabular-nums;
+    }
+    .input-wrap input:hover,
+    .input-wrap select:hover { border-color: var(--line-2); }
+    .input-wrap input:focus,
+    .input-wrap select:focus {
+      border-color: var(--red);
+      box-shadow: 0 0 0 4px rgba(208,2,27,0.14);
+      background: #fff;
+    }
+    .input-wrap select {
+      padding-right: 36px;
+      appearance: none;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+    }
+    .input-suffix {
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--steel);
+      pointer-events: none;
+    }
+    .field-hint {
+      font-size: 10.5px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+    .field-hint strong { color: var(--navy); }
+
+    /* ═══════════════════ CASE « INCLURE LA GARANTIE » ═══════════════════
+       Affichée à droite du label "Garantie prolongée à ajouter".
+       Cochée par défaut : la garantie est intégrée au paiement.
+       Décochée : le client voit le paiement véhicule seul + une bannière
+                  alternative avec le coût additionnel par terme. */
+    .warranty-label-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+    .warranty-label-row label[for="inWarranty"] {
+      margin-bottom: 0;
+    }
+    .warranty-include {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      user-select: none;
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--steel);
+      padding: 4px 10px 4px 6px;
+      border-radius: 999px;
+      background: rgba(208, 2, 27, 0.06);
+      border: 1px solid rgba(208, 2, 27, 0.18);
+      transition: all 0.2s ease;
+    }
+    .warranty-include:hover {
+      background: rgba(208, 2, 27, 0.1);
+      border-color: rgba(208, 2, 27, 0.32);
+    }
+    .warranty-include input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+      width: 0; height: 0;
+    }
+    .warranty-include-box {
+      width: 18px;
+      height: 18px;
+      border-radius: 5px;
+      background: #fff;
+      border: 1.5px solid #d4d4d8;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      transition: all 0.15s ease;
+      flex-shrink: 0;
+    }
+    .warranty-include-box svg {
+      width: 12px;
+      height: 12px;
+      opacity: 0;
+      transition: opacity 0.15s ease;
+    }
+    .warranty-include input:checked + .warranty-include-box {
+      background: var(--red);
+      border-color: var(--red);
+      box-shadow: 0 2px 6px rgba(208, 2, 27, 0.35);
+    }
+    .warranty-include input:checked + .warranty-include-box svg { opacity: 1; }
+    .warranty-include input:focus-visible + .warranty-include-box {
+      box-shadow: 0 0 0 3px rgba(208, 2, 27, 0.25);
+    }
+    .warranty-include input:checked ~ .warranty-include-text { color: var(--red); }
+    .warranty-include-text { transition: color 0.15s ease; }
+
+    /* Bandeau d'explication */
+    .formula-strip {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 14px 20px;
+      background: linear-gradient(90deg, var(--navy) 0%, var(--navy-2) 50%, var(--navy) 100%);
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.85);
+      flex-wrap: wrap;
+      text-align: center;
+    }
+    .formula-strip .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 999px;
+      font-weight: 600;
+      color: #fff;
+      backdrop-filter: blur(8px);
+    }
+    .formula-strip .chip strong { color: var(--gold); }
+    .formula-strip .plus,
+    .formula-strip .eq {
+      font-weight: 900;
+      color: rgba(255, 255, 255, 0.4);
+      font-size: 16px;
+    }
+    .formula-strip .chip.highlight {
+      background: linear-gradient(135deg, var(--red) 0%, var(--red-700) 100%);
+      color: #fff;
+      border-color: var(--red);
+      box-shadow: 0 4px 14px rgba(208, 2, 27, 0.4);
+      font-weight: 800;
+    }
+    .formula-strip .chip.highlight strong { color: #fff; }
+
+    /* Options avancées (collapsible) */
+    .advanced {
+      border-top: 1px solid var(--line);
+      background: var(--pearl);
+    }
+    .advanced summary {
+      list-style: none;
+      cursor: pointer;
+      padding: 13px 22px;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--steel);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      user-select: none;
+      transition: color 0.15s ease, background 0.15s ease;
+    }
+    .advanced summary::-webkit-details-marker { display: none; }
+    .advanced summary::before {
+      content: '+';
+      display: inline-flex;
+      align-items: center; justify-content: center;
+      width: 22px; height: 22px;
+      border-radius: 6px;
+      background: #fff;
+      color: var(--navy);
+      font-weight: 900;
+      font-size: 14px;
+      box-shadow: var(--shadow-xs);
+      transition: transform 0.2s ease;
+    }
+    .advanced[open] summary::before { content: '−'; background: var(--red); color: #fff; }
+    .advanced summary:hover { color: var(--red); background: #fff; }
+    .advanced-body {
+      padding: 6px 22px 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+      gap: 14px;
+    }
+    .field-mini { display: flex; flex-direction: column; gap: 5px; }
+    .field-mini label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--ink-2);
+      letter-spacing: 0.4px;
+    }
+    .field-mini input,
+    .field-mini select {
+      width: 100%;
+      height: 32px;
+      padding: 0 10px;
+      font-size: 12px;
+      font-weight: 600;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+      font-family: inherit;
+    }
+    .field-mini input:focus,
+    .field-mini select:focus {
+      outline: none;
+      border-color: var(--red);
+      box-shadow: 0 0 0 3px rgba(208,2,27,0.10);
+    }
+    .field-mini small { font-size: 9.5px; color: var(--muted); }
+
+    .save-indicator {
+      font-size: 10px;
+      color: var(--muted);
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .save-indicator.saved { color: var(--ok); }
+    .save-indicator .dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    /* ═══════════════════ FEUILLE IMPRIMABLE ═══════════════════ */
+    @page { size: 8.5in 11in; margin: 0.18in; }
+
+    .sheet {
+      width: 8.5in;
+      min-height: 10.6in;
+      background: #fff;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-lg);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .sheet-banner {
+      width: 100%;
+      display: block;
+      position: relative;
+      line-height: 0;
+    }
+    .sheet-banner img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    .sheet-caption {
+      background: linear-gradient(90deg, var(--navy) 0%, var(--navy-2) 50%, var(--navy) 100%);
+      color: #fff;
+      text-align: center;
+      padding: 8px 14px;
+      font-family: 'Manrope', 'Inter', sans-serif;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      position: relative;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .sheet-caption::after {
+      content: '';
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent 0%, var(--red) 50%, transparent 100%);
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .sheet-caption .red-accent {
+      color: #ff6b7a;
+      margin: 0 6px;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    /* Bannière "à partir de" */
+    .hero-banner {
+      margin: 18px 26px 4px;
+      padding: 12px 18px;
+      border-radius: 10px;
+      background:
+        linear-gradient(135deg, var(--navy) 0%, var(--navy-2) 100%);
+      color: #fff;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 18px;
+      position: relative;
+      overflow: hidden;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .hero-banner::after {
+      content: '';
+      position: absolute;
+      right: -40px; top: -40px;
+      width: 180px; height: 180px;
+      background: radial-gradient(circle, rgba(208, 2, 27, 0.25) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-icon {
+      width: 38px; height: 38px;
+      display: inline-flex; align-items: center; justify-content: center;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: var(--gold);
+      flex-shrink: 0;
+      z-index: 1;
+    }
+    .hero-icon svg { width: 22px; height: 22px; }
+    .hero-text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      z-index: 1;
+    }
+    .hero-eyebrow {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: var(--gold);
+      text-transform: uppercase;
+    }
+    .hero-eyebrow .dot-sep { opacity: 0.55; margin: 0 2px; }
+    .hero-h2 {
+      font-family: 'Manrope', 'Inter', sans-serif;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.15;
+      margin-top: 1px;
+    }
+    .hero-h2 .big {
+      font-size: 19px;
+      letter-spacing: -0.4px;
+    }
+    .hero-num {
+      color: var(--gold);
+      font-weight: 900;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .hero-sub {
+      margin-top: 3px;
+      font-size: 10.5px;
+      font-weight: 500;
+      line-height: 1.35;
+      color: rgba(255, 255, 255, 0.82);
+      max-width: 50ch;
+    }
+    .hero-sub strong {
+      color: #fff;
+      font-weight: 700;
+    }
+
+    /* Bascule du sous-titre selon l'inclusion de la garantie */
+    .hero-sub-excluded { display: none; }
+    .hero-banner.warranty-excluded .hero-sub-included { display: none; }
+    .hero-banner.warranty-excluded .hero-sub-excluded { display: block; }
+    .hero-badges {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      align-items: flex-end;
+      z-index: 1;
+    }
+    .hero-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px 4px 8px;
+      font-size: 9.5px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      color: #fff;
+      background: rgba(255, 255, 255, 0.10);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: 999px;
+      white-space: nowrap;
+      backdrop-filter: blur(6px);
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .hero-pill svg {
+      width: 11px;
+      height: 11px;
+      color: var(--gold);
+      flex-shrink: 0;
+    }
+
+    /* Carte rouge pleine largeur : titre + étapes + notice + fréquence */
+    .red-card {
+      margin: 12px 26px 4px;
+      padding: 14px 20px 12px;
+      background: linear-gradient(135deg, var(--red) 0%, var(--red-700) 100%);
+      border-radius: 12px;
+      color: #fff;
+      box-shadow: var(--shadow-red);
+      position: relative;
+      overflow: hidden;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    /* ═══════════════════ BANNIÈRE « AJOUT GARANTIE COMPLÈTE AU PAIEMENT »
+       Inspirée de la photo 4 fournie : encadré rouge, 4 cellules verticales
+       avec terme + montant additionnel par paiement.
+       Affichée uniquement quand la case "Inclure" est décochée. */
+    .warranty-addon {
+      margin: 10px 26px 4px;
+      padding: 12px 18px 10px;
+      background: linear-gradient(135deg, var(--red) 0%, var(--red-700) 100%);
+      border-radius: 12px;
+      color: #fff;
+      box-shadow: var(--shadow-red);
+      position: relative;
+      overflow: hidden;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .warranty-addon[hidden] { display: none !important; }
+    .warranty-addon::before {
+      content: '';
+      position: absolute;
+      top: -40%; right: -10%;
+      width: 50%; height: 200%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.10) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .warranty-addon-head {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 2px;
+      margin-bottom: 10px;
+      position: relative;
+      z-index: 1;
+    }
+    .warranty-addon-eyebrow {
+      font-size: 9.5px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.78);
+    }
+    .warranty-addon-title {
+      font-size: 13.5px;
+      font-weight: 800;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      color: #fff;
+      line-height: 1.15;
+    }
+    .warranty-addon-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      position: relative;
+      z-index: 1;
+    }
+    .warranty-addon-cell {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      padding: 8px 6px 9px;
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 8px;
+      transition: background 0.15s ease;
+    }
+    .warranty-addon-cell:hover {
+      background: rgba(255, 255, 255, 0.18);
+    }
+    .warranty-addon-term {
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.82);
+    }
+    .warranty-addon-amount {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      color: #fff;
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+    }
+    .warranty-addon-foot {
+      margin-top: 9px;
+      font-size: 10.5px;
+      line-height: 1.35;
+      color: rgba(255, 255, 255, 0.86);
+      text-align: center;
+      position: relative;
+      z-index: 1;
+    }
+    .warranty-addon-foot strong {
+      color: var(--gold);
+      font-weight: 800;
+    }
+    .red-card::before {
+      content: '';
+      position: absolute;
+      top: -40%; right: -10%;
+      width: 50%; height: 200%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.10) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .red-card-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+      position: relative;
+      z-index: 1;
+      flex-wrap: wrap;
+    }
+    .red-card-title {
+      font-family: 'Manrope', 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .red-card-title svg { width: 16px; height: 16px; flex-shrink: 0; }
+    .freq-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: rgba(255, 255, 255, 0.14);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      border-radius: 999px;
+      padding: 5px 12px;
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+      backdrop-filter: blur(8px);
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .freq-badge .freq-val { font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px; }
+    .freq-badge .tax-pill {
+      color: var(--gold);
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      font-size: 9.5px;
+      padding-left: 7px;
+      border-left: 1px solid rgba(255,255,255,0.25);
+    }
+
+    .steps-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      position: relative;
+      z-index: 1;
+    }
+    .step-card {
+      background: rgba(255, 255, 255, 0.13);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: 10px;
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      backdrop-filter: blur(8px);
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .step-num {
+      width: 30px; height: 30px;
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: #fff;
+      color: var(--red);
+      font-family: 'Manrope', 'Inter', sans-serif;
+      font-size: 15px;
+      font-weight: 900;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .step-text {
+      line-height: 1.2;
+      font-size: 10.5px;
+      color: rgba(255, 255, 255, 0.92);
+    }
+    .step-text strong {
+      display: block;
+      font-size: 12px;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: 0.3px;
+      margin-bottom: 1px;
+    }
+
+    .red-card-foot {
+      margin-top: 11px;
+      padding-top: 9px;
+      border-top: 1px solid rgba(255, 255, 255, 0.22);
+      font-size: 9.5px;
+      line-height: 1.4;
+      color: rgba(255, 255, 255, 0.92);
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      position: relative;
+      z-index: 1;
+    }
+    .red-card-foot .info-dot {
+      flex-shrink: 0;
+      width: 18px; height: 18px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: var(--gold);
+      color: #fff;
+      font-family: 'Manrope', 'Inter', sans-serif;
+      font-weight: 900;
+      font-size: 11px;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .red-card-foot strong { color: #fff; font-weight: 800; }
+    .red-card-foot .conseiller {
+      color: var(--gold);
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+
+    .tables-wrap {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      padding: 10px 26px 8px;
+      flex: 1;
+    }
+    table.grid {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: 8.6px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: var(--shadow-xs);
+    }
+    table.grid th,
+    table.grid td {
+      padding: 4px 7px;
+      text-align: right;
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+    table.grid th:last-child,
+    table.grid td:last-child { border-right: none; }
+    table.grid tbody tr:last-child td { border-bottom: none; }
+    table.grid th:first-child,
+    table.grid td:first-child {
+      text-align: left;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+    table.grid tbody td:first-child {
+      background: linear-gradient(90deg, #fef2f3 0%, #fafbfc 100%);
+      color: var(--navy);
+      border-right: 1.5px solid var(--line);
+    }
+    table.grid thead th {
+      background: linear-gradient(180deg, var(--navy) 0%, var(--navy-2) 100%);
+      color: #fff;
+      font-weight: 800;
+      text-align: center;
+      vertical-align: middle;
+      line-height: 1.15;
+      letter-spacing: 0.5px;
+      padding: 7px 4px;
+      font-size: 9px;
+      text-transform: uppercase;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+      border-bottom: 1px solid var(--navy);
+    }
+    table.grid thead tr.rate-row th {
+      background: linear-gradient(180deg, var(--red) 0%, var(--red-700) 100%);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      padding: 4px 4px;
+      font-family: 'Manrope', 'Inter', sans-serif;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+    }
+    table.grid thead tr.rate-row th:first-child {
+      background: linear-gradient(180deg, var(--red-700) 0%, #7a000f 100%);
+      color: rgba(255,255,255,0.9);
+      font-weight: 800;
+      font-size: 7.5px;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      text-align: center;
+    }
+    table.grid tbody tr:nth-child(even) td { background: #fafbfc; }
+    table.grid tbody tr:nth-child(even) td:first-child {
+      background: linear-gradient(90deg, #fde8ea 0%, #f4f6f8 100%);
+    }
+    table.grid tbody td {
+      font-variant-numeric: tabular-nums;
+      font-weight: 600;
+      color: var(--ink-2);
+    }
+    table.grid tbody tr:hover td { background: #fef9e3 !important; }
+    table.grid tbody tr:hover td:first-child { background: linear-gradient(90deg, #fde68a 0%, #fef9e3 100%) !important; }
+
+    .sheet-footer {
+      margin-top: auto;
+      padding: 8px 22px 10px;
+      border-top: 1px solid var(--line);
+      background:
+        linear-gradient(180deg, var(--pearl) 0%, #f1f5f9 100%);
+      position: relative;
+    }
+    .sheet-footer::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent 0%, var(--red) 50%, transparent 100%);
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .footer-grid {
+      display: block;
+    }
+    .legal-block {
+      font-size: 7px;
+      line-height: 1.45;
+      color: var(--ink-2);
+    }
+    .legal-block p { margin-bottom: 2px; }
+    .legal-block p:last-child { margin-bottom: 0; font-size: 6.5px; color: var(--steel); }
+    .legal-block strong { color: var(--navy); font-weight: 700; }
+
+    /* ═══════════════════ TOAST ═══════════════════ */
+    .toast {
+      position: fixed;
+      bottom: 24px; left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: var(--ink);
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      box-shadow: var(--shadow-lg);
+      opacity: 0;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+      z-index: 2000;
+      pointer-events: none;
+    }
+    .toast.visible { transform: translateX(-50%) translateY(0); opacity: 1; }
+    .toast.success { background: var(--ok); }
+    .toast.error { background: var(--red); }
+
+    /* ═══════════════════ MODE ÉDITION ═══════════════════ */
+    .edit-banner {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 200;
+      padding: 8px 18px;
+      background: linear-gradient(90deg, var(--gold) 0%, #e8b526 100%);
+      color: #1a1a1a;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+    body.edit-mode .edit-banner { display: flex; }
+    body.edit-mode { padding-top: 38px; }
+    .edit-banner-left {
+      display: inline-flex; align-items: center; gap: 9px;
+    }
+    .edit-banner-left svg { width: 18px; height: 18px; }
+    .edit-banner button {
+      background: #1a1a1a;
+      color: #fff;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 12px;
+      cursor: pointer;
+      letter-spacing: 0.4px;
+    }
+    .edit-banner button:hover { background: var(--red); }
+
+    [data-editable] { transition: background 0.15s, outline-offset 0.15s; }
+    body.edit-mode [data-editable] {
+      outline: 1.5px dashed rgba(212, 160, 23, 0.7);
+      outline-offset: 3px;
+      background: rgba(212, 160, 23, 0.08);
+      border-radius: 4px;
+      cursor: text;
+      min-width: 30px;
+      min-height: 14px;
+    }
+    body.edit-mode [data-editable]:hover {
+      background: rgba(212, 160, 23, 0.18);
+      outline-color: var(--gold);
+    }
+    body.edit-mode [data-editable]:focus {
+      outline: 2px solid var(--gold);
+      outline-offset: 4px;
+      background: rgba(212, 160, 23, 0.22);
+      box-shadow: 0 0 0 4px rgba(212, 160, 23, 0.12);
+    }
+    body.edit-mode [data-editable][data-edit-customized="true"] {
+      outline-color: var(--red);
+      background: rgba(208, 2, 27, 0.06);
+    }
+    body.edit-mode [data-editable][data-edit-customized="true"]:hover {
+      background: rgba(208, 2, 27, 0.12);
+    }
+
+    /* On masque tout indicateur d'édition à l'impression */
+    @media print {
+      .edit-banner { display: none !important; }
+      body.edit-mode { padding-top: 0 !important; }
+      [data-editable] { outline: none !important; background: transparent !important; box-shadow: none !important; }
+    }
+
+    /* ═══════════════════ IMPRESSION ═══════════════════ */
+    /* ═══════════════════ IMPRESSION — UNE SEULE PAGE ═══════════════════ */
+    @page {
+      size: 8.5in 11in;
+      margin: 0.25in;
+    }
+    @media print {
+      html, body {
+        padding: 0 !important;
+        margin: 0 !important;
+        background: #fff !important;
+        gap: 0 !important;
+        height: auto !important;
+      }
+      body > *:not(.sheet) { display: none !important; }
+
+      /* La sheet remplit la page entière (8.5x11 - marges 0.25in = 8x10.5in)
+         avec coins arrondis et bordure subtile pour reproduire l'aspect écran. */
+      .sheet {
+        box-shadow: none !important;
+        border-radius: 14px !important;
+        border: 1px solid #e2e8f0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-height: 10.4in !important;
+        max-height: 10.5in !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        page-break-inside: avoid;
+        page-break-after: avoid;
+        break-inside: avoid;
+        overflow: hidden !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      /* Préservation des couleurs */
+      .sheet *,
+      .hero-banner,
+      .sheet-header,
+      .sheet-footer,
+      .red-card,
+      table.grid thead th,
+      table.grid thead tr.rate-row th,
+      table.grid tbody td:first-child,
+      table.grid tbody tr:nth-child(even) td:first-child {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+      }
+      table.grid tbody tr:hover td,
+      table.grid tbody tr:hover td:first-child {
+        background: inherit !important;
+      }
+
+      /* Bandeau pleine largeur en haut */
+      .sheet-banner { flex-shrink: 0 !important; line-height: 0 !important; }
+      .sheet-banner img { width: 100% !important; height: auto !important; max-height: none !important; object-fit: contain !important; display: block !important; }
+      .sheet-caption {
+        flex-shrink: 0 !important;
+        padding: 6px 10px !important;
+        font-size: 11px !important;
+        letter-spacing: 2.4px !important;
+      }
+
+      /* Hero banner */
+      .hero-banner {
+        flex-shrink: 0 !important;
+        margin: 7px 16px 4px !important;
+        padding: 7px 14px !important;
+        gap: 12px !important;
+      }
+      .hero-icon { width: 32px !important; height: 32px !important; }
+      .hero-icon svg { width: 19px !important; height: 19px !important; }
+      .hero-eyebrow { font-size: 8.5px !important; letter-spacing: 1.4px !important; }
+      .hero-h2 .big { font-size: 16px !important; }
+      .hero-sub { font-size: 9px !important; line-height: 1.25 !important; margin-top: 2px !important; }
+      .hero-badges { gap: 3px !important; }
+      .hero-pill { font-size: 8px !important; padding: 2px 7px !important; gap: 4px !important; }
+      .hero-pill svg { width: 9px !important; height: 9px !important; }
+
+      /* Carte rouge */
+      .red-card {
+        flex-shrink: 0 !important;
+        margin: 4px 16px 4px !important;
+        padding: 7px 12px 6px !important;
+        border-radius: 8px !important;
+      }
+      .red-card-head { margin-bottom: 6px !important; gap: 8px !important; }
+      .red-card-title { font-size: 10.5px !important; letter-spacing: 1.4px !important; }
+      .red-card-title svg { width: 12px !important; height: 12px !important; }
+      .freq-badge { font-size: 9.5px !important; padding: 3px 9px !important; gap: 5px !important; }
+      .freq-badge .tax-pill { font-size: 8.5px !important; padding-left: 5px !important; }
+      .steps-row { gap: 6px !important; }
+      .step-card { padding: 5px 9px !important; gap: 8px !important; border-radius: 7px !important; }
+      .step-num { width: 22px !important; height: 22px !important; font-size: 12px !important; }
+      .step-text { font-size: 9.5px !important; line-height: 1.15 !important; }
+      .step-text strong { font-size: 10.5px !important; }
+      .red-card-foot {
+        margin-top: 6px !important;
+        padding-top: 5px !important;
+        font-size: 8.5px !important;
+        line-height: 1.3 !important;
+        gap: 6px !important;
+      }
+      .red-card-foot .info-dot { width: 14px !important; height: 14px !important; font-size: 10px !important; }
+
+      /* Bannière "Ajout garantie complète au paiement" (mode décoché) */
+      .warranty-addon {
+        flex-shrink: 0 !important;
+        margin: 3px 16px 3px !important;
+        padding: 6px 12px 6px !important;
+        border-radius: 8px !important;
+      }
+      .warranty-addon-head { margin-bottom: 5px !important; gap: 1px !important; }
+      .warranty-addon-eyebrow { font-size: 8px !important; letter-spacing: 1px !important; }
+      .warranty-addon-title { font-size: 10.5px !important; letter-spacing: 0.5px !important; }
+      .warranty-addon-grid { gap: 5px !important; }
+      .warranty-addon-cell { padding: 4px 4px 5px !important; border-radius: 6px !important; gap: 1px !important; }
+      .warranty-addon-term { font-size: 8.5px !important; letter-spacing: 0.4px !important; }
+      .warranty-addon-amount { font-size: 13px !important; }
+      .warranty-addon-foot { margin-top: 5px !important; font-size: 8.5px !important; line-height: 1.25 !important; }
+
+      /* Tableaux : calibrés pour remplir la page sans déborder.
+         35 rangées × ~18px = 630px = 6.6in pour les données. */
+      .tables-wrap {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 6px !important;
+        padding: 2px 16px !important;
+        flex: 0 0 auto !important;
+      }
+      table.grid {
+        font-size: 11px !important;
+        border-radius: 4px !important;
+        width: 100% !important;
+        border-collapse: separate !important;
+        border-spacing: 0 !important;
+      }
+      table.grid thead { display: table-header-group !important; }
+      table.grid thead th {
+        padding: 4px 4px !important;
+        font-size: 11px !important;
+        letter-spacing: 0.3px !important;
+        line-height: 1.05 !important;
+      }
+      table.grid thead tr.rate-row th {
+        padding: 3.5px 4px !important;
+        font-size: 11.5px !important;
+      }
+      table.grid thead tr.rate-row th:first-child { font-size: 9px !important; }
+      table.grid tbody td {
+        padding: 2.5px 6px !important;
+        font-size: 11px !important;
+        font-weight: 600 !important;
+        line-height: 1.05 !important;
+        vertical-align: middle !important;
+      }
+      table.grid tbody td:first-child {
+        font-weight: 700 !important;
+        font-size: 11px !important;
+        padding: 2.5px 7px !important;
+      }
+
+      /* Footer poussé en bas, compact */
+      .sheet-footer {
+        flex-shrink: 0 !important;
+        margin-top: auto !important;
+        padding: 3px 16px 4px !important;
+      }
+      .footer-grid { gap: 10px !important; }
+      .legal-block { font-size: 6.8px !important; line-height: 1.35 !important; }
+      .legal-block p { margin-bottom: 1px !important; }
+      .legal-block p:last-child { margin-bottom: 0 !important; }
+    }
+
+    /* ═══════════════════ RESPONSIVE ═══════════════════ */
+    @media (max-width: 880px) {
+      .control-main { padding: 18px; }
+      .field-row { grid-template-columns: 1fr; }
+      .rates-grid { grid-template-columns: repeat(2, 1fr); }
+      .sheet { width: 100%; }
+      .sheet-header { grid-template-columns: 1fr; text-align: center; }
+      .dealer-logo-slot, .ap-logo-slot { justify-content: center; }
+      .tables-wrap { grid-template-columns: 1fr; }
+      .footer-grid { grid-template-columns: 1fr; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══════════════════ PANEL DE CONTRÔLE ═══════════════════ -->
+  <div class="edit-banner" id="editBanner" role="status" aria-live="polite">
+    <span class="edit-banner-left">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+      Mode édition activé — cliquez sur n'importe quel texte (titre, étape, en-tête) pour le personnaliser. Les chiffres calculés ne sont pas modifiables.
+    </span>
+    <button type="button" id="btnEditDone">Terminer</button>
+  </div>
+
+  <section class="control-panel" aria-label="Paramètres du calculateur">
+    <header class="control-head">
+      <div class="control-head-left">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 17h14"/>
+            <path d="M5 17v-5.5L7 6h10l2 5.5V17"/>
+            <circle cx="8" cy="17" r="2" fill="currentColor"/>
+            <circle cx="16" cy="17" r="2" fill="currentColor"/>
+          </svg>
+        </div>
+        <div>
+          <div class="control-title">Calculateur vitrine — Avantage Plus</div>
+          <div class="control-sub" id="saveIndicator"><span class="dot"></span> Prêt</div>
+        </div>
+      </div>
+      <div class="actions">
+        <button type="button" class="btn btn-ghost" id="btnReset" title="Valeurs par défaut">Réinit.</button>
+        <button type="button" class="btn btn-green" id="btnEdit"
+                title="Personnaliser les textes : titres, descriptions, étapes, en-têtes de colonnes. Les chiffres calculés ne sont pas modifiables.">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>
+          <span id="btnEditLabel">Modifier</span>
+        </button>
+        <button type="button" class="btn btn-primary" id="btnPrint"
+                title="Ouvre l'aperçu d'impression. Choisir « Microsoft Print to PDF » pour enregistrer en PDF.">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v8H6z"/></svg>
+          Imprimer / PDF
+        </button>
+      </div>
+    </header>
+
+    <div class="control-main">
+      <div class="field field-rates">
+        <label>
+          <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="5" x2="5" y2="19"/><circle cx="6.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg></span>
+          Taux d'intérêt — un par terme
+        </label>
+        <div class="rates-grid">
+          <div class="rate-cell">
+            <span class="rate-lab">60 mois</span>
+            <div class="input-wrap">
+              <input type="number" id="inRate60" min="0" max="35" step="0.01" value="8.99" inputmode="decimal" data-default="8.99">
+              <span class="input-suffix">%</span>
+            </div>
+          </div>
+          <div class="rate-cell">
+            <span class="rate-lab">72 mois</span>
+            <div class="input-wrap">
+              <input type="number" id="inRate72" min="0" max="35" step="0.01" value="8.99" inputmode="decimal" data-default="8.99">
+              <span class="input-suffix">%</span>
+            </div>
+          </div>
+          <div class="rate-cell">
+            <span class="rate-lab">84 mois</span>
+            <div class="input-wrap">
+              <input type="number" id="inRate84" min="0" max="35" step="0.01" value="8.99" inputmode="decimal" data-default="8.99">
+              <span class="input-suffix">%</span>
+            </div>
+          </div>
+          <div class="rate-cell">
+            <span class="rate-lab">96 mois</span>
+            <div class="input-wrap">
+              <input type="number" id="inRate96" min="0" max="35" step="0.01" value="8.99" inputmode="decimal" data-default="8.99">
+              <span class="input-suffix">%</span>
+            </div>
+          </div>
+        </div>
+        <div class="field-hint">Un taux différent peut être saisi pour chaque terme — celui que votre banque vous accorde réellement.</div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <div class="warranty-label-row">
+            <label for="inWarranty">
+              <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg></span>
+              Garantie prolongée à ajouter
+            </label>
+            <label class="warranty-include" title="Cochée : la garantie est incluse dans les paiements affichés. Décochée : le client voit le paiement du véhicule seul + le coût additionnel de la garantie sous la feuille.">
+              <input type="checkbox" id="inWarrantyInclude" checked>
+              <span class="warranty-include-box" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              </span>
+              <span class="warranty-include-text">Incluse au paiement</span>
+            </label>
+          </div>
+          <div class="input-wrap">
+            <input type="number" id="inWarranty" min="0" max="99999" step="50" value="3000" inputmode="numeric">
+            <span class="input-suffix">$</span>
+          </div>
+          <div class="field-hint"><strong>Cochée</strong> : la garantie est intégrée au paiement (mode tout inclus). <strong>Décochée</strong> : seul le véhicule est financé, et le coût additionnel de la garantie apparaît sous la feuille.</div>
+        </div>
+
+        <div class="field">
+          <label for="inFreq">
+            <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg></span>
+            Fréquence affichée
+          </label>
+          <div class="input-wrap">
+            <select id="inFreq">
+              <option value="weekly" selected>Par semaine</option>
+              <option value="biweekly">Aux 2 semaines</option>
+              <option value="monthly">Par mois</option>
+            </select>
+          </div>
+          <div class="field-hint">Choisissez la fréquence la plus parlante pour vos clients.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="formula-strip" aria-hidden="true">
+      <span class="chip">Prix du véhicule</span>
+      <span class="plus">+</span>
+      <span class="chip"><strong id="stripWarranty">3 000 $</strong> garantie</span>
+      <span class="eq">=</span>
+      <span class="chip highlight">Montant financé</span>
+      <span class="eq">→</span>
+      <span class="chip"><strong id="stripRate">8,99–10,49 %</strong> · <span id="stripFreq">hebdo</span></span>
+    </div>
+
+    <details class="advanced">
+      <summary>Options avancées (plage de prix)</summary>
+      <div class="advanced-body">
+        <div class="field-mini">
+          <label for="inPriceMin">Prix min ($)</label>
+          <input type="number" id="inPriceMin" min="0" step="500" value="5999">
+        </div>
+        <div class="field-mini">
+          <label for="inPriceMid">Séparation ($)</label>
+          <input type="number" id="inPriceMid" min="0" step="500" value="39999">
+        </div>
+        <div class="field-mini">
+          <label for="inPriceMax">Prix max ($)</label>
+          <input type="number" id="inPriceMax" min="0" step="500" value="74999">
+        </div>
+        <div class="field-mini">
+          <label for="inStep">Incrément ($)</label>
+          <input type="number" id="inStep" min="100" step="100" value="1000">
+        </div>
+      </div>
+    </details>
+  </section>
+
+  <!-- ═══════════════════ FEUILLE IMPRIMABLE ═══════════════════ -->
+  <article class="sheet" id="printSheet" aria-label="Feuille de paiements">
+
+    <div class="sheet-banner">
+      <img src="/images/petit%20bandeau.jpg" alt="Produits Avantage Plus — Des protections mécaniques exceptionnelles">
+    </div>
+    <div class="sheet-caption" data-editable="caption">Financement clé en main <span class="red-accent">·</span> Paiements estimés</div>
+
+    <div class="hero-banner" id="heroBanner">
+      <div class="hero-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          <path d="M9 12l2 2 4-4"/>
+        </svg>
+      </div>
+      <div class="hero-text">
+        <span class="hero-eyebrow" data-editable="hero-eyebrow">Option recommandée <span class="dot-sep">·</span> Prix tout inclus</span>
+        <div class="hero-h2">
+          <span class="big" data-editable="hero-title"><span class="hero-num">5&nbsp;ans</span> de tranquillité au volant</span>
+        </div>
+        <div class="hero-sub hero-sub-included" data-editable="hero-sub">
+          Une <strong>protection mécanique premium</strong> est <strong>déjà intégrée</strong> au paiement affiché&nbsp;— roulez sereinement, sans frais imprévus.
+        </div>
+        <div class="hero-sub hero-sub-excluded" data-editable="hero-sub-excluded">
+          Une <strong>protection mécanique de 5 ans</strong> est <strong>disponible</strong>&nbsp;— pour quelques dollars de plus par paiement, voir ci-dessous.
+        </div>
+      </div>
+      <div class="hero-badges">
+        <span class="hero-pill">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+          <span data-editable="hero-pill-1">Aucune surprise</span>
+        </span>
+        <span class="hero-pill">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+          <span data-editable="hero-pill-2">Aucun frais caché</span>
+        </span>
+        <span class="hero-pill">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+          <span data-editable="hero-pill-3">Tranquillité d'esprit</span>
+        </span>
+      </div>
+    </div>
+
+    <!-- ═══════════ AJOUT GARANTIE COMPLÈTE AU PAIEMENT ═══════════
+         Affiché uniquement quand la case "Incluse au paiement" est décochée.
+         Montre le coût additionnel par fréquence et par terme pour ajouter
+         la garantie prolongée. -->
+    <section class="warranty-addon" id="warrantyAddon" hidden aria-label="Coût additionnel de la garantie prolongée">
+      <div class="warranty-addon-head">
+        <span class="warranty-addon-eyebrow" data-editable="warranty-addon-eyebrow">Option offerte au paiement</span>
+        <span class="warranty-addon-title" data-editable="warranty-addon-title">Ajouter la garantie complète au paiement</span>
+      </div>
+      <div class="warranty-addon-grid">
+        <div class="warranty-addon-cell">
+          <span class="warranty-addon-term">60 mois</span>
+          <span class="warranty-addon-amount" data-warranty-cost="60">+ —</span>
+        </div>
+        <div class="warranty-addon-cell">
+          <span class="warranty-addon-term">72 mois</span>
+          <span class="warranty-addon-amount" data-warranty-cost="72">+ —</span>
+        </div>
+        <div class="warranty-addon-cell">
+          <span class="warranty-addon-term">84 mois</span>
+          <span class="warranty-addon-amount" data-warranty-cost="84">+ —</span>
+        </div>
+        <div class="warranty-addon-cell">
+          <span class="warranty-addon-term">96 mois</span>
+          <span class="warranty-addon-amount" data-warranty-cost="96">+ —</span>
+        </div>
+      </div>
+      <div class="warranty-addon-foot" data-editable="warranty-addon-foot">
+        Pour <strong id="warrantyAddonPriceLabel">3 000 $</strong> de plus financé, profitez d'une couverture mécanique de 5 ans — montant <span id="warrantyAddonFreq">par semaine</span> selon le terme et le taux choisis.
+      </div>
+    </section>
+
+    <section class="red-card" id="redCard" aria-label="Couverture mécanique et lecture du tableau">
+      <div class="red-card-head">
+        <span class="red-card-title" id="redCardTitle">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+          <span data-editable="red-title">Couverture mécanique incluse</span>
+        </span>
+        <span class="freq-badge" id="freqBadge">
+          <span data-editable="freq-prefix">Paiement</span> <span class="freq-val" id="statFreq">par semaine</span>
+          <span class="tax-pill" data-editable="tax-pill">+ taxes en sus</span>
+        </span>
+      </div>
+
+      <div class="steps-row">
+        <div class="step-card">
+          <span class="step-num">1</span>
+          <div class="step-text" data-editable="step-1">
+            <strong>Repérez</strong>
+            le prix du véhicule
+          </div>
+        </div>
+        <div class="step-card">
+          <span class="step-num">2</span>
+          <div class="step-text" data-editable="step-2">
+            <strong>Choisissez</strong>
+            votre terme
+          </div>
+        </div>
+        <div class="step-card">
+          <span class="step-num">3</span>
+          <div class="step-text" data-editable="step-3">
+            <strong>Lisez</strong>
+            votre paiement
+          </div>
+        </div>
+      </div>
+
+      <div class="red-card-foot">
+        <span class="info-dot" aria-hidden="true">i</span>
+        <div data-editable="red-foot">
+          Le <strong>terme de financement</strong> dépend du <strong>montant financé</strong> et de l'<strong>année du véhicule</strong>.
+          Pour connaître la durée à laquelle vous avez droit, <span class="conseiller">consultez votre conseiller aux ventes</span>.
+        </div>
+      </div>
+    </section>
+
+    <div class="tables-wrap">
+      <table class="grid" id="tableLeft" aria-label="Tableau paiements (prix inférieurs)">
+        <thead>
+          <tr>
+            <th data-editable="th-price" data-mirror="th-price">Prix auto</th>
+            <th data-editable="th-t60" data-mirror="th-t60">60 mois</th>
+            <th data-editable="th-t72" data-mirror="th-t72">72 mois</th>
+            <th data-editable="th-t84" data-mirror="th-t84">84 mois</th>
+            <th data-editable="th-t96" data-mirror="th-t96">96 mois</th>
+          </tr>
+          <tr class="rate-row">
+            <th data-editable="th-rate" data-mirror="th-rate">Taux</th>
+            <th data-rate-cell="60">— %</th>
+            <th data-rate-cell="72">— %</th>
+            <th data-rate-cell="84">— %</th>
+            <th data-rate-cell="96">— %</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+
+      <table class="grid" id="tableRight" aria-label="Tableau paiements (prix supérieurs)">
+        <thead>
+          <tr>
+            <th data-editable="th-price-r" data-mirror="th-price">Prix auto</th>
+            <th data-editable="th-t60-r" data-mirror="th-t60">60 mois</th>
+            <th data-editable="th-t72-r" data-mirror="th-t72">72 mois</th>
+            <th data-editable="th-t84-r" data-mirror="th-t84">84 mois</th>
+            <th data-editable="th-t96-r" data-mirror="th-t96">96 mois</th>
+          </tr>
+          <tr class="rate-row">
+            <th data-editable="th-rate-r" data-mirror="th-rate">Taux</th>
+            <th data-rate-cell="60">— %</th>
+            <th data-rate-cell="72">— %</th>
+            <th data-rate-cell="84">— %</th>
+            <th data-rate-cell="96">— %</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <footer class="sheet-footer">
+      <div class="legal-block">
+        <p id="legalCompact" data-editable="legal-compact"></p>
+        <p id="legalDate"></p>
+      </div>
+    </footer>
+  </article>
+
+  <div class="toast" id="toast" role="status"></div>
+
+
+  <script src="assets/scaling-commun.js"></script>
+
+  <script>
+  (function () {
+    'use strict';
+
+    const STORAGE_KEY = 'avantageplus_calc_auto_v5';
+    const STORAGE_KEY_TEXTS = 'avantageplus_calc_auto_v5_texts';
+    let customTexts = {};
+    const defaultTexts = {};
+    let editMode = false;
+    function isCustomized(id) {
+      return Object.prototype.hasOwnProperty.call(customTexts, id) && customTexts[id] !== '';
+    }
+    function captureDefaultTexts() {
+      document.querySelectorAll('[data-editable]').forEach((el) => {
+        const id = el.getAttribute('data-editable');
+        if (id && !Object.prototype.hasOwnProperty.call(defaultTexts, id)) {
+          defaultTexts[id] = el.innerHTML;
+        }
+      });
+    }
+    const TERMS = [60, 72, 84, 96];
+
+    const printSheet = document.getElementById('printSheet');
+    const toastEl = document.getElementById('toast');
+    const saveIndicator = document.getElementById('saveIndicator');
+
+    const els = {
+      rate60: document.getElementById('inRate60'),
+      rate72: document.getElementById('inRate72'),
+      rate84: document.getElementById('inRate84'),
+      rate96: document.getElementById('inRate96'),
+      warranty: document.getElementById('inWarranty'),
+      warrantyInclude: document.getElementById('inWarrantyInclude'),
+      heroBanner: document.getElementById('heroBanner'),
+      warrantyAddon: document.getElementById('warrantyAddon'),
+      warrantyAddonPriceLabel: document.getElementById('warrantyAddonPriceLabel'),
+      warrantyAddonFreq: document.getElementById('warrantyAddonFreq'),
+      freq: document.getElementById('inFreq'),
+      priceMin: document.getElementById('inPriceMin'),
+      priceMid: document.getElementById('inPriceMid'),
+      priceMax: document.getElementById('inPriceMax'),
+      step: document.getElementById('inStep'),
+      tbodyLeft: document.querySelector('#tableLeft tbody'),
+      tbodyRight: document.querySelector('#tableRight tbody'),
+      statFreq: document.getElementById('statFreq'),
+      legalDate: document.getElementById('legalDate'),
+      stripWarranty: document.getElementById('stripWarranty'),
+      stripRate: document.getElementById('stripRate'),
+      stripFreq: document.getElementById('stripFreq'),
+    };
+
+    function rateForTerm(term) {
+      const map = { 60: els.rate60, 72: els.rate72, 84: els.rate84, 96: els.rate96 };
+      return parseNum(map[term], 0);
+    }
+    function rateInputs() { return [els.rate60, els.rate72, els.rate84, els.rate96]; }
+    function termOf(idx) { return TERMS[idx]; }
+    function fmtPct(n) {
+      if (!Number.isFinite(n)) return '— %';
+      return n.toFixed(2).replace('.', ',') + ' %';
+    }
+
+    const money0 = new Intl.NumberFormat('fr-CA', { style: 'currency', currency: 'CAD', minimumFractionDigits: 0, maximumFractionDigits: 0 });
+
+    function showToast(msg, type) {
+      toastEl.textContent = msg;
+      toastEl.className = 'toast visible' + (type === 'success' ? ' success' : type === 'error' ? ' error' : '');
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(() => { toastEl.classList.remove('visible'); }, 2600);
+    }
+
+    function parseNum(el, fallback) {
+      const v = parseFloat(String(el.value || '').replace(',', '.'));
+      return Number.isFinite(v) ? v : fallback;
+    }
+
+    function warrantyIsIncluded() {
+      return !els.warrantyInclude || els.warrantyInclude.checked !== false;
+    }
+
+    function financedAmount(vehiclePrice) {
+      const include = warrantyIsIncluded();
+      const w = include ? Math.max(0, parseNum(els.warranty, 0)) : 0;
+      return Math.max(0, vehiclePrice) + w;
+    }
+
+    function monthlyPayment(principal, annualPercent, months) {
+      if (principal <= 0 || months <= 0) return 0;
+      const apr = Number(annualPercent);
+      if (!Number.isFinite(apr) || apr < 0) return 0;
+      if (apr < 1e-10) return principal / months;
+      const i = (apr / 100) / 12;
+      const pow = Math.pow(1 + i, months);
+      if (!Number.isFinite(pow) || Math.abs(pow - 1) < 1e-15) return principal / months;
+      return (principal * i * pow) / (pow - 1);
+    }
+
+    function toDisplayFrequency(monthly) {
+      const f = els.freq.value;
+      if (f === 'weekly') return monthly * 12 / 52;
+      if (f === 'biweekly') return monthly * 12 / 26;
+      return monthly;
+    }
+    function freqWord() {
+      if (els.freq.value === 'weekly') return 'par semaine';
+      if (els.freq.value === 'biweekly') return 'aux 2 semaines';
+      return 'par mois';
+    }
+    function freqShort() {
+      if (els.freq.value === 'weekly') return 'hebdo';
+      if (els.freq.value === 'biweekly') return '2 sem.';
+      return 'mensuel';
+    }
+
+    function fmtPay(n) {
+      if (!Number.isFinite(n) || n <= 0) return '—';
+      return money0.format(Math.round(n));
+    }
+    function fmtPrice(n) {
+      return money0.format(n);
+    }
+
+    function buildPriceRange(min, max, step) {
+      const out = [];
+      if (step <= 0 || max < min) return out;
+      for (let p = min; p <= max + 1e-6; p += step) out.push(Math.round(p));
+      return out;
+    }
+
+    function fillTable(tbody, prices) {
+      tbody.textContent = '';
+      if (!prices.length) {
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 5;
+        td.style.cssText = 'text-align:center;font-style:italic;color:#aaa;padding:14px;';
+        td.textContent = 'Aucune ligne à afficher.';
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+        return;
+      }
+      const frag = document.createDocumentFragment();
+      for (const price of prices) {
+        const tr = document.createElement('tr');
+        const td0 = document.createElement('td');
+        td0.textContent = fmtPrice(price);
+        tr.appendChild(td0);
+        for (const n of TERMS) {
+          const td = document.createElement('td');
+          const L = financedAmount(price);
+          const m = monthlyPayment(L, rateForTerm(n), n);
+          td.textContent = fmtPay(toDisplayFrequency(m));
+          tr.appendChild(td);
+        }
+        frag.appendChild(tr);
+      }
+      tbody.appendChild(frag);
+    }
+
+    function updateChrome() {
+      const rates = TERMS.map(rateForTerm);
+      const rMin = Math.min.apply(null, rates);
+      const rMax = Math.max.apply(null, rates);
+      const w = Math.max(0, parseNum(els.warranty, 0));
+      const include = warrantyIsIncluded();
+
+      els.statFreq.textContent = freqWord();
+      els.stripWarranty.textContent = (include && w > 0) ? fmtPrice(w) : 'aucune';
+      els.stripRate.textContent = (rMin === rMax)
+        ? fmtPct(rMin)
+        : fmtPct(rMin) + ' – ' + fmtPct(rMax);
+      els.stripFreq.textContent = freqShort();
+
+      /* Bascule visuelle hero-banner + bannière addon selon l'inclusion */
+      if (els.heroBanner) {
+        els.heroBanner.classList.toggle('warranty-excluded', !include);
+      }
+      if (els.warrantyAddon) {
+        const showAddon = !include && w > 0;
+        els.warrantyAddon.hidden = !showAddon;
+        if (showAddon) {
+          /* Calcule le coût additionnel par paiement pour chaque terme */
+          TERMS.forEach((term) => {
+            const cell = document.querySelector('[data-warranty-cost="' + term + '"]');
+            if (!cell) return;
+            const monthly = monthlyPayment(w, rateForTerm(term), term);
+            const display = toDisplayFrequency(monthly);
+            cell.textContent = display > 0 ? '+ ' + fmtPay(display) : '—';
+          });
+          if (els.warrantyAddonPriceLabel) {
+            els.warrantyAddonPriceLabel.textContent = fmtPrice(w);
+          }
+          if (els.warrantyAddonFreq) {
+            els.warrantyAddonFreq.textContent = freqWord();
+          }
+        }
+      }
+
+      document.querySelectorAll('[data-rate-cell]').forEach((cell) => {
+        const term = parseInt(cell.getAttribute('data-rate-cell'), 10);
+        cell.textContent = fmtPct(rateForTerm(term));
+      });
+
+      const redTitleSpan = document.querySelector('[data-editable="red-title"]');
+      if (redTitleSpan && !isCustomized('red-title')) {
+        if (include && w > 0) {
+          redTitleSpan.textContent = 'Couverture mécanique incluse';
+        } else if (!include && w > 0) {
+          redTitleSpan.textContent = 'Couverture mécanique disponible';
+        } else {
+          redTitleSpan.textContent = 'Comment lire vos paiements';
+        }
+      }
+
+      const compact = document.getElementById('legalCompact');
+      if (compact && !isCustomized('legal-compact')) {
+        const mentionGarantie = (include && w > 0)
+          ? 'incluant la garantie prolongée'
+          : 'véhicule seul (garantie prolongée en supplément)';
+        compact.innerHTML =
+          '<strong>Document non contractuel</strong> — paiements indicatifs ' + freqWord() +
+          ', <strong>taxes en sus</strong>, ' + mentionGarantie + ' et dérivés du versement mensuel équivalent. ' +
+          'Sous réserve d\'approbation de crédit. ' +
+          'La durée maximale de financement dépend du <strong>montant financé</strong> et de l\'<strong>année du véhicule</strong> — ' +
+          'consultez votre conseiller aux ventes. Pour le prix comptant, voir l\'étiquette du véhicule.';
+      }
+      const d = new Date();
+      els.legalDate.innerHTML = 'Calculé le <strong>' + d.toLocaleDateString('fr-CA', { year: 'numeric', month: 'long', day: 'numeric' }) + '</strong>.';
+
+    }
+
+    function recalcAll() {
+      const min = Math.min(parseNum(els.priceMin, 5999), parseNum(els.priceMax, 74999));
+      const max = Math.max(parseNum(els.priceMin, 5999), parseNum(els.priceMax, 74999));
+      let mid = parseNum(els.priceMid, 39999);
+      mid = Math.min(Math.max(mid, min), max);
+      const step = Math.max(100, parseNum(els.step, 1000));
+
+      const leftPrices = buildPriceRange(min, Math.max(min, mid - step), step);
+      const rightPrices = buildPriceRange(mid, max, step);
+
+      fillTable(els.tbodyLeft, leftPrices);
+      fillTable(els.tbodyRight, rightPrices);
+      updateChrome();
+      scheduleSave();
+    }
+
+    let saveT = null;
+    function scheduleSave() {
+      saveIndicator.innerHTML = '<span class="dot"></span> Modification…';
+      saveIndicator.classList.remove('saved');
+      clearTimeout(saveT);
+      saveT = setTimeout(saveStorage, 350);
+    }
+
+    function saveStorage() {
+      try {
+        const data = {
+          rate60: els.rate60.value,
+          rate72: els.rate72.value,
+          rate84: els.rate84.value,
+          rate96: els.rate96.value,
+          warranty: els.warranty.value,
+          warrantyInclude: els.warrantyInclude ? els.warrantyInclude.checked : true,
+          freq: els.freq.value,
+          priceMin: els.priceMin.value,
+          priceMid: els.priceMid.value,
+          priceMax: els.priceMax.value,
+          step: els.step.value
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        saveIndicator.innerHTML = '<span class="dot"></span> Enregistré';
+        saveIndicator.classList.add('saved');
+      } catch (e) { /* ignore */ }
+    }
+
+    function loadStorage() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        const d = JSON.parse(raw);
+        if (d.rate60 != null) els.rate60.value = d.rate60;
+        if (d.rate72 != null) els.rate72.value = d.rate72;
+        if (d.rate84 != null) els.rate84.value = d.rate84;
+        if (d.rate96 != null) els.rate96.value = d.rate96;
+        if (d.rate != null && d.rate60 == null) {
+          els.rate60.value = els.rate72.value = els.rate84.value = els.rate96.value = d.rate;
+        }
+        if (d.warranty != null) els.warranty.value = d.warranty;
+        if (d.warrantyInclude != null && els.warrantyInclude) {
+          els.warrantyInclude.checked = d.warrantyInclude !== false;
+        }
+        if (d.freq != null) els.freq.value = d.freq;
+        if (d.priceMin != null) els.priceMin.value = d.priceMin;
+        if (d.priceMid != null) els.priceMid.value = d.priceMid;
+        if (d.priceMax != null) els.priceMax.value = d.priceMax;
+        if (d.step != null) els.step.value = d.step;
+      } catch (e) { /* ignore */ }
+    }
+
+    function readUrlParams() {
+      const p = new URLSearchParams(window.location.search);
+      if (p.has('taux')) {
+        const v = p.get('taux');
+        els.rate60.value = els.rate72.value = els.rate84.value = els.rate96.value = v;
+      }
+      if (p.has('taux60')) els.rate60.value = p.get('taux60');
+      if (p.has('taux72')) els.rate72.value = p.get('taux72');
+      if (p.has('taux84')) els.rate84.value = p.get('taux84');
+      if (p.has('taux96')) els.rate96.value = p.get('taux96');
+      if (p.has('garantie')) els.warranty.value = p.get('garantie');
+      if (p.has('prixMin')) els.priceMin.value = p.get('prixMin');
+      if (p.has('prixMid')) els.priceMid.value = p.get('prixMid');
+      if (p.has('prixMax')) els.priceMax.value = p.get('prixMax');
+      if (p.has('pas')) els.step.value = p.get('pas');
+      if (p.has('freq')) {
+        const f = (p.get('freq') || '').toLowerCase();
+        if (['weekly', 'hebdo', 'sem', 'hebdomadaire'].includes(f)) els.freq.value = 'weekly';
+        else if (['biweekly', 'bimensuel', '2sem'].includes(f)) els.freq.value = 'biweekly';
+        else if (['monthly', 'mensuel', 'mois'].includes(f)) els.freq.value = 'monthly';
+      }
+    }
+
+    function doPrint() {
+      try { document.title = 'Avantage Plus — Paiements auto — ' + new Date().toISOString().slice(0, 10); } catch (e) { /* noop */ }
+      showToast('Aperçu d\'impression — choisir « Microsoft Print to PDF » pour le format PDF.');
+      setTimeout(() => window.print(), 60);
+    }
+
+    let recalcQueued = null;
+    function scheduleRecalc() {
+      cancelAnimationFrame(recalcQueued);
+      recalcQueued = requestAnimationFrame(() => { recalcQueued = null; recalcAll(); });
+    }
+
+    /* ═══════════════════ MODE ÉDITION ═══════════════════ */
+    function loadCustomTexts() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY_TEXTS);
+        customTexts = raw ? (JSON.parse(raw) || {}) : {};
+      } catch (e) {
+        customTexts = {};
+      }
+    }
+    function saveCustomTexts() {
+      try {
+        localStorage.setItem(STORAGE_KEY_TEXTS, JSON.stringify(customTexts));
+      } catch (e) { /* noop */ }
+    }
+    function applyCustomTexts() {
+      document.querySelectorAll('[data-editable]').forEach((el) => {
+        const id = el.getAttribute('data-editable');
+        if (Object.prototype.hasOwnProperty.call(customTexts, id)) {
+          el.innerHTML = customTexts[id];
+          el.setAttribute('data-edit-customized', 'true');
+        } else {
+          el.removeAttribute('data-edit-customized');
+        }
+      });
+    }
+    function normalizeHtml(s) {
+      return (s || '').replace(/\s+/g, ' ').trim();
+    }
+    function captureEditableHtml(el) {
+      const id = el.getAttribute('data-editable');
+      if (!id) return;
+      const html = el.innerHTML.trim();
+      const defHtml = defaultTexts[id] || '';
+      const isDefault = normalizeHtml(html) === normalizeHtml(defHtml);
+      if (isDefault) {
+        if (Object.prototype.hasOwnProperty.call(customTexts, id)) {
+          delete customTexts[id];
+        }
+        el.removeAttribute('data-edit-customized');
+      } else {
+        customTexts[id] = html;
+        el.setAttribute('data-edit-customized', 'true');
+      }
+      const mirror = el.getAttribute('data-mirror');
+      if (mirror) {
+        document.querySelectorAll('[data-mirror="' + mirror + '"]').forEach((twin) => {
+          if (twin !== el) {
+            twin.innerHTML = html;
+            const tid = twin.getAttribute('data-editable');
+            if (tid) {
+              if (isDefault) {
+                delete customTexts[tid];
+                twin.removeAttribute('data-edit-customized');
+              } else {
+                customTexts[tid] = html;
+                twin.setAttribute('data-edit-customized', 'true');
+              }
+            }
+          }
+        });
+      }
+    }
+    function captureAllEdits() {
+      document.querySelectorAll('[data-editable]').forEach((el) => captureEditableHtml(el));
+    }
+    function setEditMode(on) {
+      const wasEditing = editMode;
+      // CRITICAL : on capture toutes les modifs AVANT de désactiver le mode,
+      // sinon le blur déclenché par le retrait de contenteditable arrive trop tard.
+      if (wasEditing && !on) {
+        captureAllEdits();
+        saveCustomTexts();
+      }
+      editMode = !!on;
+      document.body.classList.toggle('edit-mode', editMode);
+      const lbl = document.getElementById('btnEditLabel');
+      const btn = document.getElementById('btnEdit');
+      if (lbl) lbl.textContent = editMode ? 'Terminer' : 'Modifier';
+      if (btn) {
+        btn.classList.toggle('btn-green-active', editMode);
+        btn.classList.toggle('btn-green', !editMode);
+      }
+      document.querySelectorAll('[data-editable]').forEach((el) => {
+        if (editMode) {
+          el.setAttribute('contenteditable', 'true');
+          el.setAttribute('spellcheck', 'true');
+        } else {
+          el.removeAttribute('contenteditable');
+          el.removeAttribute('spellcheck');
+        }
+      });
+      if (!editMode) {
+        showToast('Modifications enregistrées');
+      } else {
+        showToast('Mode édition — cliquez un texte pour le modifier');
+      }
+    }
+    function bindEditableHandlers() {
+      document.addEventListener('input', (e) => {
+        const el = e.target.closest('[data-editable]');
+        if (!el || !editMode) return;
+        const mirror = el.getAttribute('data-mirror');
+        if (mirror) {
+          document.querySelectorAll('[data-mirror="' + mirror + '"]').forEach((twin) => {
+            if (twin !== el) twin.innerHTML = el.innerHTML;
+          });
+        }
+      });
+      document.addEventListener('blur', (e) => {
+        const el = e.target.closest && e.target.closest('[data-editable]');
+        if (!el || !editMode) return;
+        captureEditableHtml(el);
+        saveCustomTexts();
+      }, true);
+      document.addEventListener('keydown', (e) => {
+        const el = e.target.closest && e.target.closest('[data-editable]');
+        if (!el || !editMode) return;
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          el.blur();
+          setEditMode(false);
+        }
+      });
+    }
+    function resetCustomTexts() {
+      customTexts = {};
+      try { localStorage.removeItem(STORAGE_KEY_TEXTS); } catch (e) { /* noop */ }
+      document.querySelectorAll('[data-editable]').forEach((el) => {
+        const id = el.getAttribute('data-editable');
+        if (id && Object.prototype.hasOwnProperty.call(defaultTexts, id)) {
+          el.innerHTML = defaultTexts[id];
+        }
+        el.removeAttribute('data-edit-customized');
+      });
+    }
+
+    function bind() {
+      document.getElementById('btnPrint').addEventListener('click', doPrint);
+      document.getElementById('btnReset').addEventListener('click', () => {
+        // Si on est en mode édition, on capture d'abord les modifs en cours
+        if (editMode) captureAllEdits();
+        const alsoTexts = Object.keys(customTexts).length > 0;
+        const msg = alsoTexts
+          ? 'Réinitialiser les paramètres ET annuler vos modifications de textes ?'
+          : 'Réinitialiser les paramètres ?';
+        if (!confirm(msg)) return;
+        localStorage.removeItem(STORAGE_KEY);
+        els.rate60.value = '8.99';
+        els.rate72.value = '8.99';
+        els.rate84.value = '8.99';
+        els.rate96.value = '8.99';
+        els.warranty.value = '3000';
+        if (els.warrantyInclude) els.warrantyInclude.checked = true;
+        els.freq.value = 'weekly';
+        els.priceMin.value = '5999';
+        els.priceMid.value = '39999';
+        els.priceMax.value = '74999';
+        els.step.value = '1000';
+        if (alsoTexts) {
+          if (editMode) setEditMode(false);
+          resetCustomTexts();
+        }
+        recalcAll();
+        showToast(alsoTexts ? 'Réinitialisé (paramètres + textes)' : 'Réinitialisé');
+      });
+      document.getElementById('btnEdit').addEventListener('click', () => setEditMode(!editMode));
+      document.getElementById('btnEditDone').addEventListener('click', () => setEditMode(false));
+
+      document.addEventListener('input', (e) => { if (e.target.closest('.control-panel')) scheduleRecalc(); });
+      document.addEventListener('change', (e) => { if (e.target.closest('.control-panel')) scheduleRecalc(); });
+
+      document.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && (e.key.toLowerCase() === 'p' || e.key.toLowerCase() === 's')) {
+          if (editMode) return;
+          e.preventDefault();
+          doPrint();
+        }
+      });
+
+      bindEditableHandlers();
+    }
+
+    loadStorage();
+    captureDefaultTexts();
+    loadCustomTexts();
+    readUrlParams();
+    bind();
+    recalcAll();
+    applyCustomTexts();
+  })();
+  </script>
+</body>
+</html>

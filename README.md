@@ -1,6 +1,8 @@
-# Service-Avantage
+# Outil-Avantage
 
-Site web officiel de Service-Avantage construit avec **React + Vite** et hébergé sur **Firebase Hosting**.
+Centre d'outils pour concessionnaires automobiles — construit avec **React + Vite** et hébergé sur **Firebase Hosting**.
+
+Outil-Avantage regroupe plusieurs outils du quotidien d'une concession (calculateurs de financement, formulaires d'accueil et de transfert, génération de messages Marketplace, etc.) dans une interface unique et professionnelle.
 
 ## Stack technique
 
@@ -14,7 +16,7 @@ Site web officiel de Service-Avantage construit avec **React + Vite** et héberg
 - Node.js >= 20
 - npm
 - Firebase CLI (installé automatiquement via `npx`)
-- Un compte Firebase avec accès au projet `service-avantage`
+- Un compte Firebase avec accès au projet Firebase utilisé (par défaut `service-avantage` — voir `.firebaserc`)
 
 ## Installation
 
@@ -62,7 +64,7 @@ npm run preview
    npx -y firebase-tools@latest login
    ```
 
-2. Définir le projet actif :
+2. Définir le projet actif (voir `.firebaserc` pour l'ID exact) :
 
    ```bash
    npx -y firebase-tools@latest use service-avantage
@@ -84,12 +86,15 @@ npx -y firebase-tools@latest hosting:channel:deploy preview-name
 ## Structure du projet
 
 ```
-Service-Avantage/
-├── public/             Fichiers statiques (favicon, etc.)
+Outil-Avantage/
+├── public/             Fichiers statiques (favicon, outils HTML, images)
+│   ├── outils/         Outils HTML iframés (calculateur, formulaires)
+│   └── images/         Bannières et ressources partagées
 ├── src/
-│   ├── assets/         Images et ressources
-│   ├── App.jsx         Composant racine
-│   ├── App.css         Styles principaux
+│   ├── components/     Composants React partagés (Sidebar, Header, Layout, OutilFrame)
+│   ├── pages/          Pages de l'application
+│   ├── styles/         Thème global (theme.css)
+│   ├── App.jsx         Composant racine + routes
 │   ├── firebase.js     Initialisation Firebase
 │   ├── index.css       Styles globaux
 │   └── main.jsx        Point d'entrée
@@ -104,4 +109,10 @@ Service-Avantage/
 
 ## Dépôt GitHub
 
-Le code est versionné sur : [https://github.com/Math244244/Service-Avantage](https://github.com/Math244244/Service-Avantage)
+Le code est versionné sur GitHub. Si le dépôt distant a été renommé en `Outil-Avantage` côté GitHub, mettez la remote à jour :
+
+```bash
+git remote set-url origin https://github.com/Math244244/Outil-Avantage.git
+```
+
+Sinon, la remote actuelle reste valide grâce aux redirections automatiques de GitHub.

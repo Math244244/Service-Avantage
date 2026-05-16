@@ -1,0 +1,928 @@
+/* ═══════════════════════════════════════════════════════════════
+   CALCULATEUR DE PRÊT — Layout dense, tout sur une seule page.
+   Objectif : afficher l'ensemble Bandeau + Étapes 1, 2, 3 sans
+   scroll vertical sur écran 1080p (~900px utiles). La psychologie
+   de vente : le client voit immédiatement le paiement mensuel,
+   les composantes du financement et les paramètres en un coup d'œil.
+   ═══════════════════════════════════════════════════════════════ */
+.cpi-page {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* ═══════ Bandeau d'en-tête (compact pour gagner de la hauteur) ═══════ */
+.cpi-bandeau {
+  width: 100%;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--ombre-sm);
+  background: #0f172a;
+  line-height: 0;
+}
+.cpi-bandeau img {
+  width: 100%;
+  height: auto;
+  max-height: 100px;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+/* ═══════ Carte générique (padding réduit) ═══════ */
+.cpi-carte {
+  background: var(--bg-card);
+  border: 1px solid var(--border-clair);
+  border-radius: var(--radius-lg);
+  padding: 16px 20px;
+  box-shadow: var(--ombre-sm);
+}
+
+/* En-tête compact : badge + titre + sous-titre sur la même ligne */
+.cpi-carte-entete {
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.cpi-entete-compact {
+  flex-direction: row;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.cpi-carte-entete h2 {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--texte-principal);
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
+.cpi-soustitre {
+  font-size: 12.5px;
+  color: var(--texte-secondaire);
+  line-height: 1.4;
+  max-width: 760px;
+  margin-left: auto;
+}
+
+.cpi-etape {
+  display: inline-flex;
+  align-items: center;
+  background: var(--rouge-ultraclair);
+  color: var(--rouge-principal);
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 999px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ÉTAPE 1 — Bulles de saisie des montants (compact)
+   ═══════════════════════════════════════════════════════════════ */
+.cpi-bulles {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.cpi-bulle {
+  background: var(--bg-hover);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.cpi-bulle-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--texte-secondaire);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  line-height: 1.2;
+}
+
+/* Bulle « saisie » (montant à entrer) */
+.cpi-bulle-saisie:focus-within {
+  border-color: var(--rouge-principal);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(200, 16, 46, 0.1);
+}
+
+.cpi-bulle-principale {
+  background: linear-gradient(135deg, #fff5f6 0%, #ffffff 70%);
+  border-color: rgba(200, 16, 46, 0.22);
+}
+
+.cpi-bulle-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 2px 10px;
+  transition: border-color 0.15s ease;
+}
+
+.cpi-bulle-saisie:focus-within .cpi-bulle-input-wrap {
+  border-color: var(--rouge-principal);
+}
+
+.cpi-bulle-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--texte-principal);
+  padding: 6px 0;
+  letter-spacing: -0.01em;
+  min-width: 0;
+}
+
+.cpi-bulle-input::placeholder {
+  color: var(--texte-tertiaire);
+  font-weight: 500;
+}
+
+.cpi-bulle-devise {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--texte-tertiaire);
+}
+
+/* Bulle « calculée » (sous-totaux affichés en lecture) */
+.cpi-bulle-calcule {
+  background: linear-gradient(135deg, #fff7ed 0%, #ffffff 70%);
+  border-color: rgba(249, 115, 22, 0.22);
+  justify-content: center;
+  align-items: flex-start;
+}
+
+/* Sous-total : occupe la même ligne (3e colonne) que les 3 saisies */
+.cpi-bulle:nth-child(4) {
+  /* le sous-total prend toute la largeur de la 4e ligne, mais ici on
+     veut qu'il reste compact ; on le laisse en colonne normale */
+}
+
+.cpi-bulle-haut {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.cpi-bulle-mention {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--orange-degrade-fin);
+  background: rgba(249, 115, 22, 0.08);
+  padding: 2px 7px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.cpi-bulle-valeur {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--texte-principal);
+  letter-spacing: -0.01em;
+}
+
+.cpi-bulle-valeur-grand {
+  font-size: 22px;
+  color: var(--rouge-principal);
+}
+
+/* Sous-total prend la moitié, Total prend la moitié — ils sont côte à côte */
+.cpi-bulle-taxes {
+  background: linear-gradient(135deg, #fff5f6 0%, #ffffff 70%);
+  border-color: rgba(200, 16, 46, 0.25);
+  grid-column: 2 / -1;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ÉTAPE 2 — Paramètres du prêt (3 colonnes côte à côte)
+   ═══════════════════════════════════════════════════════════════ */
+.cpi-parametres {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.85fr) minmax(380px, 2.1fr) minmax(220px, 1.1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.cpi-param-bloc {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.cpi-param-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--texte-secondaire);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.cpi-param-aide-inline {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--texte-tertiaire);
+  margin-left: 4px;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.cpi-param-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Champ taux */
+.cpi-taux-wrap {
+  display: inline-flex;
+  align-items: center;
+  background: #fff;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 2px 12px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  width: 100%;
+  max-width: none;
+}
+
+.cpi-taux-wrap:focus-within {
+  border-color: var(--rouge-principal);
+  box-shadow: 0 0 0 3px rgba(200, 16, 46, 0.1);
+}
+
+.cpi-taux-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-family: inherit;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--texte-principal);
+  padding: 8px 0;
+  letter-spacing: -0.01em;
+  width: 100%;
+  min-width: 0;
+}
+
+.cpi-taux-input::placeholder {
+  color: var(--texte-tertiaire);
+  font-weight: 500;
+}
+
+.cpi-taux-suffix {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--texte-tertiaire);
+  white-space: nowrap;
+}
+
+/* Toggle demi-année (compact) */
+.cpi-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--texte-secondaire);
+  user-select: none;
+}
+
+.cpi-toggle input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.cpi-toggle-slider {
+  position: relative;
+  width: 30px;
+  height: 17px;
+  background: var(--border);
+  border-radius: 999px;
+  transition: background 0.2s ease;
+}
+
+.cpi-toggle-slider::after {
+  content: "";
+  position: absolute;
+  width: 13px;
+  height: 13px;
+  background: #fff;
+  border-radius: 50%;
+  top: 2px;
+  left: 2px;
+  transition: transform 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+.cpi-toggle input:checked + .cpi-toggle-slider {
+  background: var(--rouge-principal);
+}
+
+.cpi-toggle input:checked + .cpi-toggle-slider::after {
+  transform: translateX(13px);
+}
+
+.cpi-toggle input:focus-visible + .cpi-toggle-slider {
+  box-shadow: 0 0 0 3px rgba(200, 16, 46, 0.25);
+}
+
+/* Boutons de terme (compact, 8 colonnes) */
+.cpi-termes-grille {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 6px;
+}
+
+.cpi-terme-btn {
+  background: #fff;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 4px;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--texte-principal);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+  letter-spacing: -0.01em;
+  min-width: 0;
+}
+
+.cpi-terme-btn:hover {
+  border-color: var(--rouge-principal);
+  color: var(--rouge-principal);
+  transform: translateY(-1px);
+}
+
+.cpi-terme-actif {
+  background: linear-gradient(135deg, var(--rouge-degrade-debut), var(--rouge-degrade-fin));
+  border-color: transparent;
+  color: #fff !important;
+  box-shadow: 0 4px 12px rgba(200, 16, 46, 0.32);
+  transform: translateY(-1px);
+}
+
+/* Boutons de fréquence (1 colonne verticale dans le bloc droit, ou 3 en grand écran) */
+.cpi-freq-grille {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cpi-freq-btn {
+  background: #fff;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  text-align: left;
+}
+
+.cpi-freq-btn:hover {
+  border-color: var(--rouge-principal);
+  transform: translateY(-1px);
+}
+
+.cpi-freq-titre {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--texte-principal);
+}
+
+.cpi-freq-mention {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--texte-tertiaire);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.cpi-freq-actif {
+  background: linear-gradient(135deg, var(--rouge-degrade-debut), var(--rouge-degrade-fin));
+  border-color: transparent;
+  box-shadow: 0 4px 12px rgba(200, 16, 46, 0.32);
+}
+
+.cpi-freq-actif .cpi-freq-titre,
+.cpi-freq-actif .cpi-freq-mention {
+  color: #fff !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ÉTAPE 3 — Résultats (split horizontal : paiement + stats)
+   ═══════════════════════════════════════════════════════════════ */
+.cpi-carte-resultats {
+  background: linear-gradient(135deg, #fff5f6 0%, #ffffff 60%);
+  border-color: rgba(200, 16, 46, 0.18);
+}
+
+.cpi-resultats {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Mode détaillé : paiement à gauche + stats à droite (split horizontal).
+   Mode compact (par défaut) : paiement seul, centré et pleine largeur — c'est
+   la « vue client » : on ne montre que le chiffre qui parle au client. */
+.cpi-resultats-haut {
+  display: grid;
+  gap: 14px;
+  align-items: stretch;
+  transition: grid-template-columns 0.25s ease;
+}
+.cpi-resultats-haut-detaille {
+  grid-template-columns: minmax(280px, 1fr) minmax(380px, 1.4fr);
+}
+.cpi-resultats-haut-compact {
+  grid-template-columns: 1fr;
+}
+.cpi-resultats-haut-compact .cpi-resultat-principal {
+  max-width: 720px;
+  margin: 0 auto;
+  width: 100%;
+}
+.cpi-resultats-haut-compact .cpi-resultat-montant {
+  font-size: 52px;
+}
+.cpi-resultat-grille {
+  animation: cpiFadeSlide 0.28s ease;
+}
+@keyframes cpiFadeSlide {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.cpi-resultat-principal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 18px 20px;
+  background: linear-gradient(135deg, var(--rouge-degrade-debut) 0%, var(--rouge-degrade-fin) 100%);
+  color: #fff;
+  border-radius: var(--radius-md);
+  box-shadow: 0 12px 28px -10px rgba(200, 16, 46, 0.5);
+  position: relative;
+  overflow: hidden;
+}
+
+.cpi-resultat-principal::after {
+  content: "";
+  position: absolute;
+  width: 240px;
+  height: 240px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0) 70%);
+  top: -100px;
+  right: -90px;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.cpi-resultat-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.85);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.cpi-resultat-montant {
+  font-size: 42px;
+  font-weight: 800;
+  color: #fff;
+  margin-top: 4px;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.cpi-resultat-mention {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+  margin-top: 8px;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 4px 12px;
+  border-radius: 999px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* Bouton « Information complémentaire » — discret, intégré dans la carte rouge.
+   Reste visible sans capter l'attention du client : seul le conseiller le note. */
+.cpi-btn-info {
+  margin-top: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 11.5px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  letter-spacing: 0.1px;
+  transition: background 0.18s ease, transform 0.15s ease, border-color 0.18s ease;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  position: relative;
+  z-index: 1;
+}
+.cpi-btn-info:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: translateY(-1px);
+}
+.cpi-btn-info:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.5);
+}
+.cpi-btn-info:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.cpi-btn-info svg {
+  flex-shrink: 0;
+}
+
+/* Stats côté droit : grille 2×2 compacte */
+.cpi-resultat-grille {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.cpi-stat {
+  background: #fff;
+  border: 1px solid var(--border-clair);
+  border-radius: var(--radius-sm);
+  padding: 9px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  justify-content: center;
+}
+
+.cpi-stat-titre {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--texte-tertiaire);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.cpi-stat-valeur {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--texte-principal);
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+}
+
+.cpi-stat-mention {
+  font-size: 10px;
+  color: var(--texte-tertiaire);
+}
+
+/* Actions */
+.cpi-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.cpi-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 9px 14px;
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: inherit;
+}
+
+.cpi-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cpi-btn-ghost {
+  background: transparent;
+  color: var(--texte-secondaire);
+  border: 1px solid var(--border);
+}
+
+.cpi-btn-ghost:hover:not(:disabled) {
+  background: var(--bg-hover);
+  color: var(--texte-principal);
+}
+
+.cpi-btn-secondaire {
+  background: #fff;
+  color: var(--texte-principal);
+  border: 1px solid var(--border);
+}
+
+.cpi-btn-secondaire:hover:not(:disabled) {
+  border-color: var(--rouge-principal);
+  color: var(--rouge-principal);
+}
+
+.cpi-btn-primaire {
+  background: linear-gradient(135deg, var(--rouge-degrade-debut), var(--rouge-degrade-fin));
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(200, 16, 46, 0.28);
+}
+
+.cpi-btn-primaire:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(200, 16, 46, 0.36);
+}
+
+.cpi-btn-actif {
+  box-shadow: 0 2px 6px rgba(200, 16, 46, 0.2);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ÉTAPE 4 — Tableau d'amortissement (conditionnel, garde son design)
+   ═══════════════════════════════════════════════════════════════ */
+.cpi-carte-amortissement {
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.cpi-tableau-wrap {
+  max-height: 520px;
+  overflow-y: auto;
+  border: 1px solid var(--border-clair);
+  border-radius: var(--radius-md);
+  background: #fff;
+}
+
+.cpi-tableau {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.cpi-tableau thead {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.cpi-tableau th {
+  background: linear-gradient(135deg, var(--rouge-degrade-debut), var(--rouge-degrade-fin));
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  padding: 10px 14px;
+  text-align: right;
+}
+
+.cpi-tableau th:first-child {
+  text-align: center;
+  width: 60px;
+}
+
+.cpi-tableau td {
+  padding: 9px 14px;
+  font-size: 13px;
+  text-align: right;
+  border-bottom: 1px solid var(--border-clair);
+  color: var(--texte-principal);
+}
+
+.cpi-tableau tbody tr:nth-child(even) {
+  background: var(--bg-hover);
+}
+
+.cpi-tableau tbody tr:hover {
+  background: var(--rouge-ultraclair);
+}
+
+.cpi-num {
+  text-align: center !important;
+  font-weight: 700;
+  color: var(--texte-tertiaire);
+}
+
+.cpi-interet {
+  color: #b91c1c;
+  font-weight: 600;
+}
+
+.cpi-capital {
+  color: #047857;
+  font-weight: 700;
+}
+
+.cpi-solde {
+  font-weight: 700;
+}
+
+.cpi-tableau tfoot td {
+  background: #fafafa;
+  font-weight: 800;
+  font-size: 14px;
+  border-top: 2px solid var(--rouge-principal);
+  border-bottom: none;
+  padding: 12px 14px;
+}
+
+.cpi-tableau tfoot td:first-child {
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  font-size: 11.5px;
+  color: var(--texte-secondaire);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RESPONSIVE — Adaptations par paliers
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Tablette large : on conserve la grille 3 colonnes mais on
+   redonne de l'air en Étape 2 si la fréquence se met sur 1 ligne */
+@media (max-width: 1300px) {
+  .cpi-parametres {
+    grid-template-columns: minmax(160px, 0.8fr) minmax(340px, 2fr) minmax(200px, 1fr);
+    gap: 12px;
+  }
+}
+
+/* Tablette : Étape 1 passe en 2 colonnes, Étape 2 reste 3 si possible */
+@media (max-width: 1100px) {
+  .cpi-bulles {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .cpi-bulle-taxes {
+    grid-column: 1 / -1;
+  }
+  .cpi-parametres {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "taux freq"
+      "duree duree";
+  }
+  .cpi-param-bloc:nth-child(1) { grid-area: taux; }
+  .cpi-param-bloc-duree { grid-area: duree; }
+  .cpi-param-bloc:nth-child(3) { grid-area: freq; }
+  .cpi-freq-grille {
+    flex-direction: row;
+  }
+  .cpi-freq-grille .cpi-freq-btn {
+    flex: 1;
+  }
+  .cpi-resultats-haut-detaille {
+    grid-template-columns: 1fr;
+  }
+  .cpi-resultat-grille {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Mobile */
+@media (max-width: 760px) {
+  .cpi-carte {
+    padding: 14px 14px;
+  }
+  .cpi-bulles {
+    grid-template-columns: 1fr;
+  }
+  .cpi-bulle-taxes {
+    grid-column: 1 / -1;
+  }
+  .cpi-parametres {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "taux"
+      "duree"
+      "freq";
+  }
+  .cpi-termes-grille {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+  }
+  .cpi-terme-btn {
+    padding: 10px 6px;
+    font-size: 14px;
+  }
+  .cpi-freq-grille {
+    flex-direction: column;
+  }
+  .cpi-resultat-grille {
+    grid-template-columns: 1fr 1fr;
+  }
+  .cpi-resultat-montant {
+    font-size: 34px;
+  }
+  .cpi-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .cpi-btn {
+    justify-content: center;
+  }
+  .cpi-bandeau img {
+    max-height: 80px;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   IMPRESSION — Page propre, sans menu ni boutons
+   ═══════════════════════════════════════════════════════════════ */
+@media print {
+  body, .app-layout, .app-main, .app-content { background: #fff !important; }
+  .app-header, .sidebar { display: none !important; }
+  .app-main { margin-left: 0 !important; }
+  .app-content { padding: 0 !important; max-width: 100% !important; }
+
+  .cpi-page { gap: 10px; }
+  .cpi-carte {
+    box-shadow: none !important;
+    border: 1px solid #ccc !important;
+    page-break-inside: avoid;
+  }
+  .cpi-carte-amortissement { page-break-before: auto; }
+  .cpi-actions { display: none !important; }
+
+  .cpi-resultats-haut-detaille {
+    grid-template-columns: 1fr 1.4fr !important;
+  }
+  .cpi-resultats-haut-compact {
+    grid-template-columns: 1fr !important;
+  }
+  /* À l'impression, le bouton « info complémentaire » disparaît : on imprime
+     simplement ce que le conseiller a choisi de montrer (mode compact OU détaillé). */
+  .cpi-btn-info { display: none !important; }
+
+  .cpi-resultat-principal {
+    box-shadow: none !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .cpi-terme-actif,
+  .cpi-freq-actif,
+  .cpi-tableau th,
+  .cpi-resultat-principal {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .cpi-tableau-wrap { max-height: none !important; overflow: visible !important; }
+  .cpi-tableau thead { position: static !important; }
+  .cpi-tableau tbody tr { page-break-inside: avoid; }
+}

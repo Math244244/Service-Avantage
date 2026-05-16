@@ -1,0 +1,109 @@
+:root {
+  --rouge-principal: #C8102E;
+  --rouge-fonce: #A30D26;
+  --rouge-tres-fonce: #7F0A1E;
+  --rouge-clair: #FEE2E2;
+  --rouge-ultraclair: #FEF2F2;
+  --rouge-degrade-debut: #C8102E;
+  --rouge-degrade-fin: #8B0000;
+
+  --vert-success: #10B981;
+  --vert-clair: #D1FAE5;
+  --vert-degrade-debut: #34D399;
+  --vert-degrade-fin: #059669;
+
+  --bleu: #3B82F6;
+  --bleu-clair: #DBEAFE;
+  --bleu-degrade-debut: #60A5FA;
+  --bleu-degrade-fin: #2563EB;
+
+  --violet: #8B5CF6;
+  --violet-clair: #EDE9FE;
+  --violet-degrade-debut: #A78BFA;
+  --violet-degrade-fin: #7C3AED;
+
+  --orange: #F97316;
+  --orange-clair: #FFEDD5;
+  --orange-degrade-debut: #FB923C;
+  --orange-degrade-fin: #EA580C;
+
+  --rose: #EC4899;
+  --rose-clair: #FCE7F3;
+
+  --bg-page: #F5F6FA;
+  --bg-card: #FFFFFF;
+  --bg-sidebar: #FFFFFF;
+  --bg-hover: #F9FAFB;
+
+  --texte-principal: #111827;
+  --texte-secondaire: #6B7280;
+  --texte-tertiaire: #9CA3AF;
+  --texte-inverse: #FFFFFF;
+
+  --border: #E5E7EB;
+  --border-clair: #F3F4F6;
+
+  --ombre-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --ombre-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  --ombre-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+  --ombre-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+
+  --sidebar-width: 290px;
+  --header-height: 64px;
+
+  --transition: all 0.2s ease;
+
+  --font-base: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-base);
+  background: var(--bg-page);
+  color: var(--texte-principal);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 0;
+  font-weight: 600;
+  color: var(--texte-principal);
+  letter-spacing: -0.01em;
+}
+
+p {
+  margin: 0;
+}
+
+ul, ol {
+  margin: 0;
+  padding: 0;
+}
