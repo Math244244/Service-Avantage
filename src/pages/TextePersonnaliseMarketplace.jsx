@@ -160,11 +160,13 @@ function TextePersonnaliseMarketplace() {
   const [modeEditionId, setModeEditionId] = useState(null);
 
   /* Messages personnalisés par l'utilisateur. Clé = id du modèle, valeur = texte modifié.
-     Un message édité a priorité sur le message généré automatiquement. */
-  const [messagesEdites, setMessagesEdites] = useState(() => {
-    const sauvegarde = chargerSauvegarde();
-    return sauvegarde?.messagesEdites ?? {};
-  });
+     Un message édité a priorité sur le message généré automatiquement.
+
+     IMPORTANT : on NE persiste PAS ces modifications.
+     À chaque fois que l'utilisateur change de page et revient, on repart
+     systématiquement du texte d'origine — comportement explicitement demandé
+     pour que personne ne tombe sur les modifications d'un autre conseiller. */
+  const [messagesEdites, setMessagesEdites] = useState({});
 
   /* Messages générés depuis les templates (toujours à jour avec les valeurs visualisées) */
   const messagesGeneres = useMemo(() => {
@@ -184,6 +186,8 @@ function TextePersonnaliseMarketplace() {
     }));
   }, [messagesGeneres, messagesEdites]);
 
+  /* On persiste les valeurs de saisie (nom, URL, conseiller) + les valeurs
+     visualisées, MAIS PAS messagesEdites — voir explication ci-dessus. */
   useEffect(() => {
     try {
       localStorage.setItem(
@@ -194,13 +198,12 @@ function TextePersonnaliseMarketplace() {
           nomRepresentant: saisie.nomRepresentant,
           emailRepresentant: saisie.emailRepresentant,
           visualise: valeursVisualisees,
-          messagesEdites,
         })
       );
     } catch (_e) {
       /* stockage non disponible */
     }
-  }, [saisie, valeursVisualisees, messagesEdites]);
+  }, [saisie, valeursVisualisees]);
 
   const handleChangeChamp = (champ) => (e) => {
     setSaisie((prev) => ({ ...prev, [champ]: e.target.value }));
@@ -279,11 +282,16 @@ function TextePersonnaliseMarketplace() {
   const aDesValeursVisualisees = valeursVisualisees !== null;
   const peutVisualiser =
     saisie.nomConcessionnaire.trim().length > 0 && saisie.url.trim().length > 0;
-  const aQuelqueChoseASaisir =
+  /* Le bouton Réinitialiser est désactivé UNIQUEMENT quand la page est
+     déjà vierge (rien saisi, rien visualisé, aucune édition en cours). */
+  const aQuelqueChoseAReinitialiser =
     saisie.nomConcessionnaire.length > 0 ||
     saisie.url.length > 0 ||
     saisie.nomRepresentant.length > 0 ||
-    saisie.emailRepresentant.length > 0;
+    saisie.emailRepresentant.length > 0 ||
+    aDesValeursVisualisees ||
+    Object.keys(messagesEdites).length > 0 ||
+    modeEditionId !== null;
 
   return (
     <div className="tpm-page">
@@ -302,91 +310,6 @@ function TextePersonnaliseMarketplace() {
             Remplissez les champs, cliquez <strong>Visualiser</strong>, puis copiez en un clic le message
             (préqualification, préapprobation ou demande de rappel). Ajoutez votre nom et courriel pour vous attribuer le lead.
           </p>
-        </div>
-      </section>
-
-      <section className="tpm-astuce">
-        <div className="tpm-astuce-entete">
-          <div className="tpm-astuce-icone">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" />
-              <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" />
-            </svg>
-          </div>
-          <div className="tpm-astuce-titre-wrap">
-            <span className="tpm-astuce-badge">Astuce pratique</span>
-            <h2 className="tpm-astuce-titre">Lien trop long ? Raccourcissez-le gratuitement</h2>
-            <p className="tpm-astuce-soustitre">
-              Un lien court au nom de votre concession = plus professionnel, plus de clics.
-            </p>
-          </div>
-        </div>
-
-        <div className="tpm-astuce-etapes">
-          <div className="tpm-astuce-etape">
-            <div className="tpm-astuce-numero">1</div>
-            <div className="tpm-astuce-texte">
-              <strong>Allez sur <a href="https://tinyurl.com/" target="_blank" rel="noopener noreferrer" className="tpm-astuce-lien-fort">tinyurl.com</a></strong>
-              <span>Collez votre long URL dans le champ <em>« Long URL »</em>.</span>
-            </div>
-          </div>
-
-          <div className="tpm-astuce-fleche" aria-hidden="true">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="9 18 15 12 9 6" />
-            </svg>
-          </div>
-
-          <div className="tpm-astuce-etape">
-            <div className="tpm-astuce-numero">2</div>
-            <div className="tpm-astuce-texte">
-              <strong>Personnalisez l'alias</strong>
-              <span>
-                Dans le champ <em>« Alias (optional) »</em>, écrivez un nom
-                professionnel — idéalement <code>prequal-</code> suivi du nom de
-                votre concession.
-              </span>
-            </div>
-          </div>
-
-          <div className="tpm-astuce-fleche" aria-hidden="true">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="9 18 15 12 9 6" />
-            </svg>
-          </div>
-
-          <div className="tpm-astuce-etape">
-            <div className="tpm-astuce-numero">3</div>
-            <div className="tpm-astuce-texte">
-              <strong>Cliquez sur « Shorten Link »</strong>
-              <span>Copiez le lien raccourci, puis collez-le dans le champ
-              <em>« URL »</em> ci-dessous.</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="tpm-astuce-exemple">
-          <span className="tpm-astuce-exemple-label">Exemple de lien professionnel obtenu</span>
-          <code className="tpm-astuce-exemple-url">https://tinyurl.com/prequal-nomconcession</code>
-        </div>
-
-        <div className="tpm-astuce-actions">
-          <a
-            href="https://tinyurl.com/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="tpm-astuce-cta"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" />
-              <polyline points="15 3 21 3 21 9" />
-              <line x1="10" y1="14" x2="21" y2="3" />
-            </svg>
-            Ouvrir tinyurl.com
-          </a>
-          <span className="tpm-astuce-mention">
-            Aucune inscription requise — gratuit et instantané
-          </span>
         </div>
       </section>
 
@@ -458,8 +381,12 @@ function TextePersonnaliseMarketplace() {
               type="button"
               className="tpm-btn tpm-btn-ghost"
               onClick={handleReinitialiser}
-              disabled={!aQuelqueChoseASaisir && !aDesValeursVisualisees}
+              disabled={!aQuelqueChoseAReinitialiser}
             >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M1 4v6h6" />
+                <path d="M3.51 15a9 9 0 102.13-9.36L1 10" />
+              </svg>
               Réinitialiser
             </button>
             <button
@@ -574,6 +501,91 @@ function TextePersonnaliseMarketplace() {
               </article>
             );
           })}
+        </div>
+      </section>
+
+      <section className="tpm-astuce">
+        <div className="tpm-astuce-entete">
+          <div className="tpm-astuce-icone">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" />
+              <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" />
+            </svg>
+          </div>
+          <div className="tpm-astuce-titre-wrap">
+            <span className="tpm-astuce-badge">Astuce pratique</span>
+            <h2 className="tpm-astuce-titre">Lien trop long ? Raccourcissez-le gratuitement</h2>
+            <p className="tpm-astuce-soustitre">
+              Un lien court au nom de votre concession = plus professionnel, plus de clics.
+            </p>
+          </div>
+        </div>
+
+        <div className="tpm-astuce-etapes">
+          <div className="tpm-astuce-etape">
+            <div className="tpm-astuce-numero">1</div>
+            <div className="tpm-astuce-texte">
+              <strong>Allez sur <a href="https://tinyurl.com/" target="_blank" rel="noopener noreferrer" className="tpm-astuce-lien-fort">tinyurl.com</a></strong>
+              <span>Collez votre long URL dans le champ <em>« Long URL »</em>.</span>
+            </div>
+          </div>
+
+          <div className="tpm-astuce-fleche" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </div>
+
+          <div className="tpm-astuce-etape">
+            <div className="tpm-astuce-numero">2</div>
+            <div className="tpm-astuce-texte">
+              <strong>Personnalisez l'alias</strong>
+              <span>
+                Dans le champ <em>« Alias (optional) »</em>, écrivez un nom
+                professionnel — idéalement <code>prequal-</code> suivi du nom de
+                votre concession.
+              </span>
+            </div>
+          </div>
+
+          <div className="tpm-astuce-fleche" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </div>
+
+          <div className="tpm-astuce-etape">
+            <div className="tpm-astuce-numero">3</div>
+            <div className="tpm-astuce-texte">
+              <strong>Cliquez sur « Shorten Link »</strong>
+              <span>Copiez le lien raccourci, puis collez-le dans le champ
+              <em>« URL »</em> ci-dessus.</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="tpm-astuce-exemple">
+          <span className="tpm-astuce-exemple-label">Exemple de lien professionnel obtenu</span>
+          <code className="tpm-astuce-exemple-url">https://tinyurl.com/prequal-nomconcession</code>
+        </div>
+
+        <div className="tpm-astuce-actions">
+          <a
+            href="https://tinyurl.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="tpm-astuce-cta"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" />
+              <polyline points="15 3 21 3 21 9" />
+              <line x1="10" y1="14" x2="21" y2="3" />
+            </svg>
+            Ouvrir tinyurl.com
+          </a>
+          <span className="tpm-astuce-mention">
+            Aucune inscription requise — gratuit et instantané
+          </span>
         </div>
       </section>
     </div>

@@ -113,7 +113,7 @@ function Accueil() {
             <div className="hero-stat-sep" />
             <div className="hero-stat">
               <div className="hero-stat-valeur">100%</div>
-              <div className="hero-stat-label">Sécurisé</div>
+              <div className="hero-stat-label">Québec</div>
             </div>
           </div>
 

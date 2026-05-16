@@ -391,29 +391,31 @@
 .tpm-messages-entete {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 10px;
+  gap: 14px;
+  margin-bottom: 14px;
   flex-wrap: wrap;
 }
 
 .tpm-config-entete h2,
 .tpm-messages-entete h2 {
-  font-size: 15px;
-  font-weight: 700;
+  font-size: 22px;
+  font-weight: 800;
   color: var(--texte-principal);
+  letter-spacing: -0.2px;
 }
 
 .tpm-step {
   display: inline-flex;
   align-items: center;
-  background: var(--orange-clair);
-  color: var(--orange-degrade-fin);
-  font-size: 10.5px;
-  font-weight: 700;
-  padding: 3px 10px;
+  background: linear-gradient(135deg, var(--orange-degrade-debut) 0%, var(--orange-degrade-fin) 100%);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 800;
+  padding: 7px 16px;
   border-radius: 999px;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.5px;
   text-transform: uppercase;
+  box-shadow: 0 4px 12px rgba(255, 122, 0, 0.28);
 }
 
 .tpm-apercu-badge {
