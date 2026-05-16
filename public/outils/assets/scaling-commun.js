@@ -29,13 +29,16 @@
   /* Bornes du zoom :
      - MIN = 1 : on ne réduit jamais (le CSS gère déjà les petits écrans
        via @media max-width: 900px qui passe .sheet à width:100%).
-     - MAX = 1.35 : on agrandit modérément. Au-delà, les champs sont
-       trop massifs et on perd la vue d'ensemble du formulaire ce qui
-       nuit à la saisie (feedback utilisateur). 1.35 garde une lisibilité
-       confortable tout en montrant ~75 % du formulaire d'un coup d'œil
-       sur un écran 1080p, et la totalité sur un 1440p. */
+     - MAX = 1.35 par défaut : on agrandit modérément. Au-delà, les champs
+       sont trop massifs et on perd la vue d'ensemble.
+     - Une page peut surcharger MAX en posant `window.AVANTAGE_MAX_ZOOM`
+       AVANT le chargement de ce script. Utile pour les outils plus longs
+       (ex. calculateur vitrine voiture) où on veut voir plus de contenu
+       d'un coup. */
   var MIN = 1;
-  var MAX = 1.35;
+  var MAX = (typeof window !== 'undefined' && typeof window.AVANTAGE_MAX_ZOOM === 'number')
+    ? window.AVANTAGE_MAX_ZOOM
+    : 1.35;
 
   /* 1. Injecte la règle CSS pour annuler le zoom à l'impression.
         Posée en premier dans <head> pour qu'elle soit prioritaire. */
