@@ -90,8 +90,8 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 16px;
-      padding: 16px 22px;
+      gap: 12px;
+      padding: 9px 16px;
       border-bottom: 1px solid var(--line);
       background:
         linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
@@ -101,62 +101,62 @@
       content: '';
       position: absolute;
       left: 0; top: 0; bottom: 0;
-      width: 4px;
+      width: 3px;
       background: linear-gradient(180deg, var(--red) 0%, var(--red-700) 100%);
     }
     .control-head-left {
       display: flex;
       align-items: center;
-      gap: 14px;
-      padding-left: 6px;
+      gap: 10px;
+      padding-left: 4px;
     }
     .brand-mark {
-      width: 38px; height: 38px;
+      width: 28px; height: 28px;
       display: inline-flex; align-items: center; justify-content: center;
-      border-radius: 10px;
+      border-radius: 7px;
       background: linear-gradient(135deg, var(--red) 0%, var(--red-700) 100%);
       color: #fff;
       box-shadow: var(--shadow-red);
       flex-shrink: 0;
     }
-    .brand-mark svg { width: 22px; height: 22px; }
+    .brand-mark svg { width: 16px; height: 16px; }
     .control-title {
       font-family: 'Manrope', 'Inter', sans-serif;
-      font-size: 14px;
+      font-size: 11.5px;
       font-weight: 800;
       color: var(--navy);
-      letter-spacing: 0.4px;
+      letter-spacing: 0.35px;
       text-transform: uppercase;
       line-height: 1;
     }
     .control-sub {
-      font-size: 11px;
+      font-size: 9.5px;
       color: var(--muted);
-      margin-top: 4px;
+      margin-top: 3px;
       font-weight: 500;
     }
     .actions {
       display: flex;
-      gap: 8px;
+      gap: 6px;
       flex-wrap: wrap;
     }
     .btn {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      padding: 10px 18px;
-      font-size: 12px;
+      gap: 6px;
+      padding: 6px 11px;
+      font-size: 10.5px;
       font-weight: 700;
       font-family: inherit;
       border: 1px solid transparent;
-      border-radius: 10px;
+      border-radius: 7px;
       cursor: pointer;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.4px;
       transition: transform 0.08s ease, box-shadow 0.18s ease, background 0.18s ease, border-color 0.18s ease;
       white-space: nowrap;
     }
-    .btn svg { width: 15px; height: 15px; flex-shrink: 0; }
+    .btn svg { width: 12px; height: 12px; flex-shrink: 0; }
     .btn-primary {
       background: linear-gradient(135deg, var(--red) 0%, var(--red-700) 100%);
       color: #fff;
@@ -201,8 +201,8 @@
     .btn-ghost {
       background: transparent;
       color: var(--muted);
-      font-size: 11px;
-      padding: 8px 14px;
+      font-size: 9.5px;
+      padding: 6px 10px;
     }
     .btn-ghost:hover { color: var(--red); background: var(--red-soft); }
     .btn:active { transform: translateY(1px); }
@@ -218,52 +218,52 @@
     .btn[aria-busy="true"] svg { display: none; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* Contrôles principaux — agencement en 2 lignes */
+    /* Contrôles principaux — module compact (≈ 50 % de l'ancien) */
     .control-main {
       display: flex;
       flex-direction: column;
-      gap: 18px;
-      padding: 22px 24px;
+      gap: 11px;
+      padding: 13px 18px;
     }
     .field-rates { width: 100%; }
     .field-row {
       display: grid;
       grid-template-columns: 1.2fr 1fr;
-      gap: 20px;
+      gap: 14px;
       align-items: end;
     }
     .rates-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
+      gap: 8px;
     }
     .rate-cell {
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 3px;
       align-items: stretch;
       min-width: 0;
     }
     .rate-cell .rate-lab {
-      font-size: 10px;
+      font-size: 8.5px;
       font-weight: 800;
-      letter-spacing: 0.8px;
+      letter-spacing: 0.6px;
       text-align: center;
       color: var(--steel);
       text-transform: uppercase;
     }
     .rate-cell .input-wrap input {
-      height: 50px;
-      font-size: 20px;
+      height: 34px;
+      font-size: 14px;
       font-weight: 800;
-      padding-right: 30px;
-      padding-left: 12px;
+      padding-right: 22px;
+      padding-left: 9px;
       text-align: center;
       letter-spacing: -0.2px;
     }
     .rate-cell .input-suffix {
-      right: 12px;
-      font-size: 13px;
+      right: 9px;
+      font-size: 10.5px;
       font-weight: 700;
       color: var(--red);
     }
@@ -271,42 +271,42 @@
     .field {
       display: flex;
       flex-direction: column;
-      gap: 9px;
+      gap: 5px;
     }
     .field label {
-      font-size: 11px;
+      font-size: 9.5px;
       font-weight: 800;
       text-transform: uppercase;
-      letter-spacing: 0.6px;
+      letter-spacing: 0.45px;
       color: var(--navy);
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
     }
     .field label .ico {
-      width: 22px; height: 22px;
+      width: 17px; height: 17px;
       display: inline-flex; align-items: center; justify-content: center;
-      border-radius: 6px;
+      border-radius: 5px;
       background: linear-gradient(135deg, var(--red-soft) 0%, #ffe6e8 100%);
       color: var(--red);
       flex-shrink: 0;
       box-shadow: inset 0 0 0 1px rgba(208, 2, 27, 0.15);
     }
-    .field label .ico svg { width: 14px; height: 14px; }
+    .field label .ico svg { width: 11px; height: 11px; }
     .input-wrap {
       position: relative;
     }
     .input-wrap input,
     .input-wrap select {
       width: 100%;
-      height: 48px;
-      padding: 0 44px 0 16px;
+      height: 34px;
+      padding: 0 34px 0 11px;
       font-family: inherit;
-      font-size: 18px;
+      font-size: 13px;
       font-weight: 700;
       color: var(--navy);
       border: 1.5px solid var(--line);
-      border-radius: 10px;
+      border-radius: 7px;
       background: #fff;
       outline: none;
       transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
@@ -317,30 +317,30 @@
     .input-wrap input:focus,
     .input-wrap select:focus {
       border-color: var(--red);
-      box-shadow: 0 0 0 4px rgba(208,2,27,0.14);
+      box-shadow: 0 0 0 3px rgba(208,2,27,0.12);
       background: #fff;
     }
     .input-wrap select {
-      padding-right: 36px;
+      padding-right: 28px;
       appearance: none;
       background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>");
       background-repeat: no-repeat;
-      background-position: right 14px center;
+      background-position: right 10px center;
     }
     .input-suffix {
       position: absolute;
-      right: 16px;
+      right: 11px;
       top: 50%;
       transform: translateY(-50%);
-      font-size: 14px;
+      font-size: 11px;
       font-weight: 700;
       color: var(--steel);
       pointer-events: none;
     }
     .field-hint {
-      font-size: 10.5px;
+      font-size: 9px;
       color: var(--muted);
-      line-height: 1.45;
+      line-height: 1.35;
     }
     .field-hint strong { color: var(--navy); }
 
@@ -353,8 +353,8 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 8px;
+      gap: 8px;
+      margin-bottom: 4px;
       flex-wrap: wrap;
     }
     .warranty-label-row label[for="inWarranty"] {
@@ -363,17 +363,19 @@
     .warranty-include {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       cursor: pointer;
       user-select: none;
-      font-size: 11.5px;
+      font-size: 9.5px;
       font-weight: 700;
       color: var(--steel);
-      padding: 4px 10px 4px 6px;
+      padding: 3px 8px 3px 5px;
       border-radius: 999px;
       background: rgba(208, 2, 27, 0.06);
       border: 1px solid rgba(208, 2, 27, 0.18);
       transition: all 0.2s ease;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
     }
     .warranty-include:hover {
       background: rgba(208, 2, 27, 0.1);
@@ -386,9 +388,9 @@
       width: 0; height: 0;
     }
     .warranty-include-box {
-      width: 18px;
-      height: 18px;
-      border-radius: 5px;
+      width: 14px;
+      height: 14px;
+      border-radius: 4px;
       background: #fff;
       border: 1.5px solid #d4d4d8;
       display: inline-flex;
@@ -399,8 +401,8 @@
       flex-shrink: 0;
     }
     .warranty-include-box svg {
-      width: 12px;
-      height: 12px;
+      width: 9px;
+      height: 9px;
       opacity: 0;
       transition: opacity 0.15s ease;
     }
@@ -416,17 +418,17 @@
     .warranty-include input:checked ~ .warranty-include-text { color: var(--red); }
     .warranty-include-text { transition: color 0.15s ease; }
 
-    /* Bandeau d'explication */
+    /* Bandeau d'explication — version compacte */
     .formula-strip {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 12px;
-      padding: 14px 20px;
+      gap: 8px;
+      padding: 8px 14px;
       background: linear-gradient(90deg, var(--navy) 0%, var(--navy-2) 50%, var(--navy) 100%);
       border-top: 1px solid var(--line);
       border-bottom: 1px solid var(--line);
-      font-size: 12px;
+      font-size: 10.5px;
       color: rgba(255, 255, 255, 0.85);
       flex-wrap: wrap;
       text-align: center;
@@ -434,8 +436,8 @@
     .formula-strip .chip {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      padding: 7px 14px;
+      gap: 4px;
+      padding: 4px 10px;
       background: rgba(255, 255, 255, 0.08);
       border: 1px solid rgba(255, 255, 255, 0.15);
       border-radius: 999px;
@@ -448,7 +450,7 @@
     .formula-strip .eq {
       font-weight: 900;
       color: rgba(255, 255, 255, 0.4);
-      font-size: 16px;
+      font-size: 13px;
     }
     .formula-strip .chip.highlight {
       background: linear-gradient(135deg, var(--red) 0%, var(--red-700) 100%);
@@ -467,15 +469,15 @@
     .advanced summary {
       list-style: none;
       cursor: pointer;
-      padding: 13px 22px;
-      font-size: 11px;
+      padding: 7px 16px;
+      font-size: 9.5px;
       font-weight: 800;
       text-transform: uppercase;
-      letter-spacing: 0.6px;
+      letter-spacing: 0.45px;
       color: var(--steel);
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 7px;
       user-select: none;
       transition: color 0.15s ease, background 0.15s ease;
     }
@@ -484,40 +486,40 @@
       content: '+';
       display: inline-flex;
       align-items: center; justify-content: center;
-      width: 22px; height: 22px;
-      border-radius: 6px;
+      width: 16px; height: 16px;
+      border-radius: 5px;
       background: #fff;
       color: var(--navy);
       font-weight: 900;
-      font-size: 14px;
+      font-size: 11px;
       box-shadow: var(--shadow-xs);
       transition: transform 0.2s ease;
     }
     .advanced[open] summary::before { content: '−'; background: var(--red); color: #fff; }
     .advanced summary:hover { color: var(--red); background: #fff; }
     .advanced-body {
-      padding: 6px 22px 20px;
+      padding: 4px 18px 14px;
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-      gap: 14px;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 10px;
     }
-    .field-mini { display: flex; flex-direction: column; gap: 5px; }
+    .field-mini { display: flex; flex-direction: column; gap: 3px; }
     .field-mini label {
-      font-size: 10px;
+      font-size: 9px;
       font-weight: 700;
       text-transform: uppercase;
       color: var(--ink-2);
-      letter-spacing: 0.4px;
+      letter-spacing: 0.35px;
     }
     .field-mini input,
     .field-mini select {
       width: 100%;
-      height: 32px;
-      padding: 0 10px;
-      font-size: 12px;
+      height: 26px;
+      padding: 0 8px;
+      font-size: 11px;
       font-weight: 600;
       border: 1px solid var(--line);
-      border-radius: 6px;
+      border-radius: 5px;
       background: #fff;
       font-family: inherit;
     }
@@ -1359,9 +1361,11 @@
 
     /* ═══════════════════ RESPONSIVE ═══════════════════ */
     @media (max-width: 880px) {
-      .control-main { padding: 18px; }
-      .field-row { grid-template-columns: 1fr; }
+      .control-main { padding: 11px 14px; gap: 9px; }
+      .control-head { padding: 8px 14px; }
+      .field-row { grid-template-columns: 1fr; gap: 10px; }
       .rates-grid { grid-template-columns: repeat(2, 1fr); }
+      .formula-strip { padding: 7px 12px; gap: 6px; }
       .sheet { width: 100%; }
       .sheet-header { grid-template-columns: 1fr; text-align: center; }
       .dealer-logo-slot, .ap-logo-slot { justify-content: center; }
