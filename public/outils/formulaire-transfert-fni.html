@@ -290,19 +290,6 @@
     }
     .passation .opt { font-size: 9.5px; }
 
-    /* Signatures (zone bas du document) */
-    .sig-zone {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      padding: 8px 14px;
-      border: 1px solid #ccc;
-      border-left: 4px solid var(--red);
-      border-radius: 5px;
-      background: #fff;
-    }
-    .sig-zone .signature-box { height: 64px; }
-
     /* Footer */
     .footer {
       text-align: right;
@@ -319,7 +306,6 @@
       .fd, .fd.sm, .fd.md, .fd.xs { flex: 1 1 100%; }
       .cols { flex-direction: column; }
       .s3-g3, .s3-g2, .pg { grid-template-columns: 1fr 1fr; }
-      .sig-zone { grid-template-columns: 1fr; }
     }
 
     /* ═══════════════ MODE COMPACT (impression + export PDF) ═══════════════ */
@@ -389,65 +375,75 @@
     .sheet.compact .passation strong { font-size: 8.5px; }
     .sheet.compact .passation .opt { font-size: 8.5px; }
 
-    .sheet.compact .sig-zone { padding: 5px 11px; gap: 9px; }
-    .sheet.compact .sig-zone .signature-box { height: 46px; }
-    .sheet.compact .signature-label { font-size: 7.5px; }
-
     .sheet.compact .footer { padding: 2px 0.4in 4px 0; font-size: 6px; }
 
-    /* ═══════════════ IMPRESSION — 1 PAGE STRICT ═══════════════
-       Stratégie finale (robuste sur Chrome 2024-2026) :
-       1. On masque tout sauf la sheet
-       2. La sheet est sortie du flux (position: absolute) → Chrome
-          n'essaie plus de paginer sur la hauteur de son contenu
-       3. Le body est borné à 8.5×11 in avec overflow: hidden → garantit
-          qu'aucune 2e page ne peut être créée
-       4. Le scaling JS applique transform: scale() pour ajuster le
-          contenu visuel dans la page                                  */
-    @page { size: 8.5in 11in; margin: 0.18in; }
+    /* ═══════════════ IMPRESSION — 1 PAGE STRICT (v3) ═══════════════
+       Stratégie finale ultra-robuste pour Chrome / Edge 2026 :
+
+       1. @page sans marge : la zone imprimable couvre tout 8.5 × 11 in.
+          On gère les marges visuellement via padding sur body.
+
+       2. html + body bornés à 8.5 × 11 in avec overflow: hidden →
+          Chrome n'a STRICTEMENT pas la place de créer une 2e page,
+          peu importe la taille du contenu interne.
+
+       3. .sheet en position: fixed (et plus position: absolute) →
+          Chrome traite les éléments fixed comme "ne participent pas
+          à la pagination". Combiné avec un body overflow: hidden,
+          ça garantit qu'aucun débordement vertical ne crée de 2e page.
+
+       4. On retire « .sheet * { page-break-inside: avoid } » qui en
+          pratique peut pousser Chrome à reporter un bloc sur p.2.
+
+       5. Le scaling JS (transform: scale + width compensé) garde le
+          rendu visuel proportionné dans la fenêtre 8.14 × 10.64 in.   */
+    @page { size: 8.5in 11in; margin: 0; }
     @media print {
-      html, body {
+      html {
         background: #fff !important;
-        padding: 0 !important;
         margin: 0 !important;
-        width: 8.14in !important;   /* 8.5in - 2 × 0.18in marges */
-        height: 10.64in !important; /* 11in - 2 × 0.18in marges */
+        padding: 0 !important;
+        width: 8.5in !important;
+        height: 11in !important;
+        overflow: hidden !important;
+      }
+      body {
+        background: #fff !important;
+        margin: 0 !important;
+        padding: 0.18in !important;
+        box-sizing: border-box !important;
+        width: 8.5in !important;
+        height: 11in !important;
         overflow: hidden !important;
         position: relative !important;
       }
-      /* On garde uniquement la sheet, on cache absolument tout le reste */
+      /* Cache tout sauf la sheet — la toolbar et le toast disparaissent */
       body > *:not(.sheet) { display: none !important; }
 
-      /* CLÉ : position: absolute sort la sheet du flux normal.
-         Chrome n'imprime que ce qui est visible dans le @page.
-         Sans cela, Chrome pagine sur la hauteur du contenu interne
-         même si transform: scale() est appliqué. */
+      /* position: fixed = totalement hors flux → pas de pagination.
+         top/left calés sur les marges intérieures du body. */
       .sheet {
-        position: absolute !important;
-        top: 0 !important;
-        left: 0 !important;
+        position: fixed !important;
+        top: 0.18in !important;
+        left: 0.18in !important;
+        right: auto !important;
+        bottom: auto !important;
         box-shadow: none !important;
         border-radius: 0 !important;
         margin: 0 !important;
+        padding: 0 !important;
         width: 8.14in !important;
         max-width: 8.14in !important;
         min-height: 0 !important;
-        /* PAS de max-height ni overflow ici : laisse le JS mesurer
-           correctement scrollHeight et appliquer le transform. */
+        height: auto !important;
+        overflow: visible !important;
         page-break-inside: avoid !important;
         page-break-after: avoid !important;
         break-inside: avoid !important;
         break-after: avoid !important;
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
-      }
-
-      /* Sécurité : empêche tout enfant de forcer un saut de page */
-      .sheet * {
-        page-break-inside: avoid !important;
-        break-inside: avoid !important;
-        page-break-before: avoid !important;
-        page-break-after: avoid !important;
+        color-adjust: exact !important;
       }
 
       /* Préservation des couleurs (bandeau, sections rouges, etc.) */
@@ -734,25 +730,7 @@
         <label class="opt"><input type="radio" name="passation" value="Différée" data-track> Différée — rencontre à planifier ultérieurement</label>
       </div>
 
-      <!-- SIGNATURES -->
-      <div class="sig-zone">
-        <div class="signature-section">
-          <span class="signature-label">Signature du conseiller des ventes</span>
-          <div class="signature-box" id="sigBoxVendeur">
-            <canvas id="sigCanvasVendeur"></canvas>
-            <span class="placeholder">Signez ici</span>
-            <button type="button" class="signature-clear" data-target="vendeur">Effacer</button>
-          </div>
-        </div>
-        <div class="signature-section">
-          <span class="signature-label">Signature du directeur financier (F&amp;I)</span>
-          <div class="signature-box" id="sigBoxDf">
-            <canvas id="sigCanvasDf"></canvas>
-            <span class="placeholder">Signez ici</span>
-            <button type="button" class="signature-clear" data-target="df">Effacer</button>
-          </div>
-        </div>
-      </div>
+      <!-- Section signatures retirée — accord verbal entre conseiller et D.F. -->
 
     </div>
 
@@ -767,7 +745,6 @@
        SCRIPTS
        ═══════════════════════════════════════════════════════════════ -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
   <script src="assets/scaling-commun.js"></script>
 
   <script>
@@ -783,15 +760,11 @@
     const progressText = document.getElementById('progressText');
     const saveIndicator = document.getElementById('saveIndicator');
 
-    let pendingSigVendeur = null;
-    let pendingSigDf = null;
-
     function init() {
       markRequiredAccessibility();
       clearStaleStorage();
       prefillDate();
       loadRemembered();
-      initSignaturePads();
       readURLParams();
       attachListeners();
       attachAutoResize();
@@ -856,27 +829,8 @@
             els[0].value = value;
           }
         });
-        if (data.__signatureVendeur) pendingSigVendeur = data.__signatureVendeur;
-        if (data.__signatureDf) pendingSigDf = data.__signatureDf;
         setSaved(true);
       } catch (e) {}
-    }
-
-    function applyPendingSignatures() {
-      if (pads.vendeur && pendingSigVendeur) {
-        try {
-          pads.vendeur.fromDataURL(pendingSigVendeur, { ratio: 1 });
-          document.getElementById('sigBoxVendeur').classList.add('has-signature');
-        } catch (e) {}
-        pendingSigVendeur = null;
-      }
-      if (pads.df && pendingSigDf) {
-        try {
-          pads.df.fromDataURL(pendingSigDf, { ratio: 1 });
-          document.getElementById('sigBoxDf').classList.add('has-signature');
-        } catch (e) {}
-        pendingSigDf = null;
-      }
     }
 
     function readURLParams() {
@@ -917,10 +871,6 @@
     function saveToStorage() {
       const data = collectFormData();
       try {
-        const sigV = pads.vendeur && !pads.vendeur.isEmpty() ? pads.vendeur.toDataURL('image/png') : null;
-        const sigD = pads.df && !pads.df.isEmpty() ? pads.df.toDataURL('image/png') : null;
-        if (sigV) data.__signatureVendeur = sigV;
-        if (sigD) data.__signatureDf = sigD;
         localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
         const remember = {};
         document.querySelectorAll('[data-remember]').forEach(el => { if (el.value) remember[el.name] = el.value; });
@@ -929,7 +879,7 @@
       } catch (e) {
         console.warn('Sauvegarde impossible', e);
         if (e && (e.name === 'QuotaExceededError' || (e.code && e.code === 22))) {
-          showToast('Stockage plein : impossible de sauvegarder les signatures', 'error');
+          showToast('Stockage plein : impossible de sauvegarder', 'error');
         }
       }
     }
@@ -976,22 +926,6 @@
       document.getElementById('btnPrint').addEventListener('click', doPrint);
       document.getElementById('btnDownload').addEventListener('click', doDownload);
       document.getElementById('btnReset').addEventListener('click', doReset);
-
-      document.querySelectorAll('.signature-clear').forEach(btn => {
-        ['mousedown','touchstart','pointerdown'].forEach(evt => {
-          btn.addEventListener(evt, e => e.stopPropagation());
-        });
-        btn.addEventListener('click', (e) => {
-          e.preventDefault();
-          const t = btn.dataset.target;
-          if (pads[t]) {
-            pads[t].clear();
-            document.getElementById(t === 'vendeur' ? 'sigBoxVendeur' : 'sigBoxDf').classList.remove('has-signature');
-            scheduleSave();
-            updateProgress();
-          }
-        });
-      });
     }
 
     function updateProgress() {
@@ -1009,53 +943,10 @@
           if (el.value && el.value.trim()) filled++;
         }
       });
-      // 2 signatures comptent comme 2 points
-      total += 2;
-      if (pads.vendeur && !pads.vendeur.isEmpty()) filled++;
-      if (pads.df && !pads.df.isEmpty()) filled++;
 
       const pct = total ? Math.round((filled / total) * 100) : 0;
       progressFill.style.width = pct + '%';
       progressText.textContent = pct + ' %';
-    }
-
-    // ═══ SIGNATURES (2 pads) ═══
-    const pads = { vendeur: null, df: null };
-    function initSignaturePads() {
-      [['vendeur','sigCanvasVendeur','sigBoxVendeur'], ['df','sigCanvasDf','sigBoxDf']].forEach(([key, cId, bId]) => {
-        const canvas = document.getElementById(cId);
-        const box = document.getElementById(bId);
-        function resize() {
-          const ratio = Math.max(window.devicePixelRatio || 1, 1);
-          canvas.width = canvas.offsetWidth * ratio;
-          canvas.height = canvas.offsetHeight * ratio;
-          canvas.getContext('2d').scale(ratio, ratio);
-        }
-        resize();
-        window.addEventListener('resize', () => {
-          const data = pads[key] ? pads[key].toData() : null;
-          resize();
-          if (pads[key]) {
-            pads[key].clear();
-            if (data && data.length) pads[key].fromData(data);
-          }
-        });
-        if (typeof SignaturePad === 'undefined') {
-          showToast('Signature numérique indisponible (Internet requis)', 'error');
-          return;
-        }
-        pads[key] = new SignaturePad(canvas, {
-          backgroundColor: 'rgba(255,255,255,0)',
-          penColor: '#1d1d1f',
-          minWidth: 0.6,
-          maxWidth: 1.6
-        });
-        pads[key].addEventListener('endStroke', () => {
-          box.classList.add('has-signature');
-          scheduleSave();
-          updateProgress();
-        });
-      });
     }
 
     // ═══ AJUSTEMENT 1 PAGE ═══
@@ -1071,7 +962,7 @@
     // règles !important sur width — sans setProperty, l'override JS est
     // ignoré et la sheet reste à 8.14in (au lieu de s'élargir avant scale).
     function fitSheetToOnePage() {
-      // Reset complet avant mesure (utilise setProperty pour bypasser !important)
+      // Reset complet avant mesure (utilise removeProperty pour bypasser !important)
       sheet.style.removeProperty('transform');
       sheet.style.removeProperty('transform-origin');
       sheet.style.removeProperty('width');
@@ -1079,20 +970,22 @@
       sheet.style.removeProperty('max-width');
       void sheet.offsetHeight; // force reflow
 
-      // Cible : 10.55 in × 96 dpi ≈ 1013 px (laisse une légère marge sécurité)
-      const TARGET_H = 10.55 * 96;
+      // Cible : 10.40 in × 96 dpi ≈ 998 px
+      // Zone imprimable = 10.64 in → on garde 0.24 in (~23 px) de marge
+      // de sécurité pour absorber les arrondis pixel de Chrome.
+      const TARGET_H = 10.40 * 96;
       const actualH = sheet.scrollHeight;
 
-      if (actualH > TARGET_H) {
-        const z = (TARGET_H / actualH) * 0.99; // 1% marge supplémentaire
-        const scale = z.toFixed(4);
-        // Toutes les propriétés sont posées en !important pour battre le CSS print
-        sheet.style.setProperty('transform', `scale(${scale})`, 'important');
-        sheet.style.setProperty('transform-origin', 'top left', 'important');
-        sheet.style.setProperty('width', (100 / z).toFixed(2) + '%', 'important');
-        sheet.style.setProperty('max-width', 'none', 'important');
-        sheet.style.setProperty('height', (TARGET_H / z) + 'px', 'important');
-      }
+      // On force toujours un léger scale (même si le contenu paraît tenir)
+      // pour éviter les cas limites où Chrome pagine sur 1 px de débordement.
+      const rawRatio = TARGET_H / actualH;
+      const z = Math.min(rawRatio * 0.99, 0.99); // jamais > 0.99 = toujours un peu compressé
+      const scale = z.toFixed(4);
+      sheet.style.setProperty('transform', `scale(${scale})`, 'important');
+      sheet.style.setProperty('transform-origin', 'top left', 'important');
+      sheet.style.setProperty('width', (100 / z).toFixed(2) + '%', 'important');
+      sheet.style.setProperty('max-width', 'none', 'important');
+      sheet.style.setProperty('height', (TARGET_H / z) + 'px', 'important');
     }
     function clearFitSheet() {
       sheet.style.removeProperty('transform');
@@ -1288,8 +1181,6 @@
       cleanupAfterExport();
       form.reset();
       document.getElementById('conseiller').value = conseiller;
-      Object.values(pads).forEach(p => p && p.clear());
-      document.querySelectorAll('.signature-box').forEach(b => b.classList.remove('has-signature'));
       clearMissingMarks();
       sheet.querySelectorAll('input.invalid').forEach(el => el.classList.remove('invalid'));
       localStorage.removeItem(STORAGE_KEY);

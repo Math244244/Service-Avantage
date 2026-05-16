@@ -29,10 +29,13 @@
   /* Bornes du zoom :
      - MIN = 1 : on ne réduit jamais (le CSS gère déjà les petits écrans
        via @media max-width: 900px qui passe .sheet à width:100%).
-     - MAX = 1.8 : confortable sur 1080p / 1440p, et reste lisible sur 4K
-       tout en évitant un texte démesuré. */
+     - MAX = 1.35 : on agrandit modérément. Au-delà, les champs sont
+       trop massifs et on perd la vue d'ensemble du formulaire ce qui
+       nuit à la saisie (feedback utilisateur). 1.35 garde une lisibilité
+       confortable tout en montrant ~75 % du formulaire d'un coup d'œil
+       sur un écran 1080p, et la totalité sur un 1440p. */
   var MIN = 1;
-  var MAX = 1.8;
+  var MAX = 1.35;
 
   /* 1. Injecte la règle CSS pour annuler le zoom à l'impression.
         Posée en premier dans <head> pour qu'elle soit prioritaire. */
