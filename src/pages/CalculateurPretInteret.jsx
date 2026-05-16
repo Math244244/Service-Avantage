@@ -76,10 +76,18 @@ function formatPourcent(decimal) {
 
 /**
  * Calcule un paiement périodique d'amortissement standard.
- * @param {number} capital  Capital initial du prêt (incluant taxes).
- * @param {number} tauxAnnuel  Taux annuel en pourcentage (ex: 8.99).
+ * Méthode actuarielle conforme à la Loi sur la protection du consommateur (Qc),
+ * article 73 et règlement sur les frais de crédit : méthode nominale périodique,
+ * i = TAN / nb_périodes_an. C'est aussi la méthode utilisée par tous les grands
+ * prêteurs auto canadiens (RBC, BMO, GM Financial, Ford Credit, etc.).
+ *
+ * Formule :  M = C × i × (1+i)^n / ((1+i)^n − 1)
+ *
+ * @param {number} capital     Capital initial (incluant taxes Québec).
+ * @param {number} tauxAnnuel  Taux annuel nominal (ex: 8.99 pour 8,99 %).
  * @param {number} nbPeriodes  Nombre total de versements.
- * @param {number} periodesAn  Fréquence (12, 26, 52).
+ * @param {number} periodesAn  Périodes par an (12, 26, 52).
+ * @returns {number} Paiement périodique théorique non arrondi.
  */
 function calculerPaiement(capital, tauxAnnuel, nbPeriodes, periodesAn) {
   if (!capital || !nbPeriodes || !periodesAn) return 0;
@@ -92,28 +100,42 @@ function calculerPaiement(capital, tauxAnnuel, nbPeriodes, periodesAn) {
   return (capital * tauxPeriodique * facteur) / (facteur - 1);
 }
 
+/** Arrondit un montant au cent (pratique des contrats canadiens). */
+function arrondirCent(montant) {
+  return Math.round(montant * 100) / 100;
+}
+
 /**
  * Construit le tableau d'amortissement complet.
- * Le dernier versement absorbe l'arrondi pour garantir un solde final = 0,00 $.
+ *
+ * Méthode CONFORME aux contrats réels :
+ * 1. Le paiement périodique est ARRONDI AU CENT (comme sur le contrat).
+ * 2. À chaque période : intérêt = solde × i (calculé sur le solde au début),
+ *    capital remboursé = paiement_arrondi − intérêt.
+ * 3. Le DERNIER versement absorbe les écarts d'arrondi pour ramener le
+ *    solde exactement à 0,00 $.
+ *
+ * Conforme à la pratique des prêteurs au Québec et au Canada.
  */
 function genererAmortissement(capital, tauxAnnuel, nbPeriodes, periodesAn, paiement) {
   const tableau = [];
   if (!capital || !nbPeriodes || !paiement) return tableau;
   const tauxPeriodique = tauxAnnuel / 100 / periodesAn;
+  const paiementArrondi = arrondirCent(paiement);
   let solde = capital;
 
   for (let k = 1; k <= nbPeriodes; k++) {
-    const interet = solde * tauxPeriodique;
-    let capitalRembourse = paiement - interet;
-    let paiementActuel = paiement;
+    const interet = arrondirCent(solde * tauxPeriodique);
+    let capitalRembourse = arrondirCent(paiementArrondi - interet);
+    let paiementActuel = paiementArrondi;
 
-    /* Dernier paiement : ajuste pour solde final exact à zéro */
+    /* Dernier paiement : absorbe l'écart d'arrondi pour solder à 0,00 $ exact. */
     if (k === nbPeriodes) {
-      capitalRembourse = solde;
-      paiementActuel = solde + interet;
+      capitalRembourse = arrondirCent(solde);
+      paiementActuel = arrondirCent(solde + interet);
     }
 
-    const soldeFin = Math.max(0, solde - capitalRembourse);
+    const soldeFin = Math.max(0, arrondirCent(solde - capitalRembourse));
 
     tableau.push({
       numero: k,
@@ -127,6 +149,42 @@ function genererAmortissement(capital, tauxAnnuel, nbPeriodes, periodesAn, paiem
   }
 
   return tableau;
+}
+
+/**
+ * Calcule les vrais totaux d'un prêt en simulant l'amortissement réel
+ * (paiement arrondi au cent, dernier versement ajusté). Permet d'afficher
+ * un intérêt total qui correspond EXACTEMENT à la somme des lignes du
+ * tableau d'amortissement présenté au client.
+ */
+function totauxReelsPret(capital, tauxAnnuel, nbPeriodes, periodesAn, paiement) {
+  if (!capital || !nbPeriodes || !paiement) {
+    return { totalRembourse: 0, interetsTotaux: 0, paiementArrondi: 0, dernierPaiement: 0 };
+  }
+  const tauxPeriodique = tauxAnnuel / 100 / periodesAn;
+  const paiementArrondi = arrondirCent(paiement);
+  let solde = capital;
+  let totalInterets = 0;
+  let dernierPaiement = paiementArrondi;
+
+  for (let k = 1; k <= nbPeriodes; k++) {
+    const interet = arrondirCent(solde * tauxPeriodique);
+    totalInterets += interet;
+    if (k === nbPeriodes) {
+      dernierPaiement = arrondirCent(solde + interet);
+      solde = 0;
+    } else {
+      solde = arrondirCent(solde - (paiementArrondi - interet));
+    }
+  }
+
+  const totalRembourse = arrondirCent(paiementArrondi * (nbPeriodes - 1) + dernierPaiement);
+  return {
+    totalRembourse,
+    interetsTotaux: arrondirCent(totalRembourse - capital),
+    paiementArrondi,
+    dernierPaiement,
+  };
 }
 
 /* ───────── Composant principal ───────── */
@@ -162,10 +220,12 @@ function CalculateurPretInteret() {
     return { ...VALEURS_INITIALES, ...(sauv || {}) };
   });
   const [afficherAmortissement, setAfficherAmortissement] = useState(false);
-  /* Mode client par défaut : on cache les chiffres "détails" (intérêts totaux,
-     coût total, etc.) pour ne montrer que le paiement périodique. Le conseiller
-     les révèle au besoin via le bouton « Information complémentaire ». */
-  const [afficherStats, setAfficherStats] = useState(false);
+  /* Un seul terme peut avoir son panneau « Détail » ouvert à la fois.
+     Quand le conseiller clique sur le bouton info d'une autre carte, le
+     précédent se ferme automatiquement et le nouveau s'ouvre — la barre
+     de détail se positionne dans la grille juste après la rangée de
+     cartes contenant le terme cliqué (grid-column: 1 / -1). */
+  const [termeInfoOuvert, setTermeInfoOuvert] = useState(null);
 
   /* Persistance localStorage */
   useEffect(() => {
@@ -198,21 +258,27 @@ function CalculateurPretInteret() {
 
     const valide =
       sousTotalAvantTaxes > 0 && tauxAnnuel >= 0 && tauxAnnuel <= 100;
+    /* Au Québec, le taux d'usure du Code criminel canadien (art. 347) est
+       fixé à 60 % effectif annuel ; les prêts auto sérieux sont rarement
+       au-dessus de 29,99 %. Au-delà, on alerte le conseiller. */
+    const tauxAnormal = tauxAnnuel > 30 && tauxAnnuel <= 100;
 
     /* Paiements pour CHAQUE terme, à la fréquence active.
-       C'est le cœur du nouveau visuel : 8 cartes rouges montrant
-       le paiement réel pour 12, 24, 36, 48, 60, 72, 84, 96 mois. */
+       Les totaux (intérêts, coût total) sont calculés via la simulation
+       d'amortissement RÉEL (paiement arrondi au cent, dernier versement
+       ajusté) — chiffres strictement identiques au tableau présenté au
+       client, conformément à la Loi sur la protection du consommateur. */
     const paiementsParTerme = TERMES.map((termeMois) => {
       const nbPeriodes = Math.round((termeMois * periodesAn) / 12);
       const paiement = calculerPaiement(totalAvecTaxes, tauxAnnuel, nbPeriodes, periodesAn);
-      const totalRembourse = paiement * nbPeriodes;
-      const interetsTotaux = Math.max(0, totalRembourse - totalAvecTaxes);
+      const totaux = totauxReelsPret(totalAvecTaxes, tauxAnnuel, nbPeriodes, periodesAn, paiement);
       return {
         termeMois,
         nbPeriodes,
-        paiement,
-        totalRembourse,
-        interetsTotaux,
+        paiement: totaux.paiementArrondi || paiement,
+        dernierPaiement: totaux.dernierPaiement,
+        totalRembourse: totaux.totalRembourse,
+        interetsTotaux: totaux.interetsTotaux,
       };
     });
 
@@ -237,6 +303,7 @@ function CalculateurPretInteret() {
       paiementsParTerme,
       termeActif,
       valide,
+      tauxAnormal,
     };
   }, [saisie]);
 
@@ -268,7 +335,13 @@ function CalculateurPretInteret() {
   const handleReinitialiser = () => {
     setSaisie(VALEURS_INITIALES);
     setAfficherAmortissement(false);
-    setAfficherStats(false);
+    setTermeInfoOuvert(null);
+  };
+  /* Toggle exclusif : clic sur un autre terme ferme le précédent
+     et ouvre le nouveau ; re-clic sur le même ferme. */
+  const handleToggleInfo = (mois) => (e) => {
+    e.stopPropagation();
+    setTermeInfoOuvert((prev) => (prev === mois ? null : mois));
   };
   const handleImprimer = () => {
     window.print();
@@ -397,89 +470,162 @@ function CalculateurPretInteret() {
           </span>
         </div>
 
+        {calculs.tauxAnormal && (
+          <div className="cpi-avis-taux" role="alert">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            <span>
+              Taux annuel <strong>{formatPourcent(calculs.tauxAnnuel / 100)}</strong> — supérieur aux taux typiques du financement automobile au Québec (≤ 29,99 %). Vérifiez la saisie.
+            </span>
+          </div>
+        )}
+
         <div className="cpi-resultats">
-          {/* Grille 4×2 de cartes rouges : une par terme.
-              Le client compare visuellement le paiement pour 12 → 96 mois
-              à la fréquence active. La carte sélectionnée est mise en
-              avant (contour blanc) et alimente le tableau d'amortissement. */}
+          {/* Grille de cartes rouges : une par terme.
+              Chaque carte expose un petit bouton « ℹ » qui ouvre une barre
+              de détail PLEINE LARGEUR placée dans la même grille via
+              grid-column: 1 / -1 — donc CSS Grid l'insère automatiquement
+              juste après la rangée de la carte cliquée. Un seul détail
+              ouvert à la fois (toggle exclusif via setTermeInfoOuvert). */}
           <div className="cpi-termes-cartes" role="radiogroup" aria-label="Choisir un terme">
-            {calculs.paiementsParTerme.map((p) => {
+            {calculs.paiementsParTerme.map((p, idx) => {
               const actif = saisie.termeSelectionne === p.termeMois;
-              return (
-                <button
-                  key={p.termeMois}
-                  type="button"
+              const infoOuvert = termeInfoOuvert === p.termeMois;
+              const freqSuffix =
+                calculs.frequence.id === "mensuel" ? "mois"
+                : calculs.frequence.id === "bihebdo" ? "2 sem."
+                : "sem.";
+              const onActiverCarte = () => {
+                if (calculs.valide) handleSelectTerme(p.termeMois);
+              };
+              const cartes = [
+                <div
+                  key={"card-" + p.termeMois}
                   role="radio"
                   aria-checked={actif}
-                  className={"cpi-terme-card" + (actif ? " cpi-terme-card-active" : "")}
-                  onClick={() => handleSelectTerme(p.termeMois)}
-                  disabled={!calculs.valide}
+                  aria-disabled={!calculs.valide}
+                  tabIndex={calculs.valide ? 0 : -1}
+                  className={"cpi-terme-card" + (actif ? " cpi-terme-card-active" : "") + (infoOuvert ? " cpi-terme-card-info-ouvert" : "") + (!calculs.valide ? " cpi-terme-card-disabled" : "")}
+                  onClick={onActiverCarte}
+                  onKeyDown={(e) => {
+                    if (!calculs.valide) return;
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      onActiverCarte();
+                    }
+                  }}
                 >
                   <span className="cpi-terme-card-label">{p.termeMois} mois</span>
                   <span className="cpi-terme-card-montant">
                     {calculs.valide ? formatMontant(p.paiement) : "—"}
                   </span>
-                  <span className="cpi-terme-card-freq">
-                    / {calculs.frequence.id === "mensuel" ? "mois" : calculs.frequence.id === "bihebdo" ? "2 sem." : "sem."}
-                  </span>
+                  <span className="cpi-terme-card-freq">/ {freqSuffix}</span>
                   <span className="cpi-terme-card-meta">
                     {calculs.valide ? `${p.nbPeriodes} versements` : "—"}
                   </span>
                   <span className="cpi-terme-card-taxes">✓ Taxes incl.</span>
-                </button>
-              );
+                  {/* Bouton « Info / Fermer » : toggle exclusif du panneau de détail */}
+                  <button
+                    type="button"
+                    className={"cpi-terme-card-info-btn" + (infoOuvert ? " est-ouvert" : "")}
+                    aria-label={(infoOuvert ? "Masquer" : "Voir") + " le détail pour " + p.termeMois + " mois"}
+                    aria-expanded={infoOuvert}
+                    onClick={handleToggleInfo(p.termeMois)}
+                    disabled={!calculs.valide}
+                  >
+                    {infoOuvert ? (
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <line x1="5" y1="12" x2="19" y2="12"/>
+                      </svg>
+                    ) : (
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <line x1="12" y1="5" x2="12" y2="19"/>
+                        <line x1="5" y1="12" x2="19" y2="12"/>
+                      </svg>
+                    )}
+                    <span>{infoOuvert ? "Fermer" : "Info"}</span>
+                  </button>
+                </div>,
+              ];
+              /* Insertion du panneau de détail après la 4e carte (rangée 1)
+                 ou après la 8e carte (rangée 2). CSS Grid place le panneau
+                 (grid-column: 1/-1) sous la rangée correspondante. */
+              const finDeRangee = idx === 3 || idx === 7;
+              if (finDeRangee && termeInfoOuvert !== null && calculs.valide) {
+                const indexTermeOuvert = calculs.paiementsParTerme.findIndex((x) => x.termeMois === termeInfoOuvert);
+                const dansRangee =
+                  indexTermeOuvert >= 0 &&
+                  ((idx === 3 && indexTermeOuvert <= 3) || (idx === 7 && indexTermeOuvert >= 4 && indexTermeOuvert <= 7));
+                if (dansRangee) {
+                  const pOuvert = calculs.paiementsParTerme[indexTermeOuvert];
+                  cartes.push(
+                    <div
+                      key={"detail-" + termeInfoOuvert}
+                      className="cpi-terme-detail"
+                      role="region"
+                      aria-label={`Détail pour ${termeInfoOuvert} mois`}
+                    >
+                      <div className="cpi-terme-detail-entete">
+                        <span className="cpi-terme-detail-titre">
+                          Détail · <strong>{termeInfoOuvert} mois</strong>
+                        </span>
+                        <span className="cpi-terme-detail-meta">
+                          {pOuvert.nbPeriodes} versements {calculs.frequence.label.toLowerCase()}s · taux périodique {formatPourcent(calculs.tauxPeriodique)}
+                        </span>
+                        <button
+                          type="button"
+                          className="cpi-terme-detail-fermer"
+                          onClick={() => setTermeInfoOuvert(null)}
+                          aria-label="Fermer le détail"
+                        >
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                            <line x1="18" y1="6" x2="6" y2="18"/>
+                            <line x1="6" y1="6" x2="18" y2="18"/>
+                          </svg>
+                        </button>
+                      </div>
+                      <div className="cpi-terme-detail-grille">
+                        <StatResultat
+                          titre="Capital financé"
+                          valeur={formatMontant(calculs.totalAvecTaxes)}
+                          mention="Avec taxes Québec"
+                        />
+                        <StatResultat
+                          titre="Intérêts totaux"
+                          valeur={formatMontant(pOuvert.interetsTotaux)}
+                          mention={`Sur ${termeInfoOuvert} mois`}
+                        />
+                        <StatResultat
+                          titre="Coût total"
+                          valeur={formatMontant(pOuvert.totalRembourse)}
+                          mention="Capital + intérêts"
+                        />
+                        <StatResultat
+                          titre="Taux effectif"
+                          valeur={formatPourcent(calculs.tauxEffectifAnnuel)}
+                          mention="Annuel équivalent (TAEG)"
+                        />
+                        <StatResultat
+                          titre="Paiement"
+                          valeur={formatMontant(pOuvert.paiement)}
+                          mention={calculs.frequence.label}
+                        />
+                        <StatResultat
+                          titre="Dernier versement"
+                          valeur={formatMontant(pOuvert.dernierPaiement)}
+                          mention="Ajusté à l'arrondi"
+                        />
+                      </div>
+                    </div>
+                  );
+                }
+              }
+              return cartes;
             })}
           </div>
-
-          {/* Mini résumé du terme sélectionné — toujours visible pour le conseiller,
-              compact pour ne pas voler la vedette aux cartes. */}
-          {calculs.valide && calculs.termeActif && (
-            <div className="cpi-resume-terme">
-              <button
-                type="button"
-                className="cpi-btn-info cpi-btn-info-inline"
-                onClick={() => setAfficherStats((v) => !v)}
-                aria-expanded={afficherStats}
-                aria-controls="cpi-stats-detail"
-              >
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <circle cx="12" cy="12" r="10" />
-                  <line x1="12" y1="16" x2="12" y2="12" />
-                  <line x1="12" y1="8" x2="12.01" y2="8" />
-                </svg>
-                {afficherStats ? "Masquer le détail" : "Détail du terme sélectionné"}
-              </button>
-              <span className="cpi-resume-cle">
-                Terme actif : <strong>{calculs.termeActif.termeMois} mois</strong>
-                {" "}· {calculs.termeActif.nbPeriodes} versements
-              </span>
-            </div>
-          )}
-
-          {afficherStats && calculs.valide && calculs.termeActif && (
-            <div className="cpi-resultat-grille" id="cpi-stats-detail">
-              <StatResultat
-                titre="Capital"
-                valeur={formatMontant(calculs.totalAvecTaxes)}
-                mention="Avec taxes QC"
-              />
-              <StatResultat
-                titre="Intérêts"
-                valeur={formatMontant(calculs.termeActif.interetsTotaux)}
-                mention={`Sur ${calculs.termeActif.termeMois} mois`}
-              />
-              <StatResultat
-                titre="Coût total"
-                valeur={formatMontant(calculs.termeActif.totalRembourse)}
-                mention="Capital + intérêts"
-              />
-              <StatResultat
-                titre="Taux effectif"
-                valeur={formatPourcent(calculs.tauxEffectifAnnuel)}
-                mention="Annuel équivalent"
-              />
-            </div>
-          )}
 
           <div className="cpi-actions">
             <button

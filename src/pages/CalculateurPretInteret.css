@@ -588,7 +588,7 @@
   pointer-events: none;
 }
 
-.cpi-terme-card:hover:not(:disabled) {
+.cpi-terme-card:not(.cpi-terme-card-disabled):hover {
   transform: translateY(-3px);
   box-shadow: 0 10px 22px -4px rgba(200, 16, 46, 0.5);
 }
@@ -598,11 +598,20 @@
   box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.6), 0 10px 22px -4px rgba(200, 16, 46, 0.5);
 }
 
-.cpi-terme-card:disabled {
+.cpi-terme-card-disabled {
   opacity: 0.55;
   cursor: not-allowed;
   background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
   box-shadow: none;
+}
+
+/* Carte dont le panneau de détail est ouvert : on souligne par un
+   éclat blanc en bas pour donner l'effet "carte qui s'ouvre". */
+.cpi-terme-card-info-ouvert {
+  border-color: rgba(255, 255, 255, 0.85);
+  box-shadow:
+    0 0 0 3px rgba(200, 16, 46, 0.32),
+    0 14px 28px -6px rgba(200, 16, 46, 0.55);
 }
 
 /* Carte sélectionnée : contour blanc lumineux + halo coloré + légère
@@ -649,7 +658,7 @@
 }
 
 .cpi-terme-card-taxes {
-  margin-top: 6px;
+  margin-top: 4px;
   padding: 2px 8px;
   font-size: 8.5px;
   font-weight: 800;
@@ -661,63 +670,144 @@
   border-radius: 999px;
 }
 
-/* ───── Mini résumé + lien « détail du terme » ───── */
-.cpi-resume-terme {
+/* ───── Petit bouton « Info / Fermer » dans chaque carte ─────
+   Posé en bas de la carte, discret par défaut, visible au hover.
+   Au clic : ouvre/ferme le panneau de détail correspondant. */
+.cpi-terme-card-info-btn {
+  position: absolute;
+  bottom: 6px;
+  right: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px 3px 6px;
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  z-index: 2;
+  opacity: 0.85;
+  transition: background 0.15s ease, opacity 0.15s ease, transform 0.15s ease;
+  font-variant-numeric: tabular-nums;
+}
+.cpi-terme-card-info-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.34);
+  opacity: 1;
+  transform: scale(1.06);
+}
+.cpi-terme-card-info-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.7);
+}
+.cpi-terme-card-info-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+.cpi-terme-card-info-btn svg {
+  flex-shrink: 0;
+}
+.cpi-terme-card-info-btn.est-ouvert {
+  background: #fff;
+  color: var(--rouge-principal);
+  border-color: #fff;
+  opacity: 1;
+}
+
+/* ───── Panneau de DÉTAIL pleine largeur dans la grille ─────
+   Posé via grid-column: 1 / -1 → CSS Grid l'insère automatiquement
+   sous la rangée de cartes où se trouve le bouton « Info » activé.
+   Un seul peut être visible à la fois (logique JS).  */
+.cpi-terme-detail {
+  grid-column: 1 / -1;
+  background: linear-gradient(135deg, #fff5f6 0%, #ffffff 80%);
+  border: 1.5px solid rgba(200, 16, 46, 0.22);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  animation: cpiFadeSlide 0.22s ease;
+  position: relative;
+}
+
+.cpi-terme-detail-entete {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 10px;
-  padding: 8px 14px;
-  background: linear-gradient(90deg, rgba(200, 16, 46, 0.08), rgba(200, 16, 46, 0.02));
-  border-left: 3px solid var(--rouge-principal);
-  border-radius: var(--radius-sm);
-  font-size: 12px;
+}
+.cpi-terme-detail-titre {
+  font-size: 12.5px;
+  font-weight: 700;
   color: var(--texte-secondaire);
+  letter-spacing: 0.1px;
 }
-
-.cpi-resume-cle strong {
+.cpi-terme-detail-titre strong {
   color: var(--rouge-principal);
-  font-weight: 800;
+  font-weight: 900;
+  font-size: 14px;
 }
-
-/* Bouton « Information complémentaire » — variante inline pour le résumé. */
-.cpi-btn-info {
+.cpi-terme-detail-meta {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--texte-tertiaire);
+  flex: 1;
+  min-width: 0;
+}
+.cpi-terme-detail-fermer {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  width: 22px;
+  height: 22px;
   background: #fff;
-  color: var(--texte-principal);
   border: 1.5px solid var(--border);
   border-radius: 999px;
-  padding: 6px 14px;
-  font-size: 11.5px;
-  font-weight: 700;
-  font-family: inherit;
   cursor: pointer;
-  letter-spacing: 0.1px;
-  transition: background 0.18s ease, transform 0.15s ease, border-color 0.18s ease, color 0.18s ease;
-}
-.cpi-btn-info:hover:not(:disabled) {
-  border-color: var(--rouge-principal);
-  color: var(--rouge-principal);
-  transform: translateY(-1px);
-}
-.cpi-btn-info:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(200, 16, 46, 0.25);
-}
-.cpi-btn-info:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-.cpi-btn-info svg {
+  color: var(--texte-secondaire);
+  transition: all 0.15s ease;
   flex-shrink: 0;
 }
+.cpi-terme-detail-fermer:hover {
+  border-color: var(--rouge-principal);
+  color: var(--rouge-principal);
+}
 
-.cpi-btn-info-inline {
-  padding: 4px 10px;
-  font-size: 11px;
+/* Grille du détail : 6 stats compactes (capital, intérêts, coût total,
+   taux effectif, paiement, dernier versement). 6 colonnes sur grand
+   écran, dégénère en 3×2 puis 2×3 en responsive. */
+.cpi-terme-detail-grille {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+}
+
+/* ───── Avis « taux anormal » (informationnel, pas bloquant) ───── */
+.cpi-avis-taux {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  margin-top: 4px;
+  background: linear-gradient(90deg, rgba(234, 179, 8, 0.12), rgba(234, 179, 8, 0.04));
+  border-left: 3px solid #eab308;
+  border-radius: var(--radius-sm);
+  font-size: 11.5px;
+  color: #713f12;
+}
+.cpi-avis-taux svg {
+  flex-shrink: 0;
+  color: #b45309;
+}
+.cpi-avis-taux strong {
+  color: #b45309;
+  font-weight: 800;
 }
 
 /* Stats côté droit : grille 2×2 compacte */
@@ -966,6 +1056,9 @@
   .cpi-resultat-grille {
     grid-template-columns: repeat(4, 1fr);
   }
+  .cpi-terme-detail-grille {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 /* Tablette portrait : on passe les cartes en 2 rangées de 4 toujours */
@@ -1014,6 +1107,9 @@
   .cpi-resultat-grille {
     grid-template-columns: 1fr 1fr;
   }
+  .cpi-terme-detail-grille {
+    grid-template-columns: repeat(2, 1fr);
+  }
   .cpi-actions {
     flex-direction: column;
     align-items: stretch;
@@ -1044,21 +1140,33 @@
   .cpi-carte-amortissement { page-break-before: auto; }
   .cpi-actions { display: none !important; }
 
-  /* À l'impression, le bouton « info complémentaire » disparaît : on imprime
-     simplement la grille des cartes et, le cas échéant, le tableau. */
-  .cpi-btn-info { display: none !important; }
+  /* À l'impression : on cache les boutons Info des cartes et le bouton
+     Fermer du détail. Le panneau de détail, lui, est IMPRIMÉ s'il était
+     ouvert au moment du print → utile pour donner au client une fiche
+     détaillée pour le terme considéré. */
+  .cpi-terme-card-info-btn,
+  .cpi-terme-detail-fermer {
+    display: none !important;
+  }
 
-  /* Garder les couleurs (cartes rouges, fréquence active, tableau) à l'impression. */
+  /* Garder les couleurs (cartes rouges, fréquence active, tableau, détail). */
   .cpi-terme-card,
   .cpi-terme-card-active,
+  .cpi-terme-card-info-ouvert,
   .cpi-freq-actif,
   .cpi-tableau th,
-  .cpi-resultat-badge-taxes {
+  .cpi-resultat-badge-taxes,
+  .cpi-terme-detail,
+  .cpi-avis-taux {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
   .cpi-terme-card {
     box-shadow: none !important;
+  }
+  .cpi-terme-detail {
+    box-shadow: none !important;
+    border-color: #ccc !important;
   }
 
   .cpi-tableau-wrap { max-height: none !important; overflow: visible !important; }
