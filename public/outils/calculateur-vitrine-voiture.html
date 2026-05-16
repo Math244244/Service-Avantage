@@ -602,7 +602,8 @@
       print-color-adjust: exact;
     }
 
-    /* Bannière "à partir de" */
+    /* Bannière protection — conteneur à 2 modes (voir HTML).
+       Aucune décoration propre : seul un fond navy + halo. */
     .hero-banner {
       margin: 18px 26px 4px;
       padding: 12px 18px;
@@ -610,10 +611,6 @@
       background:
         linear-gradient(135deg, var(--navy) 0%, var(--navy-2) 100%);
       color: #fff;
-      display: grid;
-      grid-template-columns: auto 1fr auto;
-      align-items: center;
-      gap: 18px;
       position: relative;
       overflow: hidden;
       -webkit-print-color-adjust: exact;
@@ -626,6 +623,99 @@
       width: 180px; height: 180px;
       background: radial-gradient(circle, rgba(208, 2, 27, 0.25) 0%, transparent 70%);
       pointer-events: none;
+    }
+
+    /* Les deux modes sont dans le DOM ; un seul est visible à la fois.
+       La classe .warranty-excluded est posée par le JS sur .hero-banner. */
+    .hero-mode {
+      position: relative;
+      z-index: 1;
+    }
+    /* Mode "incluse" : grid 3 colonnes (icône + texte + 3 pills) */
+    .hero-mode-included {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 18px;
+    }
+    .hero-mode-addon { display: none; }
+
+    .hero-banner.warranty-excluded .hero-mode-included { display: none; }
+    .hero-banner.warranty-excluded .hero-mode-addon { display: block; }
+
+    /* ─── Mode ADDON : header centré + 4 mini-cartes par terme ─── */
+    .hero-addon-head {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 3px;
+      margin-bottom: 9px;
+    }
+    .hero-addon-title {
+      font-family: 'Manrope', 'Inter', sans-serif;
+      font-size: 14.5px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: #fff;
+      line-height: 1.15;
+    }
+    .hero-addon-head .hero-sub {
+      margin-top: 2px;
+      max-width: 64ch;
+      text-align: center;
+    }
+    .hero-addon-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+    .hero-addon-cell {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      padding: 8px 6px 9px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 8px;
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+    .hero-addon-cell:hover {
+      background: rgba(255, 255, 255, 0.14);
+      border-color: rgba(212, 175, 55, 0.45);
+    }
+    .hero-addon-term {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.72);
+    }
+    .hero-addon-amount {
+      font-size: 17px;
+      font-weight: 900;
+      letter-spacing: -0.01em;
+      color: var(--gold);
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .hero-addon-foot {
+      margin-top: 8px;
+      font-size: 10.5px;
+      line-height: 1.35;
+      color: rgba(255, 255, 255, 0.82);
+      text-align: center;
+    }
+    .hero-addon-foot strong {
+      color: var(--gold);
+      font-weight: 800;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
     }
     .hero-icon {
       width: 38px; height: 38px;
@@ -682,10 +772,6 @@
       font-weight: 700;
     }
 
-    /* Bascule du sous-titre selon l'inclusion de la garantie */
-    .hero-sub-excluded { display: none; }
-    .hero-banner.warranty-excluded .hero-sub-included { display: none; }
-    .hero-banner.warranty-excluded .hero-sub-excluded { display: block; }
     .hero-badges {
       display: flex;
       flex-direction: column;
@@ -731,108 +817,6 @@
       print-color-adjust: exact;
     }
 
-    /* ═══════════════════ BANNIÈRE « AJOUT GARANTIE COMPLÈTE AU PAIEMENT »
-       Inspirée de la photo 4 fournie : encadré rouge, 4 cellules verticales
-       avec terme + montant additionnel par paiement.
-       Affichée uniquement quand la case "Inclure" est décochée. */
-    .warranty-addon {
-      margin: 10px 26px 4px;
-      padding: 12px 18px 10px;
-      background: linear-gradient(135deg, var(--red) 0%, var(--red-700) 100%);
-      border-radius: 12px;
-      color: #fff;
-      box-shadow: var(--shadow-red);
-      position: relative;
-      overflow: hidden;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
-    }
-    .warranty-addon[hidden] { display: none !important; }
-    .warranty-addon::before {
-      content: '';
-      position: absolute;
-      top: -40%; right: -10%;
-      width: 50%; height: 200%;
-      background: radial-gradient(circle, rgba(255, 255, 255, 0.10) 0%, transparent 60%);
-      pointer-events: none;
-    }
-    .warranty-addon-head {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      gap: 2px;
-      margin-bottom: 10px;
-      position: relative;
-      z-index: 1;
-    }
-    .warranty-addon-eyebrow {
-      font-size: 9.5px;
-      font-weight: 700;
-      letter-spacing: 1.2px;
-      text-transform: uppercase;
-      color: rgba(255, 255, 255, 0.78);
-    }
-    .warranty-addon-title {
-      font-size: 13.5px;
-      font-weight: 800;
-      letter-spacing: 0.6px;
-      text-transform: uppercase;
-      color: #fff;
-      line-height: 1.15;
-    }
-    .warranty-addon-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
-      position: relative;
-      z-index: 1;
-    }
-    .warranty-addon-cell {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 3px;
-      padding: 8px 6px 9px;
-      background: rgba(255, 255, 255, 0.12);
-      backdrop-filter: blur(4px);
-      -webkit-backdrop-filter: blur(4px);
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      border-radius: 8px;
-      transition: background 0.15s ease;
-    }
-    .warranty-addon-cell:hover {
-      background: rgba(255, 255, 255, 0.18);
-    }
-    .warranty-addon-term {
-      font-size: 10.5px;
-      font-weight: 700;
-      letter-spacing: 0.6px;
-      text-transform: uppercase;
-      color: rgba(255, 255, 255, 0.82);
-    }
-    .warranty-addon-amount {
-      font-size: 18px;
-      font-weight: 800;
-      letter-spacing: -0.01em;
-      color: #fff;
-      font-variant-numeric: tabular-nums;
-      line-height: 1;
-    }
-    .warranty-addon-foot {
-      margin-top: 9px;
-      font-size: 10.5px;
-      line-height: 1.35;
-      color: rgba(255, 255, 255, 0.86);
-      text-align: center;
-      position: relative;
-      z-index: 1;
-    }
-    .warranty-addon-foot strong {
-      color: var(--gold);
-      font-weight: 800;
-    }
     .red-card::before {
       content: '';
       position: absolute;
@@ -1290,21 +1274,19 @@
       }
       .red-card-foot .info-dot { width: 14px !important; height: 14px !important; font-size: 10px !important; }
 
-      /* Bannière "Ajout garantie complète au paiement" (mode décoché) */
-      .warranty-addon {
-        flex-shrink: 0 !important;
-        margin: 3px 16px 3px !important;
-        padding: 6px 12px 6px !important;
-        border-radius: 8px !important;
+      /* Mode "addon" du hero-banner (garantie décochée) — variante compacte
+         pour l'impression : le tout est rendu À L'INTÉRIEUR du même cadre
+         sombre que le mode "incluse", sans carré supplémentaire. */
+      .hero-banner.warranty-excluded {
+        padding: 8px 14px !important;
       }
-      .warranty-addon-head { margin-bottom: 5px !important; gap: 1px !important; }
-      .warranty-addon-eyebrow { font-size: 8px !important; letter-spacing: 1px !important; }
-      .warranty-addon-title { font-size: 10.5px !important; letter-spacing: 0.5px !important; }
-      .warranty-addon-grid { gap: 5px !important; }
-      .warranty-addon-cell { padding: 4px 4px 5px !important; border-radius: 6px !important; gap: 1px !important; }
-      .warranty-addon-term { font-size: 8.5px !important; letter-spacing: 0.4px !important; }
-      .warranty-addon-amount { font-size: 13px !important; }
-      .warranty-addon-foot { margin-top: 5px !important; font-size: 8.5px !important; line-height: 1.25 !important; }
+      .hero-addon-head { margin-bottom: 5px !important; gap: 1px !important; }
+      .hero-addon-title { font-size: 11px !important; letter-spacing: 0.5px !important; }
+      .hero-addon-grid { gap: 5px !important; }
+      .hero-addon-cell { padding: 4px 4px 5px !important; border-radius: 6px !important; gap: 1px !important; }
+      .hero-addon-term { font-size: 8.5px !important; letter-spacing: 0.4px !important; }
+      .hero-addon-amount { font-size: 13px !important; }
+      .hero-addon-foot { margin-top: 5px !important; font-size: 8.5px !important; line-height: 1.25 !important; }
 
       /* Tableaux : calibrés pour remplir la page sans déborder.
          35 rangées × ~18px = 630px = 6.6in pour les données. */
@@ -1535,72 +1517,86 @@
     </div>
     <div class="sheet-caption" data-editable="caption">Financement clé en main <span class="red-accent">·</span> Paiements estimés</div>
 
+    <!-- ═══════════ BANNIÈRE PROTECTION ═══════════
+         Conteneur à DEUX MODES mutuellement exclusifs :
+           • .hero-mode-included → garantie cochée (défaut)
+                                   « Option recommandée — 5 ans de tranquillité »
+           • .hero-mode-addon    → garantie décochée
+                                   « Option offerte au paiement — Ajouter la garantie »
+                                   avec 4 mini-cartes par terme (60/72/84/96 mois).
+         Le JS bascule en posant/retirant la classe .warranty-excluded sur ce
+         même bloc. Aucune carte rouge supplémentaire : on reste sur le fond
+         sombre navy avec accents dorés pour ne pas dupliquer la rouge ci-dessous
+         et garder l'impression sur une seule page. -->
     <div class="hero-banner" id="heroBanner">
-      <div class="hero-icon" aria-hidden="true">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-          <path d="M9 12l2 2 4-4"/>
-        </svg>
+      <!-- MODE A : garantie INCLUSE (défaut) -->
+      <div class="hero-mode hero-mode-included">
+        <div class="hero-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <path d="M9 12l2 2 4-4"/>
+          </svg>
+        </div>
+        <div class="hero-text">
+          <span class="hero-eyebrow" data-editable="hero-eyebrow">Option recommandée <span class="dot-sep">·</span> Prix tout inclus</span>
+          <div class="hero-h2">
+            <span class="big" data-editable="hero-title"><span class="hero-num">5&nbsp;ans</span> de tranquillité au volant</span>
+          </div>
+          <div class="hero-sub" data-editable="hero-sub">
+            Une <strong>protection mécanique premium</strong> est <strong>déjà intégrée</strong> au paiement affiché&nbsp;— roulez sereinement, sans frais imprévus.
+          </div>
+        </div>
+        <div class="hero-badges">
+          <span class="hero-pill">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            <span data-editable="hero-pill-1">Aucune surprise</span>
+          </span>
+          <span class="hero-pill">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            <span data-editable="hero-pill-2">Aucun frais caché</span>
+          </span>
+          <span class="hero-pill">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            <span data-editable="hero-pill-3">Tranquillité d'esprit</span>
+          </span>
+        </div>
       </div>
-      <div class="hero-text">
-        <span class="hero-eyebrow" data-editable="hero-eyebrow">Option recommandée <span class="dot-sep">·</span> Prix tout inclus</span>
-        <div class="hero-h2">
-          <span class="big" data-editable="hero-title"><span class="hero-num">5&nbsp;ans</span> de tranquillité au volant</span>
+
+      <!-- MODE B : garantie DÉCOCHÉE → on RÉUTILISE le même cadre sombre,
+           pas de carré rouge supplémentaire. -->
+      <div class="hero-mode hero-mode-addon" aria-label="Coût additionnel de la garantie prolongée">
+        <div class="hero-addon-head">
+          <span class="hero-eyebrow" data-editable="warranty-addon-eyebrow">Option offerte au paiement</span>
+          <span class="hero-addon-title" data-editable="warranty-addon-title">
+            Ajouter la garantie complète au paiement
+          </span>
+          <span class="hero-sub" data-editable="hero-sub-excluded">
+            Une <strong>protection mécanique de 5 ans</strong> est <strong>disponible</strong>&nbsp;— quelques dollars de plus par paiement, selon le terme choisi.
+          </span>
         </div>
-        <div class="hero-sub hero-sub-included" data-editable="hero-sub">
-          Une <strong>protection mécanique premium</strong> est <strong>déjà intégrée</strong> au paiement affiché&nbsp;— roulez sereinement, sans frais imprévus.
+        <div class="hero-addon-grid">
+          <div class="hero-addon-cell">
+            <span class="hero-addon-term">60 mois</span>
+            <span class="hero-addon-amount" data-warranty-cost="60">+ —</span>
+          </div>
+          <div class="hero-addon-cell">
+            <span class="hero-addon-term">72 mois</span>
+            <span class="hero-addon-amount" data-warranty-cost="72">+ —</span>
+          </div>
+          <div class="hero-addon-cell">
+            <span class="hero-addon-term">84 mois</span>
+            <span class="hero-addon-amount" data-warranty-cost="84">+ —</span>
+          </div>
+          <div class="hero-addon-cell">
+            <span class="hero-addon-term">96 mois</span>
+            <span class="hero-addon-amount" data-warranty-cost="96">+ —</span>
+          </div>
         </div>
-        <div class="hero-sub hero-sub-excluded" data-editable="hero-sub-excluded">
-          Une <strong>protection mécanique de 5 ans</strong> est <strong>disponible</strong>&nbsp;— pour quelques dollars de plus par paiement, voir ci-dessous.
+        <div class="hero-addon-foot" data-editable="warranty-addon-foot">
+          Pour <strong id="warrantyAddonPriceLabel">3 000 $</strong> de plus financé, profitez d'une couverture mécanique de 5 ans — montant <span id="warrantyAddonFreq">par semaine</span> selon le terme et le taux choisis.
         </div>
-      </div>
-      <div class="hero-badges">
-        <span class="hero-pill">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
-          <span data-editable="hero-pill-1">Aucune surprise</span>
-        </span>
-        <span class="hero-pill">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
-          <span data-editable="hero-pill-2">Aucun frais caché</span>
-        </span>
-        <span class="hero-pill">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
-          <span data-editable="hero-pill-3">Tranquillité d'esprit</span>
-        </span>
       </div>
     </div>
-
-    <!-- ═══════════ AJOUT GARANTIE COMPLÈTE AU PAIEMENT ═══════════
-         Affiché uniquement quand la case "Incluse au paiement" est décochée.
-         Montre le coût additionnel par fréquence et par terme pour ajouter
-         la garantie prolongée. -->
-    <section class="warranty-addon" id="warrantyAddon" hidden aria-label="Coût additionnel de la garantie prolongée">
-      <div class="warranty-addon-head">
-        <span class="warranty-addon-eyebrow" data-editable="warranty-addon-eyebrow">Option offerte au paiement</span>
-        <span class="warranty-addon-title" data-editable="warranty-addon-title">Ajouter la garantie complète au paiement</span>
-      </div>
-      <div class="warranty-addon-grid">
-        <div class="warranty-addon-cell">
-          <span class="warranty-addon-term">60 mois</span>
-          <span class="warranty-addon-amount" data-warranty-cost="60">+ —</span>
-        </div>
-        <div class="warranty-addon-cell">
-          <span class="warranty-addon-term">72 mois</span>
-          <span class="warranty-addon-amount" data-warranty-cost="72">+ —</span>
-        </div>
-        <div class="warranty-addon-cell">
-          <span class="warranty-addon-term">84 mois</span>
-          <span class="warranty-addon-amount" data-warranty-cost="84">+ —</span>
-        </div>
-        <div class="warranty-addon-cell">
-          <span class="warranty-addon-term">96 mois</span>
-          <span class="warranty-addon-amount" data-warranty-cost="96">+ —</span>
-        </div>
-      </div>
-      <div class="warranty-addon-foot" data-editable="warranty-addon-foot">
-        Pour <strong id="warrantyAddonPriceLabel">3 000 $</strong> de plus financé, profitez d'une couverture mécanique de 5 ans — montant <span id="warrantyAddonFreq">par semaine</span> selon le terme et le taux choisis.
-      </div>
-    </section>
 
     <section class="red-card" id="redCard" aria-label="Couverture mécanique et lecture du tableau">
       <div class="red-card-head">
@@ -1741,7 +1737,6 @@
       warranty: document.getElementById('inWarranty'),
       warrantyInclude: document.getElementById('inWarrantyInclude'),
       heroBanner: document.getElementById('heroBanner'),
-      warrantyAddon: document.getElementById('warrantyAddon'),
       warrantyAddonPriceLabel: document.getElementById('warrantyAddonPriceLabel'),
       warrantyAddonFreq: document.getElementById('warrantyAddonFreq'),
       freq: document.getElementById('inFreq'),
@@ -1880,28 +1875,27 @@
         : fmtPct(rMin) + ' – ' + fmtPct(rMax);
       els.stripFreq.textContent = freqShort();
 
-      /* Bascule visuelle hero-banner + bannière addon selon l'inclusion */
+      /* Bascule visuelle du hero-banner entre les deux modes.
+         Le mode addon (4 cartes par terme) est rendu À L'INTÉRIEUR
+         du même cadre sombre — pas de carré rouge supplémentaire. */
+      const showAddon = !include && w > 0;
       if (els.heroBanner) {
-        els.heroBanner.classList.toggle('warranty-excluded', !include);
+        els.heroBanner.classList.toggle('warranty-excluded', showAddon);
       }
-      if (els.warrantyAddon) {
-        const showAddon = !include && w > 0;
-        els.warrantyAddon.hidden = !showAddon;
-        if (showAddon) {
-          /* Calcule le coût additionnel par paiement pour chaque terme */
-          TERMS.forEach((term) => {
-            const cell = document.querySelector('[data-warranty-cost="' + term + '"]');
-            if (!cell) return;
-            const monthly = monthlyPayment(w, rateForTerm(term), term);
-            const display = toDisplayFrequency(monthly);
-            cell.textContent = display > 0 ? '+ ' + fmtPay(display) : '—';
-          });
-          if (els.warrantyAddonPriceLabel) {
-            els.warrantyAddonPriceLabel.textContent = fmtPrice(w);
-          }
-          if (els.warrantyAddonFreq) {
-            els.warrantyAddonFreq.textContent = freqWord();
-          }
+      if (showAddon) {
+        /* Calcule le coût additionnel par paiement pour chaque terme */
+        TERMS.forEach((term) => {
+          const cell = document.querySelector('[data-warranty-cost="' + term + '"]');
+          if (!cell) return;
+          const monthly = monthlyPayment(w, rateForTerm(term), term);
+          const display = toDisplayFrequency(monthly);
+          cell.textContent = display > 0 ? '+ ' + fmtPay(display) : '—';
+        });
+        if (els.warrantyAddonPriceLabel) {
+          els.warrantyAddonPriceLabel.textContent = fmtPrice(w);
+        }
+        if (els.warrantyAddonFreq) {
+          els.warrantyAddonFreq.textContent = freqWord();
         }
       }
 
