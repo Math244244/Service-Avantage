@@ -226,6 +226,13 @@
   align-items: start;
 }
 
+/* Variante 2 colonnes : taux à gauche + fréquence à droite.
+   Utilisée depuis que la durée est passée en grille de cartes en Étape 3. */
+.cpi-parametres-2col {
+  grid-template-columns: minmax(220px, 0.9fr) minmax(420px, 2fr);
+  align-items: end;
+}
+
 .cpi-param-bloc {
   display: flex;
   flex-direction: column;
@@ -391,27 +398,44 @@
   transform: translateY(-1px);
 }
 
-/* Boutons de fréquence (1 colonne verticale dans le bloc droit, ou 3 en grand écran) */
+/* Boutons de fréquence : variante horizontale (3 colonnes côte à côte)
+   par défaut maintenant qu'on n'a plus que ce bloc et le bloc Taux en Étape 2. */
 .cpi-freq-grille {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
+.cpi-freq-grille-horizontale {
+  flex-direction: row;
+  gap: 8px;
+}
+
+.cpi-freq-grille-horizontale .cpi-freq-btn {
+  flex: 1 1 0;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  text-align: left;
+  padding: 10px 14px;
+}
+
 .cpi-freq-btn {
   background: #fff;
   border: 1.5px solid var(--border);
   border-radius: var(--radius-sm);
-  padding: 8px 12px;
+  padding: 10px 14px;
   cursor: pointer;
   transition: all 0.15s ease;
   font-family: inherit;
   display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 2px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
   text-align: left;
   font-variant-numeric: tabular-nums;
+  min-height: 42px;
 }
 
 .cpi-freq-btn:hover {
@@ -419,17 +443,11 @@
   transform: translateY(-1px);
 }
 
-.cpi-freq-ligne-haut {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 6px;
-}
-
 .cpi-freq-titre {
-  font-size: 12.5px;
-  font-weight: 700;
+  font-size: 14px;
+  font-weight: 800;
   color: var(--texte-principal);
+  letter-spacing: -0.01em;
 }
 
 .cpi-freq-mention {
@@ -474,18 +492,22 @@
 }
 
 .cpi-freq-actif .cpi-freq-titre,
-.cpi-freq-actif .cpi-freq-mention,
-.cpi-freq-actif .cpi-freq-montant {
+.cpi-freq-actif .cpi-freq-mention {
   color: #fff !important;
 }
 
-.cpi-freq-actif .cpi-freq-taxes {
-  color: rgba(255, 255, 255, 0.95);
+.cpi-freq-actif .cpi-freq-mention {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 2px 8px;
+  border-radius: 999px;
 }
-.cpi-freq-actif .cpi-freq-taxes::before { color: #fff; }
 
 /* ═══════════════════════════════════════════════════════════════
-   ÉTAPE 3 — Résultats (split horizontal : paiement + stats)
+   ÉTAPE 3 — Résultats : grille de cartes rouges par terme
+   ─────────────────────────────────────────────────────────────────
+   Le client voit IMMÉDIATEMENT le paiement à chaque terme (12 → 96
+   mois) pour la fréquence choisie. Une carte est mise en avant ;
+   c'est elle qui alimente le tableau d'amortissement.
    ═══════════════════════════════════════════════════════════════ */
 .cpi-carte-resultats {
   background: linear-gradient(135deg, #fff5f6 0%, #ffffff 60%);
@@ -498,150 +520,192 @@
   gap: 12px;
 }
 
-/* Mode détaillé : paiement à gauche + stats à droite (split horizontal).
-   Mode compact (par défaut) : paiement seul, centré et pleine largeur — c'est
-   la « vue client » : on ne montre que le chiffre qui parle au client. */
-.cpi-resultats-haut {
-  display: grid;
-  gap: 14px;
-  align-items: stretch;
-  transition: grid-template-columns 0.25s ease;
-}
-.cpi-resultats-haut-detaille {
-  grid-template-columns: minmax(280px, 1fr) minmax(380px, 1.4fr);
-}
-.cpi-resultats-haut-compact {
-  grid-template-columns: 1fr;
-}
-.cpi-resultats-haut-compact .cpi-resultat-principal {
-  max-width: 720px;
-  margin: 0 auto;
-  width: 100%;
-}
-.cpi-resultats-haut-compact .cpi-resultat-montant {
-  font-size: 52px;
-}
-.cpi-resultat-grille {
-  animation: cpiFadeSlide 0.28s ease;
-}
-@keyframes cpiFadeSlide {
-  from { opacity: 0; transform: translateY(-6px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.cpi-resultat-principal {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 18px 20px;
-  background: linear-gradient(135deg, var(--rouge-degrade-debut) 0%, var(--rouge-degrade-fin) 100%);
-  color: #fff;
-  border-radius: var(--radius-md);
-  box-shadow: 0 12px 28px -10px rgba(200, 16, 46, 0.5);
-  position: relative;
-  overflow: hidden;
-}
-
-.cpi-resultat-principal::after {
-  content: "";
-  position: absolute;
-  width: 240px;
-  height: 240px;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0) 70%);
-  top: -100px;
-  right: -90px;
-  border-radius: 50%;
-  pointer-events: none;
-}
-
-.cpi-resultat-label {
-  font-size: 11px;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.85);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-/* Badge « Taxes du Québec incluses » : confirme visuellement que le
-   gros chiffre affiché est bien le paiement TTC du capital affiché en
-   étape 1. Posé juste au-dessus du montant pour ne pas être manqué. */
+/* Badge « Taxes du Québec incluses » dans l'en-tête de la carte résultats. */
 .cpi-resultat-badge-taxes {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  margin-top: 6px;
   padding: 4px 11px;
-  background: rgba(255, 255, 255, 0.22);
+  background: linear-gradient(135deg, var(--rouge-degrade-debut), var(--rouge-degrade-fin));
   color: #fff;
   font-size: 10.5px;
   font-weight: 800;
   letter-spacing: 0.5px;
   text-transform: uppercase;
   border-radius: 999px;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.28);
+  box-shadow: 0 3px 8px rgba(200, 16, 46, 0.28);
+  margin-left: auto;
 }
 .cpi-resultat-badge-taxes svg {
   flex-shrink: 0;
 }
 
-.cpi-resultat-montant {
-  font-size: 42px;
-  font-weight: 800;
+/* ───── Grille des cartes par terme (4×2 sur grand écran) ───── */
+.cpi-termes-cartes {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  animation: cpiFadeSlide 0.28s ease;
+}
+
+@keyframes cpiFadeSlide {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.cpi-terme-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 2px;
+  padding: 14px 10px;
+  background: linear-gradient(135deg, var(--rouge-degrade-debut) 0%, var(--rouge-degrade-fin) 100%);
   color: #fff;
-  margin-top: 4px;
-  letter-spacing: -0.02em;
-  line-height: 1;
+  border: 2px solid transparent;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-family: inherit;
   font-variant-numeric: tabular-nums;
+  overflow: hidden;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  box-shadow: 0 5px 14px -4px rgba(200, 16, 46, 0.36);
+  min-height: 132px;
 }
 
-.cpi-resultat-mention {
-  font-size: 11.5px;
-  font-weight: 600;
+/* Effet brillance subtle en haut-droite — donne un côté premium */
+.cpi-terme-card::after {
+  content: "";
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  top: -40px;
+  right: -30px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 70%);
+  pointer-events: none;
+}
+
+.cpi-terme-card:hover:not(:disabled) {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 22px -4px rgba(200, 16, 46, 0.5);
+}
+
+.cpi-terme-card:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.6), 0 10px 22px -4px rgba(200, 16, 46, 0.5);
+}
+
+.cpi-terme-card:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
+  box-shadow: none;
+}
+
+/* Carte sélectionnée : contour blanc lumineux + halo coloré + légère
+   surélévation. C'est le terme qui alimente le tableau d'amortissement. */
+.cpi-terme-card-active {
+  border-color: #fff;
+  transform: translateY(-3px) scale(1.03);
+  box-shadow:
+    0 0 0 3px rgba(200, 16, 46, 0.32),
+    0 14px 28px -6px rgba(200, 16, 46, 0.55);
+  z-index: 1;
+}
+
+.cpi-terme-card-label {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.cpi-terme-card-montant {
+  font-size: 24px;
+  font-weight: 900;
+  color: #fff;
+  line-height: 1.05;
+  letter-spacing: -0.3px;
+  margin-top: 2px;
+}
+
+.cpi-terme-card-freq {
+  font-size: 10.5px;
+  font-weight: 700;
   color: rgba(255, 255, 255, 0.85);
-  margin-top: 8px;
-  background: rgba(255, 255, 255, 0.15);
-  padding: 4px 12px;
-  border-radius: 999px;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  letter-spacing: 0.3px;
+  text-transform: lowercase;
 }
 
-/* Bouton « Information complémentaire » — discret, intégré dans la carte rouge.
-   Reste visible sans capter l'attention du client : seul le conseiller le note. */
+.cpi-terme-card-meta {
+  font-size: 9.5px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: 2px;
+}
+
+.cpi-terme-card-taxes {
+  margin-top: 6px;
+  padding: 2px 8px;
+  font-size: 8.5px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 999px;
+}
+
+/* ───── Mini résumé + lien « détail du terme » ───── */
+.cpi-resume-terme {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 8px 14px;
+  background: linear-gradient(90deg, rgba(200, 16, 46, 0.08), rgba(200, 16, 46, 0.02));
+  border-left: 3px solid var(--rouge-principal);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  color: var(--texte-secondaire);
+}
+
+.cpi-resume-cle strong {
+  color: var(--rouge-principal);
+  font-weight: 800;
+}
+
+/* Bouton « Information complémentaire » — variante inline pour le résumé. */
 .cpi-btn-info {
-  margin-top: 12px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  background: rgba(255, 255, 255, 0.12);
-  color: rgba(255, 255, 255, 0.92);
-  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: #fff;
+  color: var(--texte-principal);
+  border: 1.5px solid var(--border);
   border-radius: 999px;
   padding: 6px 14px;
   font-size: 11.5px;
-  font-weight: 600;
+  font-weight: 700;
   font-family: inherit;
   cursor: pointer;
   letter-spacing: 0.1px;
-  transition: background 0.18s ease, transform 0.15s ease, border-color 0.18s ease;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  position: relative;
-  z-index: 1;
+  transition: background 0.18s ease, transform 0.15s ease, border-color 0.18s ease, color 0.18s ease;
 }
 .cpi-btn-info:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.22);
-  border-color: rgba(255, 255, 255, 0.4);
+  border-color: var(--rouge-principal);
+  color: var(--rouge-principal);
   transform: translateY(-1px);
 }
 .cpi-btn-info:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 0 3px rgba(200, 16, 46, 0.25);
 }
 .cpi-btn-info:disabled {
   opacity: 0.45;
@@ -649,6 +713,11 @@
 }
 .cpi-btn-info svg {
   flex-shrink: 0;
+}
+
+.cpi-btn-info-inline {
+  padding: 4px 10px;
+  font-size: 11px;
 }
 
 /* Stats côté droit : grille 2×2 compacte */
@@ -859,16 +928,25 @@
    RESPONSIVE — Adaptations par paliers
    ═══════════════════════════════════════════════════════════════ */
 
-/* Tablette large : on conserve la grille 3 colonnes mais on
-   redonne de l'air en Étape 2 si la fréquence se met sur 1 ligne */
+/* Tablette large */
 @media (max-width: 1300px) {
-  .cpi-parametres {
-    grid-template-columns: minmax(160px, 0.8fr) minmax(340px, 2fr) minmax(200px, 1fr);
+  .cpi-parametres-2col {
+    grid-template-columns: minmax(200px, 0.85fr) minmax(360px, 2fr);
     gap: 12px;
+  }
+  .cpi-termes-cartes {
+    gap: 8px;
+  }
+  .cpi-terme-card {
+    padding: 12px 8px;
+    min-height: 120px;
+  }
+  .cpi-terme-card-montant {
+    font-size: 22px;
   }
 }
 
-/* Tablette : Étape 1 passe en 2 colonnes, Étape 2 reste 3 si possible */
+/* Tablette : Étape 1 passe en 2 colonnes, étape 2 + cartes restent confortables */
 @media (max-width: 1100px) {
   .cpi-bulles {
     grid-template-columns: repeat(2, 1fr);
@@ -876,26 +954,36 @@
   .cpi-bulle-taxes {
     grid-column: 1 / -1;
   }
-  .cpi-parametres {
-    grid-template-columns: 1fr 1fr;
-    grid-template-areas:
-      "taux freq"
-      "duree duree";
-  }
-  .cpi-param-bloc:nth-child(1) { grid-area: taux; }
-  .cpi-param-bloc-duree { grid-area: duree; }
-  .cpi-param-bloc:nth-child(3) { grid-area: freq; }
-  .cpi-freq-grille {
-    flex-direction: row;
-  }
-  .cpi-freq-grille .cpi-freq-btn {
-    flex: 1;
-  }
-  .cpi-resultats-haut-detaille {
+  .cpi-parametres-2col {
     grid-template-columns: 1fr;
+  }
+  .cpi-freq-grille-horizontale {
+    flex-wrap: wrap;
+  }
+  .cpi-termes-cartes {
+    grid-template-columns: repeat(4, 1fr);
   }
   .cpi-resultat-grille {
     grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Tablette portrait : on passe les cartes en 2 rangées de 4 toujours */
+@media (max-width: 900px) {
+  .cpi-termes-cartes {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+  }
+  .cpi-terme-card {
+    padding: 10px 6px;
+    min-height: 108px;
+    gap: 1px;
+  }
+  .cpi-terme-card-montant {
+    font-size: 18px;
+  }
+  .cpi-terme-card-label {
+    font-size: 10px;
   }
 }
 
@@ -910,29 +998,21 @@
   .cpi-bulle-taxes {
     grid-column: 1 / -1;
   }
-  .cpi-parametres {
+  .cpi-parametres-2col {
     grid-template-columns: 1fr;
-    grid-template-areas:
-      "taux"
-      "duree"
-      "freq";
   }
-  .cpi-termes-grille {
-    grid-template-columns: repeat(4, 1fr);
+  .cpi-freq-grille-horizontale {
+    flex-direction: column;
+  }
+  .cpi-termes-cartes {
+    grid-template-columns: repeat(2, 1fr);
     gap: 6px;
   }
-  .cpi-terme-btn {
-    padding: 10px 6px;
-    font-size: 14px;
-  }
-  .cpi-freq-grille {
-    flex-direction: column;
+  .cpi-terme-card {
+    min-height: 100px;
   }
   .cpi-resultat-grille {
     grid-template-columns: 1fr 1fr;
-  }
-  .cpi-resultat-montant {
-    font-size: 34px;
   }
   .cpi-actions {
     flex-direction: column;
@@ -964,27 +1044,21 @@
   .cpi-carte-amortissement { page-break-before: auto; }
   .cpi-actions { display: none !important; }
 
-  .cpi-resultats-haut-detaille {
-    grid-template-columns: 1fr 1.4fr !important;
-  }
-  .cpi-resultats-haut-compact {
-    grid-template-columns: 1fr !important;
-  }
   /* À l'impression, le bouton « info complémentaire » disparaît : on imprime
-     simplement ce que le conseiller a choisi de montrer (mode compact OU détaillé). */
+     simplement la grille des cartes et, le cas échéant, le tableau. */
   .cpi-btn-info { display: none !important; }
 
-  .cpi-resultat-principal {
-    box-shadow: none !important;
+  /* Garder les couleurs (cartes rouges, fréquence active, tableau) à l'impression. */
+  .cpi-terme-card,
+  .cpi-terme-card-active,
+  .cpi-freq-actif,
+  .cpi-tableau th,
+  .cpi-resultat-badge-taxes {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
-  .cpi-terme-actif,
-  .cpi-freq-actif,
-  .cpi-tableau th,
-  .cpi-resultat-principal {
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
+  .cpi-terme-card {
+    box-shadow: none !important;
   }
 
   .cpi-tableau-wrap { max-height: none !important; overflow: visible !important; }

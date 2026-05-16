@@ -19,17 +19,19 @@ const FREQUENCES = [
   { id: "hebdo", label: "Hebdomadaire", periodesAn: 52 },
 ];
 
-/* Termes en mois — modes "année pleine" et "demi-année" */
-const TERMES_ANNEE_PLEINE = [12, 24, 36, 48, 60, 72, 84, 96];
-const TERMES_DEMI_ANNEE = [18, 30, 42, 54, 66, 78, 90];
+/* Termes en mois affichés en grille — l'utilisateur voit le paiement
+   correspondant à CHAQUE terme directement, pour comparaison visuelle. */
+const TERMES = [12, 24, 36, 48, 60, 72, 84, 96];
 
 const VALEURS_INITIALES = {
   montantAvantTaxes: "",
   protection: "",
   accessoires: "",
   tauxAnnuel: "",
-  termeMois: 60,
-  modeDemiAnnee: false,
+  /* Terme « mis en avant » : alimente le tableau d'amortissement
+     et le mini résumé. Toutes les cartes restent visibles ; celle-ci
+     est juste celle qui est légèrement surlignée. */
+  termeSelectionne: 60,
   frequence: "mensuel",
 };
 
@@ -174,19 +176,11 @@ function CalculateurPretInteret() {
     }
   }, [saisie]);
 
-  /* Si on change de mode (demi-année / année pleine), s'assurer que le terme
-     sélectionné est encore dans la liste — sinon, choisir un terme par défaut. */
-  useEffect(() => {
-    const termesValides = saisie.modeDemiAnnee ? TERMES_DEMI_ANNEE : TERMES_ANNEE_PLEINE;
-    if (!termesValides.includes(saisie.termeMois)) {
-      setSaisie((prev) => ({
-        ...prev,
-        termeMois: saisie.modeDemiAnnee ? 60 - 6 : 60 /* 54 ou 60 */,
-      }));
-    }
-  }, [saisie.modeDemiAnnee, saisie.termeMois]);
-
-  /* Calculs dérivés via useMemo (recalculés à chaque modification) */
+  /* Calculs dérivés via useMemo (recalculés à chaque modification).
+     Le calculateur produit maintenant un PAIEMENT PAR TERME : pour le capital
+     financé et le taux choisi, on calcule le paiement de chaque terme de la
+     liste (12 → 96 mois) à la fréquence active. Le client voit donc 8 cartes
+     interactives et choisit visuellement le terme qui lui convient. */
   const calculs = useMemo(() => {
     const montantAvantTaxes = parseNombre(saisie.montantAvantTaxes);
     const protection = parseNombre(saisie.protection);
@@ -199,36 +193,34 @@ function CalculateurPretInteret() {
 
     const freq = FREQUENCES.find((f) => f.id === saisie.frequence) || FREQUENCES[0];
     const periodesAn = freq.periodesAn;
-    const nbPeriodes = Math.round((saisie.termeMois * periodesAn) / 12);
-
-    const paiement = calculerPaiement(totalAvecTaxes, tauxAnnuel, nbPeriodes, periodesAn);
-    const totalRembourse = paiement * nbPeriodes;
-    const interetsTotaux = Math.max(0, totalRembourse - totalAvecTaxes);
-
-    /* Taux périodique appliqué et taux effectif annuel équivalent */
     const tauxPeriodique = tauxAnnuel / 100 / periodesAn;
     const tauxEffectifAnnuel = Math.pow(1 + tauxPeriodique, periodesAn) - 1;
 
     const valide =
-      sousTotalAvantTaxes > 0 &&
-      tauxAnnuel >= 0 &&
-      tauxAnnuel <= 100 &&
-      nbPeriodes > 0;
+      sousTotalAvantTaxes > 0 && tauxAnnuel >= 0 && tauxAnnuel <= 100;
 
-    /* Paiements pour chaque fréquence (avec mêmes capital, taux et terme).
-       Permet d'afficher les 3 montants côte à côte pour comparaison directe
-       et de confirmer visuellement que tout est calculé sur le total TAXES
-       INCLUSES du capital (voir étape 1, ligne 5). */
-    const paiementsParFrequence = FREQUENCES.map((f) => {
-      const nb = Math.round((saisie.termeMois * f.periodesAn) / 12);
+    /* Paiements pour CHAQUE terme, à la fréquence active.
+       C'est le cœur du nouveau visuel : 8 cartes rouges montrant
+       le paiement réel pour 12, 24, 36, 48, 60, 72, 84, 96 mois. */
+    const paiementsParTerme = TERMES.map((termeMois) => {
+      const nbPeriodes = Math.round((termeMois * periodesAn) / 12);
+      const paiement = calculerPaiement(totalAvecTaxes, tauxAnnuel, nbPeriodes, periodesAn);
+      const totalRembourse = paiement * nbPeriodes;
+      const interetsTotaux = Math.max(0, totalRembourse - totalAvecTaxes);
       return {
-        id: f.id,
-        label: f.label,
-        periodesAn: f.periodesAn,
-        nbPeriodes: nb,
-        paiement: calculerPaiement(totalAvecTaxes, tauxAnnuel, nb, f.periodesAn),
+        termeMois,
+        nbPeriodes,
+        paiement,
+        totalRembourse,
+        interetsTotaux,
       };
     });
+
+    /* Terme « mis en avant » → alimente le mini résumé et le tableau d'amortissement. */
+    const termeActif =
+      paiementsParTerme.find((p) => p.termeMois === saisie.termeSelectionne) ||
+      paiementsParTerme.find((p) => p.termeMois === 60) ||
+      paiementsParTerme[0];
 
     return {
       montantAvantTaxes,
@@ -241,25 +233,22 @@ function CalculateurPretInteret() {
       tauxPeriodique,
       tauxEffectifAnnuel,
       periodesAn,
-      nbPeriodes,
-      paiement,
-      totalRembourse,
-      interetsTotaux,
       frequence: freq,
-      paiementsParFrequence,
+      paiementsParTerme,
+      termeActif,
       valide,
     };
   }, [saisie]);
 
-  /* Tableau d'amortissement (uniquement quand affiché, pour économiser le rendu) */
+  /* Tableau d'amortissement du terme actif (uniquement quand affiché). */
   const tableauAmortissement = useMemo(() => {
-    if (!afficherAmortissement || !calculs.valide) return [];
+    if (!afficherAmortissement || !calculs.valide || !calculs.termeActif) return [];
     return genererAmortissement(
       calculs.totalAvecTaxes,
       calculs.tauxAnnuel,
-      calculs.nbPeriodes,
+      calculs.termeActif.nbPeriodes,
       calculs.periodesAn,
-      calculs.paiement
+      calculs.termeActif.paiement
     );
   }, [afficherAmortissement, calculs]);
 
@@ -271,10 +260,7 @@ function CalculateurPretInteret() {
     setSaisie((prev) => ({ ...prev, tauxAnnuel: e.target.value }));
   };
   const handleSelectTerme = (mois) => {
-    setSaisie((prev) => ({ ...prev, termeMois: mois }));
-  };
-  const handleToggleDemiAnnee = (e) => {
-    setSaisie((prev) => ({ ...prev, modeDemiAnnee: e.target.checked }));
+    setSaisie((prev) => ({ ...prev, termeSelectionne: mois }));
   };
   const handleSelectFrequence = (id) => {
     setSaisie((prev) => ({ ...prev, frequence: id }));
@@ -287,8 +273,6 @@ function CalculateurPretInteret() {
   const handleImprimer = () => {
     window.print();
   };
-
-  const termesAffiches = saisie.modeDemiAnnee ? TERMES_DEMI_ANNEE : TERMES_ANNEE_PLEINE;
 
   return (
     <div className="cpi-page">
@@ -346,15 +330,17 @@ function CalculateurPretInteret() {
         </div>
       </section>
 
-      {/* ═══════ Carte 2 : Paramètres du prêt ═══════ */}
+      {/* ═══════ Carte 2 : Paramètres du prêt (taux + fréquence) ═══════ */}
       <section className="cpi-carte">
         <div className="cpi-carte-entete cpi-entete-compact">
           <span className="cpi-etape">Étape 2</span>
           <h2>Paramètres du prêt</h2>
-          <p className="cpi-soustitre">Taux, durée et fréquence de paiement.</p>
+          <p className="cpi-soustitre">
+            Choisissez le taux et la fréquence — le paiement pour chaque terme s'affiche en bas.
+          </p>
         </div>
 
-        <div className="cpi-parametres">
+        <div className="cpi-parametres cpi-parametres-2col">
           <div className="cpi-param-bloc">
             <label htmlFor="cpi-taux" className="cpi-param-label">
               Taux d'intérêt annuel
@@ -373,65 +359,24 @@ function CalculateurPretInteret() {
             </div>
           </div>
 
-          <div className="cpi-param-bloc cpi-param-bloc-duree">
-            <div className="cpi-param-label-row">
-              <span className="cpi-param-label">
-                Durée
-                <span className="cpi-param-aide-inline">
-                  · {Math.round((saisie.termeMois / 12) * 100) / 100} ans
-                </span>
-              </span>
-              <label className="cpi-toggle">
-                <input
-                  type="checkbox"
-                  checked={saisie.modeDemiAnnee}
-                  onChange={handleToggleDemiAnnee}
-                />
-                <span className="cpi-toggle-slider" />
-                <span className="cpi-toggle-text">Demi-année</span>
-              </label>
-            </div>
-            <div className="cpi-termes-grille">
-              {termesAffiches.map((mois) => (
-                <button
-                  key={mois}
-                  type="button"
-                  className={
-                    "cpi-terme-btn" +
-                    (saisie.termeMois === mois ? " cpi-terme-actif" : "")
-                  }
-                  onClick={() => handleSelectTerme(mois)}
-                >
-                  {mois}
-                </button>
-              ))}
-            </div>
-          </div>
-
           <div className="cpi-param-bloc">
             <span className="cpi-param-label">
               Fréquence de paiement
               <span className="cpi-param-aide-inline">· taxes incluses</span>
             </span>
-            <div className="cpi-freq-grille">
-              {calculs.paiementsParFrequence.map((p) => (
+            <div className="cpi-freq-grille cpi-freq-grille-horizontale">
+              {FREQUENCES.map((f) => (
                 <button
-                  key={p.id}
+                  key={f.id}
                   type="button"
                   className={
                     "cpi-freq-btn" +
-                    (saisie.frequence === p.id ? " cpi-freq-actif" : "")
+                    (saisie.frequence === f.id ? " cpi-freq-actif" : "")
                   }
-                  onClick={() => handleSelectFrequence(p.id)}
+                  onClick={() => handleSelectFrequence(f.id)}
                 >
-                  <span className="cpi-freq-ligne-haut">
-                    <span className="cpi-freq-titre">{p.label}</span>
-                    <span className="cpi-freq-mention">{p.periodesAn} / an</span>
-                  </span>
-                  <span className="cpi-freq-montant">
-                    {calculs.valide ? formatMontant(p.paiement) : "—"}
-                  </span>
-                  <span className="cpi-freq-taxes">Taxes incluses</span>
+                  <span className="cpi-freq-titre">{f.label}</span>
+                  <span className="cpi-freq-mention">{f.periodesAn} / an</span>
                 </button>
               ))}
             </div>
@@ -439,95 +384,102 @@ function CalculateurPretInteret() {
         </div>
       </section>
 
-      {/* ═══════ Carte 3 : Résultats ═══════ */}
+      {/* ═══════ Carte 3 : Résultats — grille de cartes par terme ═══════ */}
       <section className="cpi-carte cpi-carte-resultats">
         <div className="cpi-carte-entete cpi-entete-compact">
           <span className="cpi-etape">Résultat</span>
-          <h2>Votre paiement</h2>
+          <h2>Paiement {calculs.frequence.label.toLowerCase()} par terme</h2>
+          <span className="cpi-resultat-badge-taxes" aria-hidden="true">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+            Taxes du Québec incluses
+          </span>
         </div>
 
         <div className="cpi-resultats">
-          {/* Mode client (compact) : paiement seul, mis en avant.
-              Mode détaillé : split horizontal paiement + grille de stats. */}
-          <div
-            className={
-              "cpi-resultats-haut" +
-              (afficherStats ? " cpi-resultats-haut-detaille" : " cpi-resultats-haut-compact")
-            }
-          >
-            <div className="cpi-resultat-principal">
-              <span className="cpi-resultat-label">
-                Paiement {calculs.frequence.label.toLowerCase()}
-              </span>
-              <span className="cpi-resultat-badge-taxes" aria-hidden="true">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-                Taxes du Québec incluses
-              </span>
-              <span className="cpi-resultat-montant">
-                {calculs.valide ? formatMontant(calculs.paiement) : "—"}
-              </span>
-              <span className="cpi-resultat-mention">
-                {calculs.valide
-                  ? `${calculs.nbPeriodes} versements · capital ${formatMontant(calculs.totalAvecTaxes)} (taxes incl.)`
-                  : "Saisissez un montant et un taux"}
-              </span>
+          {/* Grille 4×2 de cartes rouges : une par terme.
+              Le client compare visuellement le paiement pour 12 → 96 mois
+              à la fréquence active. La carte sélectionnée est mise en
+              avant (contour blanc) et alimente le tableau d'amortissement. */}
+          <div className="cpi-termes-cartes" role="radiogroup" aria-label="Choisir un terme">
+            {calculs.paiementsParTerme.map((p) => {
+              const actif = saisie.termeSelectionne === p.termeMois;
+              return (
+                <button
+                  key={p.termeMois}
+                  type="button"
+                  role="radio"
+                  aria-checked={actif}
+                  className={"cpi-terme-card" + (actif ? " cpi-terme-card-active" : "")}
+                  onClick={() => handleSelectTerme(p.termeMois)}
+                  disabled={!calculs.valide}
+                >
+                  <span className="cpi-terme-card-label">{p.termeMois} mois</span>
+                  <span className="cpi-terme-card-montant">
+                    {calculs.valide ? formatMontant(p.paiement) : "—"}
+                  </span>
+                  <span className="cpi-terme-card-freq">
+                    / {calculs.frequence.id === "mensuel" ? "mois" : calculs.frequence.id === "bihebdo" ? "2 sem." : "sem."}
+                  </span>
+                  <span className="cpi-terme-card-meta">
+                    {calculs.valide ? `${p.nbPeriodes} versements` : "—"}
+                  </span>
+                  <span className="cpi-terme-card-taxes">✓ Taxes incl.</span>
+                </button>
+              );
+            })}
+          </div>
 
-              {/* Bouton de bascule : intégré au bas de la carte rouge pour
-                  rester discret tout en restant accessible au conseiller. */}
+          {/* Mini résumé du terme sélectionné — toujours visible pour le conseiller,
+              compact pour ne pas voler la vedette aux cartes. */}
+          {calculs.valide && calculs.termeActif && (
+            <div className="cpi-resume-terme">
               <button
                 type="button"
-                className="cpi-btn-info"
+                className="cpi-btn-info cpi-btn-info-inline"
                 onClick={() => setAfficherStats((v) => !v)}
-                disabled={!calculs.valide}
                 aria-expanded={afficherStats}
                 aria-controls="cpi-stats-detail"
               >
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <circle cx="12" cy="12" r="10" />
                   <line x1="12" y1="16" x2="12" y2="12" />
                   <line x1="12" y1="8" x2="12.01" y2="8" />
                 </svg>
-                {afficherStats ? "Masquer l'information" : "Information complémentaire"}
+                {afficherStats ? "Masquer le détail" : "Détail du terme sélectionné"}
               </button>
+              <span className="cpi-resume-cle">
+                Terme actif : <strong>{calculs.termeActif.termeMois} mois</strong>
+                {" "}· {calculs.termeActif.nbPeriodes} versements
+              </span>
             </div>
+          )}
 
-            {afficherStats && (
-              <div className="cpi-resultat-grille" id="cpi-stats-detail">
-                <StatResultat
-                  titre="Capital"
-                  valeur={formatMontant(calculs.totalAvecTaxes)}
-                  mention="Avec taxes QC"
-                />
-                <StatResultat
-                  titre="Intérêts"
-                  valeur={calculs.valide ? formatMontant(calculs.interetsTotaux) : "—"}
-                  mention="Total payé"
-                />
-                <StatResultat
-                  titre="Coût total"
-                  valeur={calculs.valide ? formatMontant(calculs.totalRembourse) : "—"}
-                  mention="Capital + intérêts"
-                />
-                <StatResultat
-                  titre="Taux effectif"
-                  valeur={calculs.valide ? formatPourcent(calculs.tauxEffectifAnnuel) : "—"}
-                  mention="Annuel équivalent"
-                />
-              </div>
-            )}
-          </div>
+          {afficherStats && calculs.valide && calculs.termeActif && (
+            <div className="cpi-resultat-grille" id="cpi-stats-detail">
+              <StatResultat
+                titre="Capital"
+                valeur={formatMontant(calculs.totalAvecTaxes)}
+                mention="Avec taxes QC"
+              />
+              <StatResultat
+                titre="Intérêts"
+                valeur={formatMontant(calculs.termeActif.interetsTotaux)}
+                mention={`Sur ${calculs.termeActif.termeMois} mois`}
+              />
+              <StatResultat
+                titre="Coût total"
+                valeur={formatMontant(calculs.termeActif.totalRembourse)}
+                mention="Capital + intérêts"
+              />
+              <StatResultat
+                titre="Taux effectif"
+                valeur={formatPourcent(calculs.tauxEffectifAnnuel)}
+                mention="Annuel équivalent"
+              />
+            </div>
+          )}
 
           <div className="cpi-actions">
             <button
@@ -572,12 +524,12 @@ function CalculateurPretInteret() {
       </section>
 
       {/* ═══════ Carte 4 : Tableau d'amortissement (conditionnel) ═══════ */}
-      {afficherAmortissement && calculs.valide && (
+      {afficherAmortissement && calculs.valide && calculs.termeActif && (
         <section className="cpi-carte cpi-carte-amortissement">
           <div className="cpi-carte-entete">
-            <h2>Tableau d'amortissement</h2>
+            <h2>Tableau d'amortissement — {calculs.termeActif.termeMois} mois</h2>
             <p className="cpi-soustitre">
-              {calculs.nbPeriodes} versements {calculs.frequence.label.toLowerCase()}s — taux périodique
+              {calculs.termeActif.nbPeriodes} versements {calculs.frequence.label.toLowerCase()}s — taux périodique
               appliqué : {formatPourcent(calculs.tauxPeriodique)}
             </p>
           </div>
@@ -607,8 +559,8 @@ function CalculateurPretInteret() {
               <tfoot>
                 <tr>
                   <td>Total</td>
-                  <td>{formatMontant(calculs.totalRembourse)}</td>
-                  <td>{formatMontant(calculs.interetsTotaux)}</td>
+                  <td>{formatMontant(calculs.termeActif.totalRembourse)}</td>
+                  <td>{formatMontant(calculs.termeActif.interetsTotaux)}</td>
                   <td>{formatMontant(calculs.totalAvecTaxes)}</td>
                   <td>0,00 $</td>
                 </tr>
