@@ -55,20 +55,32 @@ const IconCalcPret = () => (
   </svg>
 );
 
+const IconPDF = () => (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+    <polyline points="14 2 14 8 20 8" />
+    <path d="M8 13h1.5a1.5 1.5 0 010 3H8v-3z" />
+    <path d="M13 16v-3h1a1.5 1.5 0 010 3h-1z" />
+    <path d="M17 16v-3h2" />
+  </svg>
+);
+
 const menuItems = [
   { to: "/", label: "Accueil", icon: <IconAccueil />, end: true },
   { to: "/calculateur-vitrine-voiture", label: "Calculateur Vitrine Voiture", icon: <IconCalcul /> },
   { to: "/calculateur-pret-interet", label: "Calculateur Prêt et Intérêt", icon: <IconCalcPret /> },
-  { to: "/formulaire-accueil-client", label: "Formulaire Accueil Client", icon: <IconFormulaire /> },
-  { to: "/formulaire-transfert-fi", label: "Formulaire Transfert F&I", icon: <IconTransfert /> },
+  { to: "/formulaire-accueil-client", label: "Fiche Accueil Client", icon: <IconFormulaire /> },
+  { to: "/formulaire-transfert-fi", label: "Fiche Transfert FNI", icon: <IconTransfert /> },
   { to: "/texte-personnalise-marketplace", label: "Texte personnalisé Marketplace", icon: <IconMarketplace /> },
+  { to: "/formulaire-avantage-plus", label: "Formulaire Avantage Plus", icon: <IconFormulaire /> },
+  { to: "/pdf-garanties", label: "PDF des garanties", icon: <IconPDF /> },
 ];
 
 function Sidebar() {
   return (
     <aside className="sidebar">
       <div className="sidebar-brand">
-        <div className="sidebar-logo">OA</div>
+        <div className="sidebar-logo" aria-label="Outil-Avantage Plus">OA+</div>
         <div className="sidebar-brand-text">
           <span className="sidebar-brand-title">Outil-Avantage</span>
           <span className="sidebar-brand-subtitle">Centre d'outils</span>

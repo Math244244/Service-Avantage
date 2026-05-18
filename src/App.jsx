@@ -6,6 +6,8 @@ import FormulaireAccueilClient from "./pages/FormulaireAccueilClient";
 import FormulaireTransfertFI from "./pages/FormulaireTransfertFI";
 import TextePersonnaliseMarketplace from "./pages/TextePersonnaliseMarketplace";
 import CalculateurPretInteret from "./pages/CalculateurPretInteret";
+import PDFGaranties from "./pages/PDFGaranties";
+import FormulaireAvantagePlus from "./pages/FormulaireAvantagePlus";
 
 function App() {
   return (
@@ -32,6 +34,14 @@ function App() {
           <Route
             path="/texte-personnalise-marketplace"
             element={<TextePersonnaliseMarketplace />}
+          />
+          <Route
+            path="/pdf-garanties"
+            element={<PDFGaranties />}
+          />
+          <Route
+            path="/formulaire-avantage-plus"
+            element={<FormulaireAvantagePlus />}
           />
         </Route>
       </Routes>

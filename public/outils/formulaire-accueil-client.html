@@ -7,10 +7,16 @@
 
   <link rel="stylesheet" href="assets/styles-commun.css">
 
+  <!-- Génération PDF côté navigateur :
+       - html2canvas capture la fiche en image.
+       - jsPDF place l'image sur une seule page Letter.
+       On charge les deux librairies directement (plutôt que le bundle
+       html2pdf) pour éviter l'algorithme de pagebreak automatique. -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
   <style>
     /* ═══ STYLES SPÉCIFIQUES À LA FICHE DE QUALIFICATION ═══ */
-    @page { size: 8.5in 11in; margin: 0.18in; }
-
     .sheet {
       padding: 0;
       min-height: 10.6in;
@@ -18,27 +24,28 @@
 
     /* En-tête */
     .header-bar {
-      padding: 12px 0.32in 6px 0.32in;
-      display: grid;
-      grid-template-columns: 1fr 1.35fr 1fr;
+      padding: 8px 0.32in 5px 0.32in;
+      display: flex;
       align-items: center;
-      gap: 18px;
+      justify-content: center;
       border-bottom: 1px solid #cfcfcf;
     }
     .header-title {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 3px;
+      gap: 2px;
       text-align: center;
+      width: 100%;
     }
     .doc-title {
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 900;
       color: var(--red);
       text-transform: uppercase;
       letter-spacing: 1.2px;
-      line-height: 1;
+      line-height: 0.95;
+      white-space: nowrap;
     }
     .doc-subtitle {
       font-size: 8px;
@@ -47,16 +54,8 @@
       font-weight: 700;
       color: #686868;
     }
-    .header-right {
-      display: flex;
-      justify-content: flex-end;
-      align-items: center;
-    }
-    .owner-logo {
-      max-width: 1.65in;
-      max-height: 0.6in;
-      object-fit: contain;
-    }
+    .header-logo-slot,
+    .header-right { display: none; }
     .header-line {
       height: 3px;
       background: linear-gradient(90deg, var(--red-dark), var(--red), var(--red-light));
@@ -313,138 +312,191 @@
     .footer-left { font-size: 7px; color: #999; }
     .footer-right { font-size: 7px; color: var(--red); font-weight: 800; }
 
-    @media (max-width: 900px) {
-      .header-bar { grid-template-columns: 1fr; text-align: center; }
-      .header-right { justify-content: center; }
+    /* Responsive mobile : RÉSERVÉ à l'écran (screen) — ne doit JAMAIS
+       s'appliquer à l'impression. À l'impression sur Letter portrait,
+       le viewport fait 768px (8.5in − marges) < 900px, ce qui
+       déclencherait à tort le mode mobile et casserait la mise en
+       page (champs empilés verticalement au lieu d'être côte-à-côte). */
+    @media screen and (max-width: 900px) {
+      .header-bar { text-align: center; }
+      .doc-title { white-space: normal; }
       .row { flex-wrap: wrap; }
       .f, .f.s, .f.m, .f.xs { flex: 1 1 100%; }
       .finance-choice-row { grid-template-columns: 1fr; }
     }
 
-    /* ═══════════════ MODE COMPACT (impression + export PDF) ═══════════════ */
-    /* Activé automatiquement via JS pour beforeprint et html2pdf */
-    .sheet.compact { min-height: auto; }
-    .sheet.compact .header-bar { padding: 7px 0.32in 4px; }
-    .sheet.compact .doc-title { font-size: 14px; letter-spacing: 1px; }
-    .sheet.compact .doc-subtitle { font-size: 7px; }
-    .sheet.compact .owner-logo { max-height: 0.52in; max-width: 1.45in; }
-    .sheet.compact .header-line { height: 2px; }
-    .sheet.compact .content { padding: 5px 0.32in 5px; }
+    /* ═══════════════════════════════════════════════════════════════
+       MODAL DE RAPPEL D'IMPRESSION
+       ═══════════════════════════════════════════════════════════════ */
+    .print-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.55);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 20px;
+      animation: printModalFadeIn 0.18s ease-out;
+    }
+    .print-modal-overlay[hidden] { display: none; }
+    @keyframes printModalFadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    .print-modal {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+      max-width: 480px;
+      width: 100%;
+      overflow: hidden;
+      animation: printModalSlideIn 0.22s ease-out;
+    }
+    @keyframes printModalSlideIn {
+      from { transform: translateY(-12px) scale(0.97); opacity: 0; }
+      to   { transform: translateY(0) scale(1);        opacity: 1; }
+    }
+    .print-modal-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 18px 22px;
+      background: linear-gradient(135deg, var(--red, #d0021b), #a4011a);
+      color: #fff;
+    }
+    .print-modal-header svg { flex-shrink: 0; }
+    .print-modal-header h2 {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0.2px;
+    }
+    .print-modal-body {
+      padding: 22px;
+      color: #333;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .print-modal-intro {
+      margin: 0 0 14px;
+      font-size: 13.5px;
+    }
+    .print-modal-intro strong { color: var(--red, #d0021b); font-weight: 700; }
+    .print-modal-steps {
+      margin: 0 0 16px;
+      padding-left: 20px;
+    }
+    .print-modal-steps li {
+      margin-bottom: 8px;
+    }
+    .print-modal-steps strong { font-weight: 700; }
+    .print-modal-steps .hl {
+      background: #fff3cd;
+      padding: 1px 6px;
+      border-radius: 4px;
+      color: #6b5400;
+      border: 1px solid #f5d97a;
+    }
+    .print-modal-note {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin: 0 0 16px;
+      padding: 10px 12px;
+      background: #eef5ff;
+      border-left: 3px solid #2c7fff;
+      border-radius: 4px;
+      color: #1d4f9e;
+      font-size: 12px;
+    }
+    .print-modal-note svg { flex-shrink: 0; margin-top: 2px; color: #2c7fff; }
+    .print-modal-note em { font-style: italic; font-weight: 600; }
+    .print-modal-note strong { font-weight: 700; }
+    .print-modal-note--success {
+      background: #e8f5e9;
+      border-left-color: #2e7d32;
+      color: #1b5e20;
+    }
+    .print-modal-note--success svg { color: #2e7d32; }
+    .print-modal-note--success strong { color: #0d3d12; }
+    .print-modal-dontshow {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-top: 8px;
+      border-top: 1px solid #eee;
+      font-size: 12px;
+      color: #666;
+      cursor: pointer;
+      user-select: none;
+    }
+    .print-modal-dontshow input { cursor: pointer; }
+    .print-modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      padding: 14px 22px;
+      background: #fafafa;
+      border-top: 1px solid #eee;
+    }
+    .print-modal-footer .btn { padding: 10px 16px; font-size: 12px; }
 
-    .sheet.compact .meta-row { padding: 0 0 4px; margin-bottom: 5px; gap: 10px; }
-    .sheet.compact .meta-field label { font-size: 7.5px; }
-    .sheet.compact .meta-field input { height: 16px; padding: 1px 5px; font-size: 9px; }
-    .sheet.compact #date { width: 110px; }
-    .sheet.compact #conseiller { width: 130px; }
+    /* ═══════════════════════════════════════════════════════════════
+       IMPRESSION : approche "feuille = page entière"
+       ──────────────────────────────────────────────────────────────
+       STRATÉGIE :
+       1. @page margin: 0 → la zone imprimable est la page entière
+          (8.5×11 in). Chrome n'a aucune marge à appliquer.
+       2. La sheet est forcée en JS à EXACTEMENT 8.5×11 in avec un
+          padding interne de 0.2in qui sert de marge visuelle.
+          → Pas de "fit-to-page" automatique de Chrome (la sheet
+            correspond pile à la page).
+       3. Si le contenu intérieur déborde, le JS applique un `zoom`
+          tout en agrandissant pré-zoom les dimensions de la sheet
+          pour que POST-zoom elle reste exactement 8.5×11 in.
+       ═══════════════════════════════════════════════════════════════ */
+    @page {
+      size: letter portrait;
+      margin: 0;
+    }
 
-    .sheet.compact .section { margin-bottom: 4px; padding: 5px 9px 6px; }
-    .sheet.compact .stitle { margin-bottom: 3px; padding-bottom: 2px; gap: 6px; }
-    .sheet.compact .stitle .num { width: 14px; height: 14px; font-size: 8px; }
-    .sheet.compact .stitle .ico { width: 11px; height: 11px; }
-    .sheet.compact .stitle .txt { font-size: 8.5px; letter-spacing: 0.4px; }
-
-    .sheet.compact .row { gap: 8px; margin-bottom: 3px; }
-    .sheet.compact .f label,
-    .sheet.compact .rg .rl,
-    .sheet.compact .cr .cl,
-    .sheet.compact .ebox-hd .el,
-    .sheet.compact .result-row .rl-result,
-    .sheet.compact .followup label { font-size: 7px; margin-bottom: 2px; letter-spacing: 0.25px; }
-
-    .sheet.compact input[type="text"],
-    .sheet.compact input[type="email"],
-    .sheet.compact input[type="tel"],
-    .sheet.compact input[type="number"],
-    .sheet.compact input[type="date"] { height: 17px; padding: 1px 5px; font-size: 9px; border-radius: 3px; }
-    .sheet.compact textarea { padding: 3px 5px; font-size: 9px; line-height: 1.3; border-radius: 3px; }
-
-    .sheet.compact .ri { font-size: 8.5px; gap: 4px; }
-    .sheet.compact .cr { gap: 7px; margin-bottom: 3px; padding: 1px 0; }
-    .sheet.compact input[type="checkbox"],
-    .sheet.compact input[type="radio"] { width: 10px; height: 10px; }
-    .sheet.compact input[type="checkbox"]:checked::after { left: 2px; top: -1px; width: 4px; height: 7px; }
-
-    .sheet.compact .finance-choice-row { margin-top: 3px; margin-bottom: 4px; gap: 7px; }
-    .sheet.compact .choice-card { padding: 4px 7px; border-radius: 4px; }
-    .sheet.compact .choice-card .rl { font-size: 7px; margin-bottom: 3px; }
-    .sheet.compact .choice-pill { min-height: 18px; padding: 1px 5px; font-size: 8.5px; }
-
-    .sheet.compact .ebox { padding: 4px 8px; margin-top: 3px; }
-    .sheet.compact .ebox-hd { margin-bottom: 3px; padding-bottom: 3px; gap: 8px; }
-
-    .sheet.compact .nbox textarea { min-height: 38px; }
-    .sheet.compact .result-row,
-    .sheet.compact .followup { gap: 7px; margin-top: 3px; padding-top: 3px; }
-    .sheet.compact .followup input[type="date"] { width: 105px; }
-
-    .sheet.compact .consent-block { padding: 5px 9px; gap: 10px; margin-top: 3px; }
-    .sheet.compact .consent-text { font-size: 7px; line-height: 1.3; gap: 6px; }
-
-    .sheet.compact .footer { margin-top: 3px; padding-top: 2px; }
-    .sheet.compact .footer-left,
-    .sheet.compact .footer-right { font-size: 6px; }
-
-    /* ═══════════════ IMPRESSION — 1 PAGE STRICT (v3) ═══════════════
-       Stratégie finale ultra-robuste pour Chrome / Edge 2026 :
-
-       1. @page sans marge : la zone imprimable couvre tout 8.5 × 11 in.
-          On gère les marges visuellement via padding sur body.
-
-       2. html + body bornés à 8.5 × 11 in avec overflow: hidden →
-          Chrome n'a STRICTEMENT pas la place de créer une 2e page,
-          peu importe la taille du contenu interne.
-
-       3. .sheet en position: fixed (et plus position: absolute) →
-          Chrome traite les éléments fixed comme "ne participent pas
-          à la pagination". Combiné avec un body overflow: hidden,
-          ça garantit qu'aucun débordement vertical ne crée de 2e page.
-
-       4. On retire « .sheet * { page-break-inside: avoid } » qui en
-          pratique peut pousser Chrome à reporter un bloc sur p.2.
-
-       5. Le scaling JS (transform: scale + width compensé) garde le
-          rendu visuel proportionné dans la fenêtre 8.14 × 10.64 in.   */
-    @page { size: 8.5in 11in; margin: 0; }
     @media print {
-      html {
-        background: #fff !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        width: 8.5in !important;
-        height: 11in !important;
-        overflow: hidden !important;
-      }
+      html,
       body {
-        background: #fff !important;
-        margin: 0 !important;
-        padding: 0.18in !important;
-        box-sizing: border-box !important;
-        width: 8.5in !important;
-        height: 11in !important;
-        overflow: hidden !important;
-        position: relative !important;
-      }
-      /* Cache tout sauf la sheet — la toolbar et le toast disparaissent */
-      body > *:not(.sheet) { display: none !important; }
-
-      /* position: fixed = totalement hors flux → pas de pagination.
-         top/left calés sur les marges intérieures du body. */
-      .sheet {
-        position: fixed !important;
-        top: 0.18in !important;
-        left: 0.18in !important;
-        right: auto !important;
-        bottom: auto !important;
-        box-shadow: none !important;
-        border-radius: 0 !important;
         margin: 0 !important;
         padding: 0 !important;
-        width: 8.14in !important;
-        max-width: 8.14in !important;
+        background: #fff !important;
+        width: 8.5in !important;
+        height: 11in !important;
         min-height: 0 !important;
-        height: auto !important;
-        overflow: visible !important;
-        /* page-break-inside: avoid suffit, on ne descend PAS sur * */
+        max-width: none !important;
+        overflow: hidden !important;
+      }
+
+      /* Centrage absolu de la sheet sur la page imprimée. Flexbox
+         distribue l'espace même si Chrome alloue une zone légèrement
+         différente de 8.5×11 in (à cause de ses marges de dialogue). */
+      body {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+      }
+
+      body > *:not(.sheet) {
+        display: none !important;
+      }
+
+      .sheet {
+        margin: 0 auto !important;
+        box-shadow: none !important;
+        /* Coins arrondis conservés (identique à l'écran). On NE met PAS
+           border-radius: 0 — sinon les coins seraient carrés à l'impression
+           alors qu'ils sont arrondis sur le web. */
+        border-radius: 4px !important;
+        max-width: none !important;
+        /* width, height, padding et zoom sont pilotés en JS — voir
+           preparePrintLayout(). On ne les écrase PAS ici. */
         page-break-inside: avoid !important;
         page-break-after: avoid !important;
         break-inside: avoid !important;
@@ -454,22 +506,48 @@
         color-adjust: exact !important;
       }
 
-      /* Préservation des couleurs (bandeau, sections rouges, etc.) */
-      .sheet-banner, .sheet-banner img,
-      .header-line, .stitle, .stitle .num,
-      input[type="checkbox"]:checked, input[type="radio"]:checked {
-        -webkit-print-color-adjust: exact !important;
-        print-color-adjust: exact !important;
-        color-adjust: exact !important;
+      /* Préserve EXACTEMENT l'apparence écran du bandeau. On garde
+         `height: auto` + `max-height: 1.6in` (= valeurs écran) pour que
+         le ratio largeur/hauteur de l'image source ne change pas entre
+         écran et impression — sinon `object-fit: cover` recadrerait
+         différemment (perte de texte sur les côtés). La fonction
+         waitForSheetImages() garantit que l'image est chargée AVANT
+         la mesure JS. */
+      .sheet-banner img {
+        height: auto !important;
+        max-height: 1.6in !important;
+        width: 100% !important;
+        object-fit: cover !important;
+        object-position: center !important;
       }
 
-      .sheet-banner { line-height: 0 !important; }
+      /* Coins arrondis en HAUT : Chrome ne clippe pas toujours les
+         images au border-radius du parent en mode impression (bug
+         connu de overflow: hidden + border-radius). On force
+         explicitement l'arrondi sur le bandeau et son image. */
+      .sheet-banner {
+        border-top-left-radius:  4px !important;
+        border-top-right-radius: 4px !important;
+        overflow: hidden !important;
+      }
       .sheet-banner img {
-        width: 100% !important;
-        height: auto !important;
-        display: block !important;
+        border-top-left-radius:  4px !important;
+        border-top-right-radius: 4px !important;
+      }
+
+      input,
+      textarea,
+      select {
+        border-color: #999 !important;
+        background: #fff !important;
+        box-shadow: none !important;
+      }
+      textarea {
+        overflow: hidden !important;
+        resize: none !important;
       }
     }
+
   </style>
 </head>
 <body>
@@ -492,20 +570,64 @@
         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.65 6.35A7.95 7.95 0 0 0 12 4a8 8 0 1 0 7.74 10h-2.08A6 6 0 1 1 12 6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
         <span class="btn-label">Réinitialiser</span>
       </button>
+      <button type="button" class="btn btn-primary" id="btnDownloadPdf" title="Télécharger en PDF — rendu garanti pleine page (Ctrl+S)">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+        <span class="btn-label">Télécharger PDF</span>
+      </button>
       <button type="button" class="btn btn-secondary" id="btnPrint" title="Imprimer (Ctrl+P)">
         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>
         <span class="btn-label">Imprimer</span>
-      </button>
-      <button type="button" class="btn btn-primary" id="btnDownload" title="Télécharger en PDF (Ctrl+S)">
-        <span class="spinner" aria-hidden="true"></span>
-        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-        <span class="btn-label">Télécharger</span>
       </button>
     </div>
   </div>
 
   <!-- ═══════════════════════════════════════════════════════════════
-       FEUILLE (zone imprimable / téléchargeable en PDF)
+       MODAL DE RAPPEL D'IMPRESSION (affiché au 1er clic Imprimer)
+       ═══════════════════════════════════════════════════════════════ -->
+  <div id="printReminderOverlay" class="print-modal-overlay" hidden>
+    <div class="print-modal" role="dialog" aria-labelledby="printModalTitle" aria-modal="true">
+      <div class="print-modal-header">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" width="24" height="24">
+          <path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/>
+        </svg>
+        <h2 id="printModalTitle">Réglages d'impression recommandés</h2>
+      </div>
+      <div class="print-modal-body">
+        <p class="print-modal-note print-modal-note--success">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" width="14" height="14">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+          </svg>
+          <span>Astuce : utilisez plutôt le bouton <strong>« Télécharger PDF »</strong> pour un rendu garanti pleine page, sans aucun réglage à faire.</span>
+        </p>
+        <p class="print-modal-intro">
+          Sinon, pour imprimer directement et que la feuille remplisse
+          <strong>toute la page</strong>, appliquez ces réglages dans
+          l'aperçu d'impression Chrome :
+        </p>
+        <ol class="print-modal-steps">
+          <li>Dans l'aperçu, dépliez <strong>« Plus de paramètres »</strong></li>
+          <li>Mettez <strong>Marges</strong> sur <strong class="hl">« Aucune »</strong></li>
+          <li>Mettez <strong>Mise à l'échelle</strong> sur <strong class="hl">« Par défaut »</strong> (100 %)</li>
+        </ol>
+        <label class="print-modal-dontshow">
+          <input type="checkbox" id="printDontShowAgain" checked>
+          <span>Ne plus afficher ce rappel</span>
+        </label>
+      </div>
+      <div class="print-modal-footer">
+        <button type="button" class="btn btn-secondary" id="printModalCancel">Annuler</button>
+        <button type="button" class="btn btn-primary" id="printModalContinue">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" width="14" height="14">
+            <path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/>
+          </svg>
+          <span>Continuer vers l'impression</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════════════
+       FEUILLE (zone imprimable)
        ═══════════════════════════════════════════════════════════════ -->
   <form id="qualifForm" class="sheet" autocomplete="off">
 
@@ -811,17 +933,6 @@
           <textarea id="notes" name="notes" data-track placeholder="Notes, observations, suivi à faire…" rows="4"></textarea>
         </div>
 
-        <div class="result-row">
-          <span class="rl-result">Résultat :</span>
-          <div class="ro">
-            <label class="ri"><input type="radio" name="resultat" value="Vente conclue" data-track> Vente conclue</label>
-            <label class="ri"><input type="radio" name="resultat" value="RDV pris" data-track> RDV pris</label>
-            <label class="ri"><input type="radio" name="resultat" value="À suivre" data-track> À suivre</label>
-            <label class="ri"><input type="radio" name="resultat" value="Référé F&I" data-track> Référé F&amp;I</label>
-            <label class="ri"><input type="radio" name="resultat" value="Perdu" data-track> Perdu</label>
-          </div>
-        </div>
-
         <div class="followup">
           <label for="relance">Relance prévue :</label>
           <input id="relance" name="relance" type="date" data-track>
@@ -858,7 +969,6 @@
   <!-- ═══════════════════════════════════════════════════════════════
        SCRIPTS
        ═══════════════════════════════════════════════════════════════ -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="assets/scaling-commun.js"></script>
 
   <script>
@@ -1061,10 +1171,73 @@
           }
         });
       });
-
-      document.getElementById('btnPrint').addEventListener('click', doPrint);
-      document.getElementById('btnDownload').addEventListener('click', doDownload);
+      document.getElementById('btnPrint').addEventListener('click', requestPrint);
+      document.getElementById('btnDownloadPdf').addEventListener('click', downloadPdf);
       document.getElementById('btnReset').addEventListener('click', doReset);
+      attachPrintModalListeners();
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // MODAL DE RAPPEL D'IMPRESSION
+    // ───────────────────────────────────────────────────────────────
+    // Affiche un rappel (la 1re fois, ou tant que l'utilisateur n'a pas
+    // coché « ne plus afficher ») expliquant qu'il faut choisir
+    // "Marges : Aucune" dans le dialogue Chrome pour un rendu pleine
+    // page. Sans ce réglage, Chrome applique ses marges par défaut
+    // (~0.4 in) et rétrécit la feuille pour rentrer dans cette zone
+    // → résultat ~80 % de la page seulement.
+    // ═══════════════════════════════════════════════════════════════
+    const PRINT_REMINDER_KEY = 'fiche-accueil-print-reminder-ack';
+
+    function requestPrint() {
+      const acknowledged = localStorage.getItem(PRINT_REMINDER_KEY) === '1';
+      if (acknowledged) {
+        doPrint();
+        return;
+      }
+      showPrintReminder();
+    }
+
+    function showPrintReminder() {
+      const overlay = document.getElementById('printReminderOverlay');
+      if (!overlay) { doPrint(); return; }
+      overlay.hidden = false;
+      // Focus sur le bouton "Continuer" pour permettre Entrée=valider.
+      const continueBtn = document.getElementById('printModalContinue');
+      if (continueBtn) continueBtn.focus();
+    }
+
+    function hidePrintReminder() {
+      const overlay = document.getElementById('printReminderOverlay');
+      if (overlay) overlay.hidden = true;
+    }
+
+    function attachPrintModalListeners() {
+      const overlay     = document.getElementById('printReminderOverlay');
+      const continueBtn = document.getElementById('printModalContinue');
+      const cancelBtn   = document.getElementById('printModalCancel');
+      const dontShow    = document.getElementById('printDontShowAgain');
+      if (!overlay || !continueBtn || !cancelBtn) return;
+
+      continueBtn.addEventListener('click', () => {
+        if (dontShow && dontShow.checked) {
+          localStorage.setItem(PRINT_REMINDER_KEY, '1');
+        }
+        hidePrintReminder();
+        doPrint();
+      });
+
+      cancelBtn.addEventListener('click', hidePrintReminder);
+
+      // Cliquer en dehors du modal = annuler.
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) hidePrintReminder();
+      });
+
+      // Échap = annuler.
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !overlay.hidden) hidePrintReminder();
+      });
     }
 
     // ═══ FORMATAGE AUTO ═══
@@ -1123,244 +1296,422 @@
     }
 
     // ═══ ACTIONS ═══
-    // Active le mode compact + agrandit textareas + scaling pour tenir sur 1 page.
-    // Ordre critique : compact AVANT prepareSheetForExport pour que les textareas
-    // soient mesurées avec les tailles compactes (sinon, hauteurs trop grandes).
-    window.addEventListener('beforeprint', () => {
-      sheet.classList.add('compact');
-      void sheet.offsetHeight;        // force reflow → CSS compact appliqué
-      prepareSheetForExport();         // textareas mesurées correctement
-      void sheet.offsetHeight;        // force reflow → tailles textareas appliquées
-      fitSheetToOnePage();             // mesure et applique transform: scale
-    });
-    window.addEventListener('afterprint', () => {
-      clearFitSheet();
-      sheet.classList.remove('compact');
-      cleanupAfterExport();
-    });
+    // ─────────────────────────────────────────────────────────────
+    // IMPRESSION — Approche "photocopieuse fidèle"
+    // ─────────────────────────────────────────────────────────────
+    // Stratégie : on RAPETIT la feuille via CSS `zoom` (qui modifie
+    // réellement la box layout, contrairement à transform:scale).
+    // Le navigateur voit donc UNE seule page et le rendu est
+    // strictement identique à la vue web (polices, icônes, paddings,
+    // tout est conservé — c'est un vrai "shrink-to-fit").
+    //
+    // Page Letter @ 96 dpi = 816 × 1056 px.
+    // @page margin: 0 → la sheet aura EXACTEMENT cette taille à l'impression.
+    // Le padding interne (0.1in ≈ 9.6 px) crée la marge visuelle entre
+    // le bord de la feuille et le contenu. Plus c'est petit, plus le
+    // contenu apparaît grand sur la page imprimée.
+    const PRINT_CONFIG = {
+      pageWidthIn:    8.5,
+      pageHeightIn:   11,
+      internalPadIn:  0.1,  // padding interne de la sheet à l'impression
+      maxTextareaPx: {
+        raison: 50,
+        notes:  80,
+      },
+    };
 
-    function doPrint() {
+    function getPageDimensionsPx() {
+      return {
+        w: PRINT_CONFIG.pageWidthIn  * 96,  // 816
+        h: PRINT_CONFIG.pageHeightIn * 96,  // 1056
+        pad: PRINT_CONFIG.internalPadIn * 96, // 19.2
+      };
+    }
+
+    const SHEET_INLINE_PROPS = [
+      'zoom', 'transform', 'width', 'height',
+      'minHeight', 'maxHeight', 'padding', 'boxSizing',
+    ];
+
+    const printSnapshot = {
+      valueAttrs: new Map(),
+      checkedAttrs: new Map(),
+      textareaText: new Map(),
+      textareaHeights: new Map(),
+      textareaMaxHeights: new Map(),
+      sheetStyle: {},
+      htmlZoom: null,
+      prepared: false,
+    };
+
+    function resetPrintSnapshot() {
+      printSnapshot.valueAttrs.clear();
+      printSnapshot.checkedAttrs.clear();
+      printSnapshot.textareaText.clear();
+      printSnapshot.textareaHeights.clear();
+      printSnapshot.textareaMaxHeights.clear();
+      printSnapshot.sheetStyle = {};
+      printSnapshot.htmlZoom = null;
+      printSnapshot.prepared = false;
+    }
+
+    // Garantit que toutes les images de la feuille sont chargées avant
+    // qu'on en mesure la hauteur. Sinon img.height = 0 pendant la mesure
+    // et la sheet déborde de ~150px à l'impression réelle.
+    function waitForSheetImages() {
+      const imgs = Array.from(sheet.querySelectorAll('img'));
+      const pending = imgs.filter(img => !img.complete || img.naturalHeight === 0);
+      if (pending.length === 0) return Promise.resolve();
+      return Promise.all(
+        pending.map(img => new Promise(resolve => {
+          const done = () => resolve();
+          img.addEventListener('load',  done, { once: true });
+          img.addEventListener('error', done, { once: true });
+          // Fallback de 2 s pour ne jamais bloquer l'impression.
+          setTimeout(done, 2000);
+        }))
+      );
+    }
+
+    // Pousse les valeurs des inputs/textareas dans les attributs HTML
+    // (sinon ils ne sont pas rendus à l'impression sur certains navigateurs).
+    function syncLiveValuesForPrint() {
+      sheet.querySelectorAll('input, textarea').forEach(el => {
+        if (el.type === 'checkbox' || el.type === 'radio') {
+          printSnapshot.checkedAttrs.set(el, el.hasAttribute('checked'));
+          if (el.checked) el.setAttribute('checked', 'checked');
+          else el.removeAttribute('checked');
+          return;
+        }
+
+        if (el.tagName === 'TEXTAREA') {
+          printSnapshot.textareaText.set(el, el.textContent);
+          printSnapshot.textareaHeights.set(el, el.style.height);
+          printSnapshot.textareaMaxHeights.set(el, el.style.maxHeight);
+          el.textContent = el.value;
+          return;
+        }
+
+        printSnapshot.valueAttrs.set(el, el.getAttribute('value'));
+        el.setAttribute('value', el.value);
+      });
+    }
+
+    function preparePrintLayout() {
+      if (printSnapshot.prepared) return;
+      resetPrintSnapshot();
+
+      // 1. Neutraliser le zoom écran appliqué par scaling-commun.js
+      //    (sinon scrollHeight serait multiplié par 1.0–1.35 → calcul faux).
+      printSnapshot.htmlZoom = document.documentElement.style.zoom;
+      document.documentElement.style.zoom = '';
+
+      // 2. Snapshot des valeurs et leur "freeze" en attributs HTML.
+      syncLiveValuesForPrint();
+
+      // 3. Sauvegarder TOUS les styles inline de la sheet qu'on va modifier.
+      SHEET_INLINE_PROPS.forEach(prop => {
+        printSnapshot.sheetStyle[prop] = sheet.style[prop];
+      });
+      sheet.style.zoom = '';
+      sheet.style.transform = '';
+
+      // 4. Forcer la sheet à EXACTEMENT la taille de la page (8.5×11 in).
+      //    Padding interne 0.2in pour la marge visuelle. Box-sizing
+      //    border-box → les dimensions externes incluent le padding.
+      //    Ainsi, la sheet correspond pile à la page imprimable et
+      //    Chrome n'a plus de "fit-to-page" à appliquer.
+      const { w: PAGE_W, h: PAGE_H, pad: PAD } = getPageDimensionsPx();
+      sheet.style.width     = PAGE_W + 'px';
+      sheet.style.height    = PAGE_H + 'px';
+      sheet.style.minHeight = PAGE_H + 'px';
+      sheet.style.maxHeight = PAGE_H + 'px';
+      sheet.style.padding   = PAD + 'px';
+      sheet.style.boxSizing = 'border-box';
+
+      // 5. Figer la hauteur des textareas à leur taille actuelle,
+      //    plafonnée pour éviter qu'un long texte ne fasse rapetisser
+      //    toute la page au point de devenir illisible.
+      sheet.querySelectorAll('textarea').forEach(ta => {
+        autoResizeTextarea(ta);
+        const naturalTaH = ta.offsetHeight;
+        const cap = PRINT_CONFIG.maxTextareaPx[ta.id] || naturalTaH;
+        const finalH = Math.min(naturalTaH, cap);
+        ta.style.height    = finalH + 'px';
+        ta.style.minHeight = finalH + 'px';
+        ta.style.maxHeight = finalH + 'px';
+        ta.style.overflow  = 'hidden';
+      });
+
+      // 6. Forcer le reflow puis MESURER la taille du contenu (qui
+      //    inclut le padding via scrollHeight).
+      void sheet.offsetHeight;
+      const naturalH = Math.max(sheet.scrollHeight, sheet.offsetHeight, 1);
+      const naturalW = Math.max(sheet.scrollWidth,  sheet.offsetWidth,  1);
+
+      // 7. Si le contenu déborde de la page, on calcule un zoom < 1
+      //    ET on AGRANDIT pré-zoom les dimensions de la sheet pour
+      //    que POST-zoom elle conserve exactement 8.5×11 in.
+      //
+      //    Exemple : naturalH = 1100 (déborde de 1056). scale = 1056/1100 ≈ 0.96.
+      //    On met sheet.height = 1056/0.96 = 1100, puis zoom = 0.96.
+      //    Effet final = 1100 × 0.96 = 1056 = PAGE_H ✓
+      let scale = 1;
+      let guard = 0;
+
+      if (naturalH > PAGE_H || naturalW > PAGE_W) {
+        scale = Math.min(PAGE_W / naturalW, PAGE_H / naturalH);
+        sheet.style.width     = (PAGE_W / scale) + 'px';
+        sheet.style.height    = (PAGE_H / scale) + 'px';
+        sheet.style.minHeight = (PAGE_H / scale) + 'px';
+        sheet.style.maxHeight = (PAGE_H / scale) + 'px';
+        sheet.style.padding   = (PAD    / scale) + 'px';
+        sheet.style.zoom      = scale;
+        void sheet.offsetHeight;
+
+        // Boucle de sécurité : si ça déborde encore (arrondis), resserre.
+        while (
+          (sheet.scrollHeight * scale > PAGE_H + 0.5 ||
+           sheet.scrollWidth  * scale > PAGE_W + 0.5) &&
+          guard < 12
+        ) {
+          scale *= 0.97;
+          sheet.style.width     = (PAGE_W / scale) + 'px';
+          sheet.style.height    = (PAGE_H / scale) + 'px';
+          sheet.style.minHeight = (PAGE_H / scale) + 'px';
+          sheet.style.maxHeight = (PAGE_H / scale) + 'px';
+          sheet.style.padding   = (PAD    / scale) + 'px';
+          sheet.style.zoom      = scale;
+          void sheet.offsetHeight;
+          guard++;
+        }
+      }
+
+      // 8. Debug — visible dans DevTools (variable CSS + console).
+      const debugStr =
+        `nat=${Math.round(naturalW)}×${Math.round(naturalH)} ` +
+        `page=${PAGE_W}×${PAGE_H} ` +
+        `scale=${scale.toFixed(3)} guards=${guard} ` +
+        `sheet=${sheet.scrollWidth}×${sheet.scrollHeight} ` +
+        `effective=${Math.round(sheet.scrollWidth*scale)}×${Math.round(sheet.scrollHeight*scale)}`;
+      sheet.style.setProperty('--print-debug', debugStr);
+      // eslint-disable-next-line no-console
+      console.log('[PRINT DEBUG]', debugStr);
+      // eslint-disable-next-line no-console
+      console.log('[PRINT DEBUG] sheet styles:', {
+        width:     sheet.style.width,
+        height:    sheet.style.height,
+        padding:   sheet.style.padding,
+        zoom:      sheet.style.zoom,
+        boxSizing: sheet.style.boxSizing,
+      });
+
+      printSnapshot.prepared = true;
+    }
+
+    function restoreAfterPrint() {
+      if (!printSnapshot.prepared) return;
+
+      // Restaurer attributs HTML des inputs/checkbox/radio.
+      printSnapshot.checkedAttrs.forEach((hadChecked, el) => {
+        if (hadChecked) el.setAttribute('checked', 'checked');
+        else el.removeAttribute('checked');
+      });
+      printSnapshot.valueAttrs.forEach((previousValue, el) => {
+        if (previousValue === null) el.removeAttribute('value');
+        else el.setAttribute('value', previousValue);
+      });
+
+      // Restaurer textareas (text + hauteurs).
+      printSnapshot.textareaText.forEach((previousText, el) => {
+        const liveValue = el.value;
+        el.textContent = previousText;
+        el.value = liveValue;
+        el.style.removeProperty('min-height');
+        el.style.removeProperty('max-height');
+        el.style.removeProperty('overflow');
+      });
+      printSnapshot.textareaHeights.forEach((previousHeight, el) => {
+        el.style.removeProperty('height');
+        if (previousHeight) el.style.height = previousHeight;
+        else autoResizeTextarea(el);
+      });
+
+      // (Le bandeau-image n'est plus modifié en JS — sa hauteur
+      // naturelle est conservée. Rien à restaurer.)
+
+      // Restaurer TOUS les styles inline de la sheet à leurs valeurs
+      // d'avant l'impression (= chaîne vide si rien n'était défini,
+      // ce qui supprime le style inline).
+      SHEET_INLINE_PROPS.forEach(prop => {
+        const prev = printSnapshot.sheetStyle[prop];
+        if (prev) sheet.style[prop] = prev;
+        else      sheet.style.removeProperty(prop.replace(/[A-Z]/g, m => '-' + m.toLowerCase()));
+      });
+      sheet.style.removeProperty('--print-debug');
+
+      // Restaurer zoom écran (scaling-commun.js le recalcule
+      // également via son afterprint, mais on remet la valeur
+      // exacte au cas où il y aurait un délai).
+      if (printSnapshot.htmlZoom !== null) {
+        if (printSnapshot.htmlZoom) {
+          document.documentElement.style.zoom = printSnapshot.htmlZoom;
+        } else {
+          document.documentElement.style.removeProperty('zoom');
+        }
+      }
+
+      resetPrintSnapshot();
+    }
+
+    async function doPrint() {
       saveToStorage();
+      // CRITIQUE : attendre que toutes les images du formulaire soient
+      // entièrement chargées AVANT de mesurer/zoomer. Sinon la mesure
+      // est faussée et la feuille déborde sur une 2e page.
+      await waitForSheetImages();
+      preparePrintLayout();
+      // Deux frames d'attente : laisse le navigateur appliquer le zoom,
+      // recalculer le layout, et re-rasteriser avant l'aperçu.
+      await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
       window.print();
     }
 
-    function getClientName() {
-      const nom = (document.getElementById('nom').value || '').trim();
-      const prenom = (document.getElementById('prenom').value || '').trim();
-      const combined = [prenom, nom].filter(Boolean).join(' ');
-      return combined || 'Client';
-    }
-    function getFileBaseName() {
-      const today = document.getElementById('date').value || new Date().toISOString().slice(0,10);
-      return `Fiche qualification - ${getClientName()} - ${today}`;
+    // ═══════════════════════════════════════════════════════════════
+    // GÉNÉRATION PDF (sans dialogue d'impression)
+    // ───────────────────────────────────────────────────────────────
+    // Utilise html2canvas + jsPDF en mode MANUEL :
+    //   1. html2canvas capture la sheet en image.
+    //   2. jsPDF place cette image sur UNE SEULE page Letter.
+    // On évite volontairement html2pdf parce que son algorithme de
+    // pagebreak peut splitter le rendu en 2 pages.
+    // ═══════════════════════════════════════════════════════════════
+    async function downloadPdf() {
+      // 1. Vérifier que la lib est chargée (CDN).
+      if (
+        typeof window.html2canvas === 'undefined' ||
+        !window.jspdf ||
+        typeof window.jspdf.jsPDF !== 'function'
+      ) {
+        alert('Génération PDF indisponible : la librairie n\'a pas pu être chargée. Vérifiez votre connexion internet.');
+        return;
+      }
+
+      const btn = document.getElementById('btnDownloadPdf');
+      const label = btn ? btn.querySelector('.btn-label') : null;
+      const originalLabel = label ? label.textContent : '';
+
+      try {
+        if (btn) btn.disabled = true;
+        if (label) label.textContent = 'Génération HD…';
+
+        // 2. Préparer la feuille : sauvegarder valeurs, attendre images,
+        //    forcer dimensions 8.5×11 in. Idem que pour window.print().
+        saveToStorage();
+        await waitForSheetImages();
+        preparePrintLayout();
+        await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+
+        // 3. Construire un nom de fichier intelligent :
+        //    Fiche_Accueil_NOM_AAAA-MM-JJ.pdf
+        const today = new Date().toISOString().slice(0, 10);
+        const nameField = document.getElementById('nomFamille');
+        const clientName = (nameField && nameField.value || '').trim().replace(/\s+/g, '_');
+        const filename = clientName
+          ? `Fiche_Accueil_${clientName}_${today}.pdf`
+          : `Fiche_Accueil_${today}.pdf`;
+
+        // 4. Options html2canvas.
+        //
+        // ⚠️ PIÈGE CRITIQUE : `windowWidth` détermine la largeur du
+        //    viewport virtuel utilisée par html2canvas pour évaluer les
+        //    @media queries CSS. Si on met 816 (= la largeur de la sheet),
+        //    les règles `@media screen and (max-width: 900px)` se
+        //    déclenchent et forcent le layout responsive (champs empilés
+        //    verticalement, `.f { flex: 1 1 100% }`). Résultat : le contenu
+        //    capturé fait ~2× la hauteur attendue → split sur 2 pages PDF
+        //    avec la page 1 quasi-vide (offset jsPDF) et le formulaire
+        //    décalé sur la page 2.
+        //
+        // ✅ On met `windowWidth: 1280` (> tous les seuils max-width des
+        //    media queries du projet : 900, 540, 880) pour rendre la sheet
+        //    dans son layout DESKTOP, identique au rendu écran normal.
+        //
+        // ⚠️ On ajoute aussi `width: 816, height: 1056` qui FORCENT les
+        //    dimensions exactes du canvas (= 8.5×11 in à 96 dpi). Avec
+        //    `scale: 4`, le canvas réel devient 3264×4224 px : beaucoup
+        //    plus net pour les petits caractères et les traits fins.
+        //    Ensuite jsPDF place l'image sur UNE page via addImage().
+        const canvasOptions = {
+          scale: 4,                  // résolution HD pour texte/lignes très nets
+          useCORS: true,
+          backgroundColor: '#ffffff',
+          logging: false,
+          width:        816,         // largeur exacte du canvas (8.5in × 96dpi)
+          height:       1056,        // hauteur exacte du canvas (11in × 96dpi)
+          windowWidth:  1280,        // > 900 pour éviter les responsives screen
+          windowHeight: 1600,
+        };
+
+        // 5. Debug : log les dimensions réelles de la sheet juste avant capture.
+        // eslint-disable-next-line no-console
+        console.log('[PDF DEBUG] sheet avant capture :', {
+          offsetWidth:  sheet.offsetWidth,
+          offsetHeight: sheet.offsetHeight,
+          scrollWidth:  sheet.scrollWidth,
+          scrollHeight: sheet.scrollHeight,
+          inlineWidth:  sheet.style.width,
+          inlineHeight: sheet.style.height,
+          inlineZoom:   sheet.style.zoom,
+        });
+
+        // 6. Capturer la sheet en canvas.
+        const canvas = await window.html2canvas(sheet, canvasOptions);
+
+        // 7. Créer manuellement un PDF Letter portrait d'une seule page
+        //    et y placer l'image pleine page. Cette étape contourne
+        //    totalement l'algorithme de pagebreak de html2pdf.
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({
+          unit: 'in',
+          format: 'letter',
+          orientation: 'portrait',
+          compress: false,
+        });
+        // PNG = sans perte. C'est plus lourd qu'un JPEG, mais les textes,
+        // cases et lignes restent beaucoup plus nets.
+        const imageData = canvas.toDataURL('image/png');
+        pdf.addImage(imageData, 'PNG', 0, 0, 8.5, 11);
+        pdf.save(filename);
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error('Erreur lors de la génération PDF :', err);
+        alert('Une erreur est survenue lors de la génération du PDF. Veuillez réessayer.');
+      } finally {
+        // 8. Toujours restaurer les styles d'écran, même en cas d'erreur.
+        restoreAfterPrint();
+        if (label) label.textContent = originalLabel;
+        if (btn) btn.disabled = false;
+      }
     }
 
-    function labelFor(el) {
-      // Cherche un <label for="id"> propre, sinon fallback
-      if (el.id) {
-        const lbl = document.querySelector(`label[for="${CSS.escape(el.id)}"]`);
-        if (lbl) return lbl.textContent.replace('*','').replace(':','').trim();
-      }
-      const sib = el.previousElementSibling;
-      if (sib && sib.tagName === 'LABEL') return sib.textContent.replace('*','').replace(':','').trim();
-      return el.name;
-    }
+    // Le listener `beforeprint` couvre aussi le cas Ctrl+P natif
+    // (qui ne passe pas par doPrint). preparePrintLayout est
+    // idempotent grâce au flag `printSnapshot.prepared`.
+    // Note : on ne peut pas await dans beforeprint (le dialogue
+    // d'impression bloque), mais à ce stade les images ont eu le
+    // temps de se charger depuis l'ouverture de la page.
+    window.addEventListener('beforeprint', preparePrintLayout);
+    window.addEventListener('afterprint', restoreAfterPrint);
 
     function clearMissingMarks() {
       sheet.querySelectorAll('.field-missing').forEach(el => el.classList.remove('field-missing'));
     }
 
-    function warnIfMissing() {
-      clearMissingMarks();
-      const missing = [];
-      const missingEls = [];
-      form.querySelectorAll('[data-required]').forEach(el => {
-        if (!el.value || !el.value.trim()) {
-          missing.push(labelFor(el));
-          missingEls.push(el);
-        }
-      });
-      if (missing.length) {
-        missingEls.forEach(el => el.classList.add('field-missing'));
-        const first = missingEls[0];
-        if (first && first.scrollIntoView) {
-          first.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-        return confirm(`Attention, certains champs essentiels sont vides :\n\n• ${missing.join('\n• ')}\n\nContinuer quand même ?`);
-      }
-      return true;
-    }
-
-    // Sauvegarde state pour cleanup propre après export
-    const exportSnapshot = { textareaHeights: new Map(), prevValueAttr: new Map(), prevChecked: new Map() };
-
-    // Avant export PDF : copie .value (propriété JS) en attribut HTML pour que html2canvas voie
-    // + agrandit les textareas pour montrer tout le contenu
-    function prepareSheetForExport() {
-      exportSnapshot.textareaHeights.clear();
-      exportSnapshot.prevValueAttr.clear();
-      exportSnapshot.prevChecked.clear();
-
-      sheet.querySelectorAll('input, textarea').forEach(el => {
-        if (el.type === 'checkbox' || el.type === 'radio') {
-          exportSnapshot.prevChecked.set(el, el.hasAttribute('checked'));
-          if (el.checked) el.setAttribute('checked', 'checked');
-          else el.removeAttribute('checked');
-        } else if (el.tagName === 'TEXTAREA') {
-          exportSnapshot.textareaHeights.set(el, el.style.height);
-          el.textContent = el.value;
-          el.style.height = 'auto';
-          el.style.height = (el.scrollHeight + 4) + 'px';
-        } else {
-          exportSnapshot.prevValueAttr.set(el, el.getAttribute('value'));
-          el.setAttribute('value', el.value);
-        }
-      });
-    }
-
-    // ═══ AJUSTEMENT 1 PAGE ═══
-    // Mesure la hauteur réelle de la fiche et applique un facteur d'échelle
-    // dynamique pour qu'elle tienne strictement sur une page Lettre (8.5 × 11 in).
-    //
-    // IMPORTANT : on utilise transform: scale() au lieu de zoom car :
-    //   - zoom n'est pas standard CSS
-    //   - Chrome ignore zoom lors de l'impression (bug observé en 2024-2026)
-    //   - transform: scale() est universellement supporté pour l'impression
-    //
-    // SETPROPERTY 'important' : nécessaire car le CSS print contient des
-    // règles !important sur width — sans setProperty, l'override JS est
-    // ignoré et la sheet reste à 8.14in (au lieu de s'élargir avant scale).
-    function fitSheetToOnePage() {
-      // Reset complet avant mesure (utilise removeProperty pour bypasser !important)
-      sheet.style.removeProperty('transform');
-      sheet.style.removeProperty('transform-origin');
-      sheet.style.removeProperty('width');
-      sheet.style.removeProperty('height');
-      sheet.style.removeProperty('max-width');
-      void sheet.offsetHeight; // force reflow
-
-      // Cible : 10.40 in × 96 dpi ≈ 998 px
-      // Zone imprimable = 10.64 in → on garde 0.24 in (~23 px) de marge
-      // de sécurité pour absorber les arrondis pixel de Chrome.
-      const TARGET_H = 10.40 * 96;
-      const actualH = sheet.scrollHeight;
-
-      // On force toujours un léger scale (même si le contenu paraît tenir)
-      // pour éviter les cas limites où Chrome pagine sur 1 px de débordement.
-      const rawRatio = TARGET_H / actualH;
-      const z = Math.min(rawRatio * 0.99, 0.99); // jamais > 0.99 = toujours un peu compressé
-      const scale = z.toFixed(4);
-      sheet.style.setProperty('transform', `scale(${scale})`, 'important');
-      sheet.style.setProperty('transform-origin', 'top left', 'important');
-      sheet.style.setProperty('width', (100 / z).toFixed(2) + '%', 'important');
-      sheet.style.setProperty('max-width', 'none', 'important');
-      sheet.style.setProperty('height', (TARGET_H / z) + 'px', 'important');
-    }
-    function clearFitSheet() {
-      sheet.style.removeProperty('transform');
-      sheet.style.removeProperty('transform-origin');
-      sheet.style.removeProperty('width');
-      sheet.style.removeProperty('max-width');
-      sheet.style.removeProperty('height');
-    }
-
-    // CRUCIAL : restaure le DOM pour que form.reset() fonctionne correctement après
-    function cleanupAfterExport() {
-      exportSnapshot.prevChecked.forEach((wasChecked, el) => {
-        if (wasChecked) el.setAttribute('checked', 'checked');
-        else el.removeAttribute('checked');
-      });
-      exportSnapshot.prevValueAttr.forEach((prev, el) => {
-        if (prev === null) el.removeAttribute('value');
-        else el.setAttribute('value', prev);
-      });
-      exportSnapshot.textareaHeights.forEach((prevHeight, el) => {
-        el.style.height = prevHeight || '';
-        if (!prevHeight) autoResizeTextarea(el);
-      });
-      // Vide les textContent ajoutés (sinon ils restent dans le HTML statique)
-      sheet.querySelectorAll('textarea').forEach(el => {
-        const liveValue = el.value;
-        el.textContent = '';
-        el.value = liveValue;
-      });
-      exportSnapshot.textareaHeights.clear();
-      exportSnapshot.prevValueAttr.clear();
-      exportSnapshot.prevChecked.clear();
-    }
-
-    function setButtonBusy(btn, busy) {
-      if (!btn) return;
-      btn.setAttribute('aria-busy', busy ? 'true' : 'false');
-      const label = btn.querySelector('.btn-label');
-      if (label) label.textContent = busy ? 'En cours…' : 'Télécharger';
-    }
-
-    let isGenerating = false;
-    function doDownload() {
-      if (isGenerating) return;
-      if (!warnIfMissing()) return;
-      saveToStorage();
-      prepareSheetForExport();
-      const filename = getFileBaseName() + '.pdf';
-      const btn = document.getElementById('btnDownload');
-      setButtonBusy(btn, true);
-      isGenerating = true;
-      sheet.classList.add('compact');
-      showToast('Génération du PDF en cours…');
-      const opts = {
-        margin: 0,
-        filename,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: {
-          scale: 2,
-          useCORS: true,
-          allowTaint: false,
-          logging: false,
-          windowWidth: 816,
-          backgroundColor: '#ffffff',
-          // Garantit que le scaling dynamique appliqué au .sheet soit visible
-          // dans le clone capturé par html2canvas (sinon il peut être ignoré)
-          onclone: (doc) => {
-            const tf = sheet.style.getPropertyValue('transform');
-            const w = sheet.style.getPropertyValue('width');
-            const h = sheet.style.getPropertyValue('height');
-            const mw = sheet.style.getPropertyValue('max-width');
-            if (tf) {
-              const cloned = doc.getElementById('qualifForm');
-              if (cloned) {
-                cloned.style.setProperty('transform', tf, 'important');
-                cloned.style.setProperty('transform-origin', 'top left', 'important');
-                if (w) cloned.style.setProperty('width', w, 'important');
-                if (h) cloned.style.setProperty('height', h, 'important');
-                if (mw) cloned.style.setProperty('max-width', mw, 'important');
-              }
-            }
-          }
-        },
-        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait', compress: true },
-        pagebreak: { mode: ['avoid-all'] }
-      };
-      return new Promise(r => requestAnimationFrame(() => {
-          fitSheetToOnePage();
-          requestAnimationFrame(() => r());
-        }))
-        .then(() => html2pdf().set(opts).from(sheet).save())
-        .then(() => showToast('PDF téléchargé ✓', 'success'))
-        .catch(err => { console.error(err); showToast('Erreur lors de la génération du PDF', 'error'); })
-        .finally(() => {
-          clearFitSheet();
-          sheet.classList.remove('compact');
-          cleanupAfterExport();
-          isGenerating = false;
-          setButtonBusy(btn, false);
-        });
-    }
-
     function doReset() {
       if (!confirm('Réinitialiser la fiche ?\n\nToutes les informations saisies seront effacées (le nom du conseiller est conservé).')) return;
       const conseiller = document.getElementById('conseiller').value;
-      cleanupAfterExport();
+      restoreAfterPrint();
       form.reset();
       document.getElementById('conseiller').value = conseiller;
       clearMissingMarks();
@@ -1389,8 +1740,8 @@
       document.addEventListener('keydown', (e) => {
         if (!(e.ctrlKey || e.metaKey)) return;
         const k = e.key.toLowerCase();
-        if (k === 'p') { e.preventDefault(); doPrint(); }
-        else if (k === 's') { e.preventDefault(); doDownload(); }
+        if (k === 'p') { e.preventDefault(); requestPrint(); }
+        else if (k === 's') { e.preventDefault(); downloadPdf(); }
         else if (k === 'n') { e.preventDefault(); doReset(); }
       });
     }

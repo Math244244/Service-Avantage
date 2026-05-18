@@ -8,7 +8,7 @@
 .cpi-page {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
 }
 
 /* ═══════ Bandeau d'en-tête (compact pour gagner de la hauteur) ═══════ */
@@ -34,13 +34,13 @@
   background: var(--bg-card);
   border: 1px solid var(--border-clair);
   border-radius: var(--radius-lg);
-  padding: 16px 20px;
+  padding: 14px 18px;
   box-shadow: var(--ombre-sm);
 }
 
 /* En-tête compact : badge + titre + sous-titre sur la même ligne */
 .cpi-carte-entete {
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -50,7 +50,7 @@
   align-items: baseline;
   flex-wrap: wrap;
   gap: 10px;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .cpi-carte-entete h2 {
@@ -81,6 +81,103 @@
   letter-spacing: 0.4px;
   text-transform: uppercase;
   flex-shrink: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   ÉTAPE 1 — Sélecteur de MODE de saisie du capital
+   ─────────────────────────────────────────────────────────────────
+   Deux modes mutuellement exclusifs :
+   - « Détaillé » : prix de vente + protections + accessoires → taxes
+     automatiquement calculées (mode complet, par défaut).
+   - « Rapide »   : on saisit directement le total financé (taxes
+     déjà incluses), pour faire une simulation rapide « 45 000 $
+     à 8,99 %, ça donne quoi ? ».
+   ═══════════════════════════════════════════════════════════════ */
+.cpi-mode-switch {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  padding: 4px;
+  margin-bottom: 10px;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+}
+
+.cpi-mode-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  padding: 8px 12px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  transition: background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+  min-width: 0;
+}
+
+.cpi-mode-btn:hover:not(.cpi-mode-btn-actif) {
+  background: rgba(255, 255, 255, 0.75);
+  border-color: rgba(200, 16, 46, 0.18);
+}
+
+.cpi-mode-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(200, 16, 46, 0.22);
+}
+
+.cpi-mode-btn-actif {
+  background: #fff;
+  border-color: rgba(200, 16, 46, 0.32);
+  box-shadow: 0 10px 22px -16px rgba(200, 16, 46, 0.65);
+}
+
+.cpi-mode-btn-titre {
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  color: var(--texte-secondaire);
+}
+
+.cpi-mode-btn-actif .cpi-mode-btn-titre {
+  color: var(--rouge-principal);
+}
+
+.cpi-mode-btn-aide {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--texte-tertiaire);
+  letter-spacing: 0.2px;
+}
+
+.cpi-mode-btn-actif .cpi-mode-btn-aide {
+  color: var(--texte-secondaire);
+}
+
+/* En mode RAPIDE on n'a qu'une saisie + une bulle « capital amorti » :
+   on les laisse occuper toute la largeur pour bien mettre en valeur
+   le chiffre saisi. */
+.cpi-bulles-rapide {
+  grid-template-columns: 1fr;
+}
+
+.cpi-bulles-rapide .cpi-bulle-principale {
+  grid-column: 1 / -1;
+}
+
+.cpi-bulles-rapide .cpi-bulle-taxes {
+  grid-column: 1 / -1;
+}
+
+/* Mention informative (au lieu du « + taxes » coloré orange) :
+   en mode rapide on rappelle que le montant inclut déjà les taxes. */
+.cpi-bulle-mention-info {
+  background: rgba(200, 16, 46, 0.08) !important;
+  color: var(--rouge-principal) !important;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -517,7 +614,41 @@
 .cpi-resultats {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
+}
+
+.cpi-notice-terme {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: -2px 0 10px;
+  padding: 7px 11px;
+  background: linear-gradient(90deg, #fff7ed 0%, #fff 78%);
+  border: 1px solid rgba(234, 88, 12, 0.18);
+  border-left: 4px solid #ea580c;
+  border-radius: var(--radius-sm);
+  color: #7c2d12;
+  font-size: 11.5px;
+  line-height: 1.25;
+}
+
+.cpi-notice-terme-icone {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: #ea580c;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 900;
+  flex-shrink: 0;
+}
+
+.cpi-notice-terme strong {
+  color: #9a3412;
+  font-weight: 900;
 }
 
 /* Badge « Taxes du Québec incluses » dans l'en-tête de la carte résultats. */
@@ -544,7 +675,7 @@
 .cpi-termes-cartes {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
+  gap: 8px;
   animation: cpiFadeSlide 0.28s ease;
 }
 
@@ -558,10 +689,10 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   text-align: center;
-  gap: 2px;
-  padding: 14px 10px;
+  gap: 3px;
+  padding: 0 10px 10px;
   background: linear-gradient(135deg, var(--rouge-degrade-debut) 0%, var(--rouge-degrade-fin) 100%);
   color: #fff;
   border: 2px solid transparent;
@@ -572,7 +703,7 @@
   overflow: hidden;
   transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
   box-shadow: 0 5px 14px -4px rgba(200, 16, 46, 0.36);
-  min-height: 132px;
+  min-height: 124px;
 }
 
 /* Effet brillance subtle en haut-droite — donne un côté premium */
@@ -625,16 +756,46 @@
   z-index: 1;
 }
 
+.cpi-terme-card-head {
+  width: calc(100% + 20px);
+  margin: 0 -10px 6px;
+  padding: 7px 8px 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  background:
+    linear-gradient(90deg, rgba(15, 23, 42, 0.74), rgba(15, 23, 42, 0.52)),
+    rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.12);
+  position: relative;
+  z-index: 1;
+}
+
 .cpi-terme-card-label {
-  font-size: 11px;
+  font-size: 15px;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.8px;
-  color: rgba(255, 255, 255, 0.88);
+  letter-spacing: 0.5px;
+  color: #fff;
+  line-height: 1;
+}
+
+.cpi-terme-card-comparer {
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 8px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.55px;
 }
 
 .cpi-terme-card-montant {
-  font-size: 24px;
+  font-size: 23px;
   font-weight: 900;
   color: #fff;
   line-height: 1.05;
@@ -654,11 +815,11 @@
   font-size: 9.5px;
   font-weight: 600;
   color: rgba(255, 255, 255, 0.7);
-  margin-top: 2px;
+  margin-top: 0;
 }
 
 .cpi-terme-card-taxes {
-  margin-top: 4px;
+  margin-top: 3px;
   padding: 2px 8px;
   font-size: 8.5px;
   font-weight: 800;
@@ -1028,8 +1189,12 @@
     gap: 8px;
   }
   .cpi-terme-card {
-    padding: 12px 8px;
-    min-height: 120px;
+    padding: 0 8px 10px;
+    min-height: 122px;
+  }
+  .cpi-terme-card-head {
+    width: calc(100% + 16px);
+    margin: 0 -8px 5px;
   }
   .cpi-terme-card-montant {
     font-size: 22px;
@@ -1068,15 +1233,24 @@
     gap: 6px;
   }
   .cpi-terme-card {
-    padding: 10px 6px;
-    min-height: 108px;
+    padding: 0 6px 9px;
+    min-height: 112px;
     gap: 1px;
+  }
+  .cpi-terme-card-head {
+    width: calc(100% + 12px);
+    margin: 0 -6px 5px;
+    padding: 6px 6px 5px;
+    gap: 5px;
   }
   .cpi-terme-card-montant {
     font-size: 18px;
   }
   .cpi-terme-card-label {
-    font-size: 10px;
+    font-size: 13px;
+  }
+  .cpi-terme-card-comparer {
+    display: none;
   }
 }
 
@@ -1102,7 +1276,7 @@
     gap: 6px;
   }
   .cpi-terme-card {
-    min-height: 100px;
+    min-height: 108px;
   }
   .cpi-resultat-grille {
     grid-template-columns: 1fr 1fr;
@@ -1118,7 +1292,7 @@
     justify-content: center;
   }
   .cpi-bandeau img {
-    max-height: 80px;
+    max-height: none;
   }
 }
 
@@ -1172,4 +1346,1126 @@
   .cpi-tableau-wrap { max-height: none !important; overflow: visible !important; }
   .cpi-tableau thead { position: static !important; }
   .cpi-tableau tbody tr { page-break-inside: avoid; }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   REFONTE TABLEAU DE BORD — pleine page, premium, orientée vente
+   ═══════════════════════════════════════════════════════════════ */
+.cpi-page {
+  min-height: calc(100vh - var(--header-height) - 56px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cpi-bandeau,
+.cpi-resume-barre {
+  flex: 0 0 auto;
+}
+
+.cpi-dashboard {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.cpi-bandeau {
+  width: 100%;
+  height: clamp(96px, 11vh, 132px);
+  border-radius: 18px;
+  overflow: hidden;
+  background: #0f172a;
+  box-shadow: 0 18px 38px -28px rgba(17, 24, 39, 0.7);
+  line-height: 0;
+  isolation: isolate;
+}
+
+.cpi-bandeau img {
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+  image-rendering: -webkit-optimize-contrast;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.cpi-resume-barre {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+  padding: 10px 14px;
+  background: #fff;
+  border: 1px solid rgba(229, 231, 235, 0.92);
+  border-radius: 16px;
+  box-shadow: 0 14px 30px -28px rgba(17, 24, 39, 0.65);
+}
+
+.cpi-resume-stats {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 14px;
+  min-width: 0;
+}
+
+.cpi-resume-stats span {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 4px 14px;
+  border-left: 1px solid rgba(229, 231, 235, 0.95);
+}
+
+.cpi-resume-stats span:first-child {
+  border-left: none;
+  padding-left: 4px;
+}
+
+.cpi-resume-stats small {
+  color: var(--texte-secondaire);
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.55px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cpi-resume-stats strong {
+  margin-top: 3px;
+  color: #111827;
+  font-size: clamp(16px, 1.3vw, 22px);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cpi-resume-stats-fort {
+  color: var(--rouge-principal) !important;
+}
+
+.cpi-resume-reset {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 16px;
+  background: #fff;
+  color: var(--texte-principal);
+  border: 1.5px solid #e5e7eb;
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 12.5px;
+  font-weight: 900;
+  letter-spacing: 0.2px;
+  cursor: pointer;
+  transition: var(--transition);
+  white-space: nowrap;
+}
+
+.cpi-resume-reset:hover {
+  border-color: var(--rouge-principal);
+  color: var(--rouge-principal);
+  transform: translateY(-1px);
+  box-shadow: 0 12px 20px -16px rgba(200, 16, 46, 0.6);
+}
+
+.cpi-resume-reset:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(200, 16, 46, 0.22);
+}
+
+.cpi-resume-reset svg {
+  flex-shrink: 0;
+}
+
+.cpi-dashboard {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(330px, 0.78fr) minmax(620px, 1.7fr);
+  gap: 12px;
+}
+
+.cpi-colonne-saisie,
+.cpi-zone-decision {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cpi-zone-decision {
+  min-height: 0;
+}
+
+.cpi-colonne-saisie > .cpi-carte,
+.cpi-zone-decision > .cpi-carte {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.cpi-carte {
+  border: 1px solid rgba(229, 231, 235, 0.92);
+  border-radius: 18px;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 18px 38px -34px rgba(17, 24, 39, 0.65);
+}
+
+.cpi-carte-entete {
+  margin-bottom: 10px;
+  gap: 5px;
+}
+
+.cpi-entete-compact {
+  align-items: center;
+  gap: 8px;
+}
+
+.cpi-carte-entete h2 {
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+.cpi-soustitre {
+  margin-left: 0;
+  color: var(--texte-tertiaire);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.cpi-etape {
+  padding: 4px 9px;
+  background: rgba(200, 16, 46, 0.09);
+  color: var(--rouge-principal);
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.cpi-carte-saisie {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.cpi-bulles {
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.cpi-bulle {
+  gap: 5px;
+  padding: 9px 10px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  min-width: 0;
+}
+
+.cpi-bulle-principale {
+  grid-column: 1 / -1;
+  background: linear-gradient(135deg, #fff, #fff5f6);
+  border-color: rgba(200, 16, 46, 0.2);
+}
+
+.cpi-bulle-input-wrap {
+  border-radius: 10px;
+  padding: 1px 9px;
+  min-width: 0;
+}
+
+.cpi-bulle-input {
+  padding: 5px 0;
+  font-size: 14px;
+  min-width: 0;
+  width: 100%;
+}
+
+.cpi-bulle-label,
+.cpi-param-label {
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+}
+
+.cpi-bulle-calcule {
+  background: #fff;
+  border-color: rgba(229, 231, 235, 0.95);
+}
+
+.cpi-bulle-taxes {
+  grid-column: 1 / -1;
+  background: linear-gradient(135deg, rgba(200, 16, 46, 0.08), #fff 72%);
+  border-color: rgba(200, 16, 46, 0.18);
+}
+
+.cpi-bulle-valeur {
+  font-size: 14px;
+}
+
+.cpi-bulle-valeur-grand {
+  font-size: clamp(20px, 1.8vw, 28px);
+  color: var(--rouge-principal);
+}
+
+.cpi-bulle-mention {
+  background: rgba(200, 16, 46, 0.08);
+  color: var(--rouge-principal);
+}
+
+.cpi-carte-parametres {
+  flex: 0 0 auto;
+}
+
+.cpi-parametres {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.cpi-param-bloc {
+  gap: 6px;
+}
+
+.cpi-taux-wrap {
+  border-radius: 14px;
+  padding: 1px 11px;
+}
+
+.cpi-taux-input {
+  padding: 7px 0;
+  font-size: 18px;
+}
+
+.cpi-freq-grille {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 7px;
+}
+
+.cpi-freq-btn,
+.cpi-freq-grille-horizontale .cpi-freq-btn {
+  min-height: 42px;
+  padding: 8px 10px;
+  border-radius: 13px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 2px;
+  box-shadow: none;
+}
+
+.cpi-freq-titre {
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.cpi-freq-mention {
+  font-size: 8px;
+}
+
+.cpi-freq-actif {
+  background: linear-gradient(135deg, var(--rouge-principal), var(--rouge-tres-fonce));
+  box-shadow: 0 12px 22px -16px rgba(200, 16, 46, 0.85);
+}
+
+.cpi-carte-conseil {
+  padding: 12px 14px;
+  background:
+    linear-gradient(135deg, rgba(17, 24, 39, 0.96), rgba(35, 8, 15, 0.94)),
+    radial-gradient(circle at top right, rgba(200, 16, 46, 0.4), transparent 48%);
+  color: #fff;
+  border-color: transparent;
+}
+
+.cpi-conseil-label {
+  display: inline-flex;
+  margin-bottom: 5px;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.55px;
+  text-transform: uppercase;
+}
+
+.cpi-carte-conseil p {
+  color: #fff;
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.cpi-carte-resultats {
+  flex: 1 1 auto;
+  min-width: 0;
+  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 22px;
+  background:
+    linear-gradient(135deg, #fff 0%, #fff 58%, rgba(254, 242, 242, 0.72) 100%);
+  border-color: rgba(200, 16, 46, 0.14);
+}
+
+.cpi-resultats {
+  min-height: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cpi-resultat-badge-taxes {
+  margin-left: auto;
+  padding: 4px 10px;
+  background: #111827;
+  box-shadow: none;
+  font-size: 9px;
+}
+
+.cpi-recommandation {
+  display: grid;
+  grid-template-columns: minmax(260px, 1.05fr) minmax(360px, 1fr);
+  gap: 12px;
+  padding: 14px;
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at top right, rgba(255, 255, 255, 0.24), transparent 36%),
+    linear-gradient(135deg, var(--rouge-principal), #8b0000 86%);
+  color: #fff;
+  box-shadow: 0 20px 42px -28px rgba(200, 16, 46, 0.92);
+}
+
+.cpi-reco-contenu {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 12px;
+  align-items: center;
+}
+
+.cpi-reco-badge {
+  grid-row: span 2;
+  align-self: start;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.45px;
+  text-transform: uppercase;
+}
+
+.cpi-reco-label {
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.45px;
+}
+
+.cpi-recommandation h3 {
+  color: #fff;
+  font-size: 24px;
+  font-weight: 950;
+  line-height: 1;
+}
+
+.cpi-recommandation strong {
+  grid-column: 1 / -1;
+  margin-top: 2px;
+  color: #fff;
+  font-size: clamp(34px, 3.6vw, 56px);
+  font-weight: 950;
+  letter-spacing: -0.055em;
+  line-height: 0.94;
+  font-variant-numeric: tabular-nums;
+}
+
+.cpi-recommandation small {
+  grid-column: 1 / -1;
+  color: rgba(255, 255, 255, 0.74);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.cpi-reco-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.cpi-reco-stats .cpi-stat {
+  background: rgba(255, 255, 255, 0.13);
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+.cpi-reco-stats .cpi-stat-titre,
+.cpi-reco-stats .cpi-stat-mention {
+  color: rgba(255, 255, 255, 0.68);
+}
+
+.cpi-reco-stats .cpi-stat-valeur {
+  color: #fff;
+}
+
+.cpi-notice-terme {
+  margin: 0;
+  padding: 7px 10px;
+  border-radius: 12px;
+  background: #fffbeb;
+  border: 1px solid rgba(245, 158, 11, 0.24);
+  border-left: 4px solid #f59e0b;
+  font-size: 11px;
+}
+
+.cpi-termes-cartes {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.cpi-terme-card {
+  min-height: 88px;
+  padding: 9px 10px 10px;
+  align-items: flex-start;
+  gap: 2px;
+  text-align: left;
+  background: #fff;
+  color: var(--texte-principal);
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  box-shadow: 0 12px 22px -22px rgba(17, 24, 39, 0.55);
+  overflow: visible;
+}
+
+.cpi-terme-card::after {
+  display: none;
+}
+
+.cpi-terme-card:not(.cpi-terme-card-disabled):hover {
+  transform: translateY(-2px);
+  border-color: rgba(200, 16, 46, 0.34);
+  box-shadow: 0 16px 28px -24px rgba(200, 16, 46, 0.8);
+}
+
+.cpi-terme-card-active {
+  background:
+    radial-gradient(circle at top right, rgba(255, 255, 255, 0.2), transparent 44%),
+    linear-gradient(135deg, var(--rouge-principal), var(--rouge-tres-fonce));
+  color: #fff;
+  border-color: transparent;
+  transform: translateY(-2px);
+  box-shadow: 0 18px 34px -25px rgba(200, 16, 46, 0.9);
+}
+
+.cpi-terme-card-info-ouvert {
+  border-color: rgba(200, 16, 46, 0.55);
+}
+
+.cpi-terme-card-head {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  justify-content: space-between;
+  gap: 8px;
+  background: transparent;
+  border-bottom: 0;
+  box-shadow: none;
+}
+
+.cpi-terme-card-label {
+  color: inherit;
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.cpi-terme-card-comparer {
+  background: rgba(200, 16, 46, 0.08);
+  border-color: rgba(200, 16, 46, 0.14);
+  color: var(--rouge-principal);
+  font-size: 7.5px;
+}
+
+.cpi-terme-card-active .cpi-terme-card-comparer {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+.cpi-terme-card-montant {
+  margin-top: 5px;
+  color: inherit;
+  font-size: clamp(18px, 1.6vw, 24px);
+  font-weight: 950;
+  letter-spacing: -0.04em;
+}
+
+.cpi-terme-card-freq {
+  color: var(--texte-secondaire);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.cpi-terme-card-active .cpi-terme-card-freq,
+.cpi-terme-card-active .cpi-terme-card-meta {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.cpi-terme-card-meta {
+  color: var(--texte-tertiaire);
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.cpi-terme-card-taxes {
+  display: none;
+}
+
+.cpi-terme-card-info-btn {
+  right: 8px;
+  bottom: 8px;
+  padding: 3px 7px;
+  background: #f9fafb;
+  color: var(--texte-secondaire);
+  border-color: #e5e7eb;
+  opacity: 1;
+  font-size: 8px;
+}
+
+.cpi-terme-card-active .cpi-terme-card-info-btn {
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.cpi-terme-card-info-btn.est-ouvert {
+  background: #111827;
+  color: #fff;
+  border-color: #111827;
+}
+
+.cpi-terme-detail {
+  padding: 10px 12px;
+  border-radius: 15px;
+  background: #f9fafb;
+  border: 1px solid rgba(229, 231, 235, 0.95);
+  gap: 8px;
+}
+
+.cpi-terme-detail-grille {
+  grid-template-columns: repeat(4, 1fr);
+  gap: 7px;
+}
+
+.cpi-stat {
+  padding: 8px 9px;
+  border-radius: 12px;
+}
+
+.cpi-stat-titre {
+  font-size: 8.5px;
+}
+
+.cpi-stat-valeur {
+  font-size: 13px;
+}
+
+.cpi-stat-mention {
+  font-size: 9px;
+}
+
+.cpi-actions {
+  margin-top: auto;
+  justify-content: flex-end;
+  gap: 7px;
+}
+
+.cpi-btn {
+  border-radius: 12px;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.cpi-btn-primaire {
+  background: linear-gradient(135deg, var(--rouge-principal), var(--rouge-tres-fonce));
+}
+
+.cpi-carte-amortissement {
+  flex: 0 1 44%;
+  min-height: 190px;
+  display: flex;
+  flex-direction: column;
+  animation: cpiFadeSlide 0.22s ease;
+}
+
+.cpi-tableau-wrap {
+  flex: 1;
+  min-height: 0;
+  max-height: none;
+  overflow-y: auto;
+  border-radius: 14px;
+}
+
+.cpi-tableau th {
+  padding: 8px 10px;
+  font-size: 10px;
+  background: #111827;
+}
+
+.cpi-tableau td {
+  padding: 7px 10px;
+  font-size: 12px;
+}
+
+.cpi-tableau tfoot td {
+  padding: 8px 10px;
+  font-size: 12px;
+}
+
+@media (max-width: 1320px) {
+  .cpi-page {
+    min-height: calc(100vh - var(--header-height) - 56px);
+  }
+
+  .cpi-dashboard {
+    grid-template-columns: 340px minmax(0, 1fr);
+  }
+
+  .cpi-recommandation {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .cpi-reco-stats {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .cpi-terme-card {
+    min-height: 100px;
+  }
+
+  .cpi-resume-stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .cpi-resume-stats span:nth-child(5) {
+    display: none;
+  }
+}
+
+@media (max-width: 1100px) {
+  .cpi-page {
+    min-height: 0;
+  }
+
+  .cpi-dashboard {
+    grid-template-columns: 1fr;
+  }
+
+  .cpi-resume-barre {
+    flex-wrap: wrap;
+  }
+
+  .cpi-resume-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .cpi-resume-stats span:nth-child(4),
+  .cpi-resume-stats span:nth-child(5) {
+    display: none;
+  }
+
+  .cpi-colonne-saisie,
+  .cpi-zone-decision {
+    overflow: visible;
+  }
+
+  .cpi-bulles {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .cpi-termes-cartes {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .cpi-carte-amortissement {
+    min-height: 360px;
+  }
+}
+
+@media (max-width: 760px) {
+  .cpi-bulles,
+  .cpi-freq-grille,
+  .cpi-reco-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .cpi-resume-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .cpi-resume-stats span {
+    border-left: none;
+    padding-left: 0;
+  }
+
+  .cpi-termes-cartes {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .cpi-terme-detail-grille {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .cpi-actions {
+    flex-direction: column;
+  }
+
+  .cpi-btn {
+    justify-content: center;
+  }
+
+  .cpi-resume-reset {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media print {
+  .cpi-page {
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    display: flex !important;
+  }
+
+  .cpi-resume-barre,
+  .cpi-resume-stats,
+  .cpi-dashboard,
+  .cpi-recommandation {
+    display: block !important;
+  }
+
+  .cpi-resume-stats,
+  .cpi-reco-stats,
+  .cpi-termes-cartes,
+  .cpi-terme-detail-grille {
+    display: grid !important;
+  }
+
+  .cpi-resume-reset,
+  .cpi-carte-conseil {
+    display: none !important;
+  }
+}
+
+/* Ajustement UX : moins de vide, champs plus évidents, résultats plus lisibles. */
+.cpi-dashboard {
+  grid-template-columns: minmax(320px, 0.85fr) minmax(0, 1.65fr);
+  gap: 14px;
+}
+
+.cpi-colonne-saisie,
+.cpi-zone-decision {
+  gap: 14px;
+}
+
+.cpi-colonne-saisie {
+  justify-content: start;
+}
+
+.cpi-carte {
+  padding: 18px;
+}
+
+.cpi-carte-saisie {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.cpi-carte-saisie .cpi-bulles {
+  align-content: start;
+}
+
+.cpi-carte-entete h2 {
+  font-size: 18px;
+}
+
+.cpi-soustitre {
+  font-size: 12px;
+}
+
+.cpi-etape {
+  font-size: 10px;
+  padding: 5px 10px;
+}
+
+.cpi-bulles {
+  gap: 12px;
+}
+
+.cpi-bulle {
+  padding: 14px;
+  gap: 8px;
+}
+
+.cpi-bulle-label,
+.cpi-param-label {
+  font-size: 10.5px;
+}
+
+.cpi-bulle-input-wrap {
+  min-height: 48px;
+  padding: 3px 13px;
+  border-width: 1.5px;
+}
+
+.cpi-bulle-input {
+  font-size: 18px;
+  padding: 9px 0;
+}
+
+.cpi-bulle-devise {
+  font-size: 17px;
+}
+
+.cpi-bulle-valeur {
+  font-size: 17px;
+}
+
+.cpi-bulle-valeur-grand {
+  font-size: clamp(28px, 2.3vw, 38px);
+}
+
+.cpi-carte-parametres {
+  flex: 0 0 auto;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+}
+
+.cpi-carte-parametres .cpi-parametres {
+  align-content: start;
+}
+
+.cpi-parametres {
+  gap: 14px;
+}
+
+.cpi-taux-wrap {
+  min-height: 52px;
+  padding: 3px 14px;
+  border-width: 1.5px;
+}
+
+.cpi-taux-input {
+  font-size: 22px;
+  padding: 10px 0;
+}
+
+.cpi-taux-suffix {
+  font-size: 13px;
+}
+
+.cpi-freq-grille {
+  gap: 10px;
+}
+
+.cpi-freq-btn,
+.cpi-freq-grille-horizontale .cpi-freq-btn {
+  min-height: 56px;
+  padding: 10px 12px;
+}
+
+.cpi-freq-titre {
+  font-size: 14px;
+}
+
+.cpi-freq-mention {
+  font-size: 9px;
+}
+
+.cpi-carte-conseil {
+  padding: 14px 16px;
+}
+
+.cpi-carte-conseil p {
+  font-size: 13px;
+}
+
+
+.cpi-resultats {
+  gap: 18px;
+}
+
+.cpi-recommandation {
+  grid-template-columns: minmax(280px, 1.05fr) minmax(360px, 0.95fr);
+  padding: 22px 24px;
+  gap: 22px;
+  flex: 0 0 auto;
+}
+
+.cpi-reco-badge {
+  font-size: 10px;
+  padding: 6px 11px;
+}
+
+.cpi-reco-label {
+  font-size: 12px;
+}
+
+.cpi-recommandation h3 {
+  font-size: 30px;
+}
+
+.cpi-recommandation strong {
+  font-size: clamp(46px, 4.6vw, 74px);
+}
+
+.cpi-recommandation small {
+  font-size: 14px;
+}
+
+.cpi-reco-stats {
+  gap: 10px;
+}
+
+.cpi-stat {
+  padding: 12px;
+}
+
+.cpi-stat-titre {
+  font-size: 9.5px;
+}
+
+.cpi-stat-valeur {
+  font-size: 16px;
+}
+
+.cpi-stat-mention {
+  font-size: 10px;
+}
+
+.cpi-notice-terme {
+  padding: 9px 12px;
+  font-size: 12px;
+}
+
+.cpi-termes-cartes {
+  flex: 1 1 auto;
+  gap: 14px;
+  align-content: stretch;
+  grid-auto-rows: 1fr;
+}
+
+.cpi-terme-card {
+  min-height: 132px;
+  height: 100%;
+  padding: 14px 15px 40px;
+  justify-content: flex-start;
+  gap: 3px;
+}
+
+.cpi-terme-card-head {
+  margin-bottom: 8px;
+}
+
+.cpi-terme-card-montant {
+  margin-top: 0;
+  line-height: 1.05;
+}
+
+.cpi-terme-card-freq {
+  margin-top: 1px;
+}
+
+.cpi-terme-card-meta {
+  margin-top: 6px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(17, 24, 39, 0.06);
+  color: var(--texte-secondaire);
+  font-weight: 800;
+  font-size: 9.5px;
+  letter-spacing: 0.2px;
+  align-self: flex-start;
+}
+
+.cpi-terme-card-active .cpi-terme-card-meta {
+  background: rgba(255, 255, 255, 0.18);
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.cpi-terme-card-label {
+  font-size: 14px;
+}
+
+.cpi-terme-card-comparer {
+  font-size: 8.5px;
+  padding: 3px 7px;
+}
+
+.cpi-terme-card-montant {
+  margin-top: 8px;
+  font-size: clamp(24px, 2.05vw, 34px);
+}
+
+.cpi-terme-card-freq {
+  font-size: 11px;
+}
+
+.cpi-terme-card-meta {
+  font-size: 10px;
+}
+
+.cpi-terme-card-info-btn {
+  bottom: 10px;
+  right: 10px;
+  padding: 4px 8px;
+  font-size: 8.5px;
+}
+
+.cpi-actions {
+  margin-top: auto;
+  padding-top: 6px;
+}
+
+.cpi-btn {
+  padding: 10px 15px;
+  font-size: 12.5px;
+}
+
+@media (min-width: 1101px) {
+  .cpi-carte-resultats:not(:has(+ .cpi-carte-amortissement)) {
+    flex: 0 0 auto;
+  }
+}
+
+@media (max-width: 1320px) {
+  .cpi-dashboard {
+    grid-template-columns: 360px minmax(0, 1fr);
+  }
+
+  .cpi-recommandation {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .cpi-terme-card {
+    min-height: 110px;
+  }
 }

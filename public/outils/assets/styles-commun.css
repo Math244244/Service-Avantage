@@ -466,14 +466,20 @@ input[type="radio"]:focus-visible {
 }
 
 /* ═══════════════ RESPONSIVE ═══════════════ */
-@media (max-width: 900px) {
+/* IMPORTANT : on cible STRICTEMENT `screen` pour que ces règles
+   responsives ne s'appliquent JAMAIS à l'impression. À l'impression
+   sur Letter portrait, le viewport mesure ~768 px (8.5in − marges),
+   donc < 900 px. Sans le qualificatif `screen`, ces règles
+   déclencheraient à tort le mode mobile (sheet à 100%, layout en
+   colonne, etc.) et casseraient toute la mise en page imprimée. */
+@media screen and (max-width: 900px) {
   body { padding: 12px 8px 50px; }
   .sheet { width: 100%; }
   .toolbar-header { flex-direction: column; align-items: stretch; gap: 8px; }
   .toolbar-actions { flex-wrap: wrap; }
   .toolbar-actions .btn { flex: 1 1 calc(50% - 4px); min-width: 130px; }
 }
-@media (max-width: 540px) {
+@media screen and (max-width: 540px) {
   .toolbar-actions .btn { flex: 1 1 100%; }
 }
 
@@ -508,6 +514,6 @@ input[type="radio"]:focus-visible {
   }
 }
 
-@media (max-width: 900px) {
+@media screen and (max-width: 900px) {
   .sheet-banner img { max-height: 90px; }
 }

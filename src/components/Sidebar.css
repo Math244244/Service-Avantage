@@ -26,12 +26,12 @@
   border-radius: var(--radius-md);
   background: linear-gradient(135deg, var(--rouge-degrade-debut), var(--rouge-degrade-fin));
   color: #fff;
-  font-weight: 700;
-  font-size: 16px;
+  font-weight: 800;
+  font-size: 15px;
   display: flex;
   align-items: center;
   justify-content: center;
-  letter-spacing: -0.5px;
+  letter-spacing: -1px;
   box-shadow: 0 4px 10px rgba(200, 16, 46, 0.28);
   flex-shrink: 0;
 }

@@ -12,7 +12,7 @@ const ICONE = (
 function FormulaireTransfertFI() {
   return (
     <OutilFrame
-      titre="Formulaire Transfert F&I"
+      titre="Fiche Transfert FNI"
       sousTitre="Transfert vers le directeur financier — Avantage Plus"
       url="/outils/formulaire-transfert-fni.html"
       couleur="violet"

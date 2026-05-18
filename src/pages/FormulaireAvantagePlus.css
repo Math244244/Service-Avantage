@@ -1,0 +1,186 @@
+.form-ap-page {
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+}
+
+.form-ap-hero,
+.form-ap-section {
+  background: var(--bg-card);
+  border: 1px solid var(--border-clair);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--ombre-sm);
+}
+
+.form-ap-hero {
+  padding: 34px 38px;
+  background:
+    radial-gradient(circle at top right, rgba(200, 16, 46, 0.14), transparent 34%),
+    linear-gradient(135deg, #ffffff 0%, #fff5f5 100%);
+}
+
+.form-ap-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  color: var(--rouge-principal);
+  background: var(--rouge-ultraclair);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+}
+
+.form-ap-hero h1 {
+  margin-top: 16px;
+  font-size: 34px;
+  font-weight: 850;
+  color: var(--texte-principal);
+  letter-spacing: -0.03em;
+}
+
+.form-ap-hero p {
+  margin-top: 10px;
+  max-width: 760px;
+  color: var(--texte-secondaire);
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+.form-ap-section {
+  padding: 28px 32px;
+}
+
+.form-ap-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 18px;
+  margin-bottom: 22px;
+}
+
+.form-ap-section-header h2 {
+  font-size: 22px;
+  font-weight: 850;
+  color: var(--texte-principal);
+}
+
+.form-ap-section-header p {
+  margin-top: 5px;
+  color: var(--texte-tertiaire);
+  font-size: 14px;
+}
+
+.form-ap-section-header > span {
+  color: var(--rouge-principal);
+  background: var(--rouge-ultraclair);
+  border-radius: 999px;
+  padding: 6px 13px;
+  font-size: 13px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.form-ap-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(240px, 360px));
+  justify-content: center;
+  gap: 18px;
+}
+
+.form-ap-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 250px;
+  padding: 24px;
+  overflow: hidden;
+  color: var(--texte-principal);
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+}
+
+.form-ap-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--card-accent);
+}
+
+.form-ap-card:hover {
+  transform: translateY(-3px);
+  border-color: transparent;
+  box-shadow: var(--ombre-lg);
+}
+
+.form-ap-bleu { --card-accent: linear-gradient(90deg, var(--bleu-degrade-debut), var(--bleu-degrade-fin)); }
+.form-ap-violet { --card-accent: linear-gradient(90deg, var(--violet-degrade-debut), var(--violet-degrade-fin)); }
+.form-ap-rouge { --card-accent: linear-gradient(90deg, var(--rouge-degrade-debut), var(--rouge-degrade-fin)); }
+.form-ap-orange { --card-accent: linear-gradient(90deg, var(--orange-degrade-debut), var(--orange-degrade-fin)); }
+.form-ap-vert { --card-accent: linear-gradient(90deg, var(--vert-degrade-debut), var(--vert-degrade-fin)); }
+
+.form-ap-card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  margin-bottom: 18px;
+  color: #fff;
+  background: var(--card-accent);
+  border-radius: var(--radius-md);
+}
+
+.form-ap-card-title {
+  font-size: 18px;
+  font-weight: 850;
+  line-height: 1.25;
+}
+
+.form-ap-card-description {
+  margin-top: 10px;
+  color: var(--texte-secondaire);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.form-ap-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: auto;
+  padding-top: 24px;
+  color: var(--texte-tertiaire);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.form-ap-card-footer strong {
+  color: var(--rouge-principal);
+  font-size: 13px;
+  font-weight: 850;
+}
+
+@media (max-width: 900px) {
+  .form-ap-hero,
+  .form-ap-section {
+    padding: 22px;
+  }
+
+  .form-ap-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 620px) {
+  .form-ap-section-header {
+    flex-direction: column;
+  }
+}

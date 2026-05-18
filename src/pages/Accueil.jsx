@@ -35,7 +35,7 @@ const outils = [
   },
   {
     to: "/formulaire-accueil-client",
-    titre: "Formulaire Accueil Client",
+    titre: "Fiche Accueil Client",
     description:
       "Recueillez efficacement les informations de vos clients lors de leur arrivée en concession.",
     couleur: "bleu",
@@ -50,7 +50,7 @@ const outils = [
   },
   {
     to: "/formulaire-transfert-fi",
-    titre: "Formulaire Transfert F&I",
+    titre: "Fiche Transfert FNI",
     description:
       "Transférez les dossiers vers le département Financement & Assurance en toute simplicité.",
     couleur: "violet",
@@ -75,6 +75,37 @@ const outils = [
         <path d="M5 9v11a1 1 0 001 1h12a1 1 0 001-1V9" />
         <path d="M3 9a3 3 0 006 0 3 3 0 006 0 3 3 0 006 0" />
         <line x1="9" y1="14" x2="15" y2="14" />
+      </svg>
+    ),
+  },
+  {
+    to: "/formulaire-avantage-plus",
+    titre: "Formulaire Avantage Plus",
+    description:
+      "Accédez aux formulaires Avantage Plus depuis des cartes centrales prêtes à ouvrir, remplir ou imprimer.",
+    couleur: "bleu",
+    icone: (
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+        <polyline points="14 2 14 8 20 8" />
+        <path d="M9 12l2 2 4-4" />
+        <line x1="8" y1="18" x2="16" y2="18" />
+      </svg>
+    ),
+  },
+  {
+    to: "/pdf-garanties",
+    titre: "PDF des garanties",
+    description:
+      "Accédez aux dépliants de garanties par catégorie : automobile, loisir, VR, tracteur, camion lourd et hasard routier.",
+    couleur: "rouge",
+    icone: (
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+        <polyline points="14 2 14 8 20 8" />
+        <path d="M8 13h1.5a1.5 1.5 0 010 3H8v-3z" />
+        <path d="M13 16v-3h1a1.5 1.5 0 010 3h-1z" />
+        <path d="M17 16v-3h2" />
       </svg>
     ),
   },

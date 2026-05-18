@@ -12,11 +12,11 @@ const titreParRoute = {
     sousTitre: "Calcul de paiements automobiles",
   },
   "/formulaire-accueil-client": {
-    titre: "Formulaire Accueil Client",
+    titre: "Fiche Accueil Client",
     sousTitre: "Saisie client",
   },
   "/formulaire-transfert-fi": {
-    titre: "Formulaire Transfert F&I",
+    titre: "Fiche Transfert FNI",
     sousTitre: "Transfert de dossier",
   },
   "/texte-personnalise-marketplace": {

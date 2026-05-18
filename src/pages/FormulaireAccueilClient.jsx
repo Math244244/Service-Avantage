@@ -12,7 +12,7 @@ const ICONE = (
 function FormulaireAccueilClient() {
   return (
     <OutilFrame
-      titre="Formulaire Accueil Client"
+      titre="Fiche Accueil Client"
       sousTitre="Fiche de qualification client — Avantage Plus"
       url="/outils/formulaire-accueil-client.html"
       couleur="bleu"

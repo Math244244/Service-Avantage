@@ -14,20 +14,22 @@ const MODELES = [
     couleur: "vert",
     template: `Bonjour 👋
 
-🌟 **Validez si vous êtes éligible à nos meilleures offres de financement :** faites votre **préqualification** en quelques clics, **sans impact sur votre crédit** et sans engagement — un parcours simple pour découvrir à l'avance ce à quoi vous avez droit.
-
 Oui, le véhicule est disponible chez **{NOM_CONCESSIONNAIRE}** 🚗
 
 Quand seriez-vous disponible pour venir le voir?
 
-Préqualification gratuite ici 👇
+🌟 Préqualification gratuite
+
+Validez si vous êtes éligible à nos meilleures offres de financement.
+
+👉 Cliquez ici :
 {URL}
 
 ✅ Sans impact sur votre crédit
-✅ Réponse en temps réel 24h / 7 jours
-✅ Aucune obligation après la préqualification
+✅ Réponse en temps réel
+✅ Aucune obligation
 
-📩 Une fois la préqualification terminée, je pourrai prendre votre dossier en main rapidement.`,
+📩 Avisez-moi quand c'est fait, j'accélère votre dossier.`,
   },
   {
     id: "preapprobation",
@@ -36,20 +38,22 @@ Préqualification gratuite ici 👇
     couleur: "vert",
     template: `Bonjour 👋
 
-🌟 **Validez si vous êtes éligible à nos meilleures offres de financement :** obtenez une **préapprobation** rapide en ligne et découvrez à l'avance le paiement qui vous convient — sans surprise, sans pression, et 100 % adapté à votre réalité.
-
 Oui, le véhicule est disponible chez **{NOM_CONCESSIONNAIRE}** 🚗
 
 Quand seriez-vous disponible pour venir le voir?
 
-Préapprobation rapide en ligne ici 👇
+🌟 Préapprobation rapide en ligne
+
+Validez si vous êtes éligible à nos meilleures offres de financement.
+
+👉 Cliquez ici :
 {URL}
 
 ✅ Rapide et sans frais
 ✅ Avec approbation
 ✅ Simple à compléter
 
-📩 Une fois la demande terminée, je pourrai prendre votre dossier en main rapidement.`,
+📩 Avisez-moi quand c'est fait, j'accélère votre dossier.`,
   },
   {
     id: "rappel",
@@ -58,20 +62,22 @@ Préapprobation rapide en ligne ici 👇
     couleur: "vert",
     template: `Bonjour 👋
 
-🌟 **Validez si vous êtes éligible à nos meilleures offres de financement :** faites une **demande de renseignements** et un conseiller vous accompagne pour bâtir la solution qui vous ressemble — à votre rythme, sans engagement, et avec toutes les réponses à vos questions.
-
 Oui, le véhicule est disponible chez **{NOM_CONCESSIONNAIRE}** 🚗
 
 Quand seriez-vous disponible pour venir le voir?
 
-Vous pouvez aussi faire une **demande de renseignements** ici 👇
+🌟 Demande de renseignements
+
+Validez si vous êtes éligible à nos meilleures offres de financement.
+
+👉 Cliquez ici :
 {URL}
 
 ✅ Rapide et sans frais
 ✅ Simple à compléter
-✅ Un conseiller pourra vous rappeler rapidement
+✅ Suivi personnalisé
 
-📩 Une fois la demande envoyée, je pourrai prendre votre dossier en main rapidement.`,
+📩 Avisez-moi quand c'est fait, j'accélère votre dossier.`,
   },
 ];
 
