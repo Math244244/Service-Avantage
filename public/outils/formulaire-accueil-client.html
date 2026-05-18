@@ -7,19 +7,13 @@
 
   <link rel="stylesheet" href="assets/styles-commun.css">
 
-  <!-- Génération PDF côté navigateur :
-       - html2canvas capture la fiche en image.
-       - jsPDF place l'image sur une seule page Letter.
-       On charge les deux librairies directement (plutôt que le bundle
-       html2pdf) pour éviter l'algorithme de pagebreak automatique. -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
   <style>
     /* ═══ STYLES SPÉCIFIQUES À LA FICHE DE QUALIFICATION ═══ */
     .sheet {
       padding: 0;
       min-height: 10.6in;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: auto;
     }
 
     /* En-tête */
@@ -65,7 +59,7 @@
       flex: 1;
       display: flex;
       flex-direction: column;
-      padding: 8px 0.32in 8px 0.32in;
+      padding: 6px 0.32in 6px 0.32in;
     }
 
     /* Meta row */
@@ -74,9 +68,9 @@
       justify-content: space-between;
       align-items: center;
       gap: 14px;
-      padding: 0 0 6px 0;
-      border-bottom: 1px solid #eeeeee;
-      margin-bottom: 8px;
+      padding: 0 0 5px 0;
+      border-bottom: 1px solid #dedede;
+      margin-bottom: 6px;
       flex-wrap: wrap;
     }
     .meta-left, .meta-right {
@@ -104,9 +98,9 @@
 
     /* Sections */
     .section {
-      margin-bottom: 8px;
-      padding: 8px 12px 9px;
-      border: 1px solid var(--line);
+      margin-bottom: 6px;
+      padding: 7px 12px 8px;
+      border: 1px solid #d0d0d0;
       border-left: 4px solid var(--red);
       border-radius: 5px;
       background: #fff;
@@ -117,9 +111,9 @@
       display: flex;
       align-items: center;
       gap: 7px;
-      margin-bottom: 7px;
-      padding-bottom: 4px;
-      border-bottom: 1px solid #ececec;
+      margin-bottom: 6px;
+      padding-bottom: 3px;
+      border-bottom: 1px solid #dedede;
     }
     .stitle .num {
       background: var(--red);
@@ -127,11 +121,15 @@
       width: 18px;
       height: 18px;
       border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: inline-grid;
+      place-items: center;
       font-size: 10px;
       font-weight: 900;
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+      padding: 0 0 2px 0;
+      box-sizing: border-box;
       flex-shrink: 0;
     }
     .stitle .ico { width: 13px; height: 13px; fill: var(--red); opacity: 0.9; flex-shrink: 0; }
@@ -148,7 +146,7 @@
     .row {
       display: flex;
       gap: 10px;
-      margin-bottom: 6px;
+      margin-bottom: 5px;
       align-items: flex-end;
     }
     .row:last-child { margin-bottom: 0; }
@@ -162,7 +160,7 @@
       font-size: 8px;
       font-weight: 800;
       text-transform: uppercase;
-      color: #3c3c3c;
+      color: #222;
       letter-spacing: 0.35px;
       margin-bottom: 3px;
     }
@@ -175,12 +173,22 @@
       align-items: center;
       gap: 5px;
       font-size: 9.5px;
-      color: #222;
-      font-weight: 600;
+      color: #151515;
+      font-weight: 650;
       line-height: 1.15;
       white-space: nowrap;
       cursor: pointer;
       user-select: none;
+    }
+    .ri .label-text {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 2.5px;
+      white-space: nowrap;
+    }
+    .ri .label-text .word {
+      display: inline-block;
+      white-space: nowrap;
     }
     .ri:hover { color: var(--red-dark); }
     .cr {
@@ -203,7 +211,7 @@
       margin-bottom: 6px;
     }
     .choice-card {
-      border: 1px solid #e6b2b8;
+      border: 1px solid #df9da5;
       border-radius: 6px;
       background: linear-gradient(180deg, #fff, #fff8f8);
       padding: 7px 10px;
@@ -228,7 +236,7 @@
       gap: 5px;
       min-height: 24px;
       padding: 3px 8px;
-      border: 1px solid #f0c5ca;
+      border: 1px solid #e7aeb5;
       border-radius: 999px;
       background: #fff;
       color: #1f2937;
@@ -250,7 +258,7 @@
 
     /* Bloc échange */
     .ebox {
-      border: 1px solid #d4d4d4;
+      border: 1px solid #c9c9c9;
       border-left: 3px solid var(--red);
       border-radius: 5px;
       padding: 7px 10px;
@@ -269,23 +277,23 @@
     /* Notes */
     .notes-section { flex: 1; display: flex; flex-direction: column; }
     .nbox { flex: 1; min-height: 60px; }
-    .nbox textarea { width: 100%; min-height: 60px; }
+    .nbox textarea { width: 100%; min-height: 54px; }
 
     .result-row, .followup {
       display: flex;
       align-items: center;
       gap: 10px;
-      margin-top: 5px;
-      padding-top: 5px;
-      border-top: 1px dashed #d6d6d6;
+      margin-top: 4px;
+      padding-top: 4px;
+      border-top: 1px dashed #cfcfcf;
       flex-wrap: wrap;
     }
     .followup input[type="date"] { width: 140px; }
 
     /* Consentement Loi 25 (sans signature) */
     .consent-block {
-      margin-top: 6px;
-      padding: 7px 12px;
+      margin-top: 5px;
+      padding: 6px 12px;
       border: 1px solid #efb4ba;
       border-radius: 6px;
       background: var(--soft);
@@ -294,23 +302,53 @@
       display: flex;
       align-items: flex-start;
       gap: 7px;
-      font-size: 8.5px;
+      font-size: 8.2px;
       color: #333;
-      line-height: 1.35;
+      line-height: 1.45;
     }
     .consent-text label { cursor: pointer; }
+    .consent-copy {
+      display: flex;
+      flex-wrap: wrap;
+      column-gap: 2.5px;
+      row-gap: 0;
+      min-width: 0;
+      max-width: 100%;
+    }
+    .consent-copy span {
+      display: inline-block;
+      white-space: nowrap;
+    }
+    .consent-copy .law { font-style: italic; }
 
     /* Footer */
     .footer {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-top: 6px;
-      padding-top: 4px;
-      border-top: 1px solid #e0e0e0;
+      margin-top: 4px;
+      padding-top: 3px;
+      border-top: 1px solid #d8d8d8;
     }
     .footer-left { font-size: 7px; color: #999; }
     .footer-right { font-size: 7px; color: var(--red); font-weight: 800; }
+
+    /* Netteté PDF/impression : contraste légèrement renforcé pour les
+       petits textes, traits fins et champs capturés en PNG HD. */
+    .sheet input,
+    .sheet textarea,
+    .sheet select {
+      border-color: #9f9f9f;
+      color: #111;
+    }
+    .sheet input[type="checkbox"],
+    .sheet input[type="radio"] {
+      border-color: #a6a6a6;
+    }
+    .sheet .footer-left,
+    .sheet .consent-text {
+      color: #555;
+    }
 
     /* Responsive mobile : RÉSERVÉ à l'écran (screen) — ne doit JAMAIS
        s'appliquer à l'impression. À l'impression sur Letter portrait,
@@ -570,10 +608,6 @@
         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.65 6.35A7.95 7.95 0 0 0 12 4a8 8 0 1 0 7.74 10h-2.08A6 6 0 1 1 12 6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
         <span class="btn-label">Réinitialiser</span>
       </button>
-      <button type="button" class="btn btn-primary" id="btnDownloadPdf" title="Télécharger en PDF — rendu garanti pleine page (Ctrl+S)">
-        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
-        <span class="btn-label">Télécharger PDF</span>
-      </button>
       <button type="button" class="btn btn-secondary" id="btnPrint" title="Imprimer (Ctrl+P)">
         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg>
         <span class="btn-label">Imprimer</span>
@@ -597,10 +631,10 @@
           <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" width="14" height="14">
             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
           </svg>
-          <span>Astuce : utilisez plutôt le bouton <strong>« Télécharger PDF »</strong> pour un rendu garanti pleine page, sans aucun réglage à faire.</span>
+          <span>Astuce : le bouton <strong>« Imprimer »</strong> permet aussi d'enregistrer en PDF en choisissant une destination PDF dans le dialogue d'impression.</span>
         </p>
         <p class="print-modal-intro">
-          Sinon, pour imprimer directement et que la feuille remplisse
+          Pour imprimer ou enregistrer en PDF avec une feuille qui remplit
           <strong>toute la page</strong>, appliquez ces réglages dans
           l'aperçu d'impression Chrome :
         </p>
@@ -907,15 +941,15 @@
           <div class="line"></div>
         </div>
         <div class="cr">
-          <label class="ri"><input type="checkbox" name="source" value="Walk-in" data-track> Walk-in</label>
-          <label class="ri"><input type="checkbox" name="source" value="Site web" data-track> Site web</label>
-          <label class="ri"><input type="checkbox" name="source" value="Réseaux sociaux" data-track> Réseaux sociaux</label>
-          <label class="ri"><input type="checkbox" name="source" value="Référence" data-track> Référence</label>
-          <label class="ri"><input type="checkbox" name="source" value="AutoHebdo / AutoTrader" data-track> AutoHebdo / AutoTrader</label>
-          <label class="ri"><input type="checkbox" name="source" value="Kijiji / Marketplace" data-track> Kijiji / Marketplace</label>
-          <label class="ri"><input type="checkbox" name="source" value="Client de retour" data-track> Client de retour</label>
+          <label class="ri"><input type="checkbox" name="source" value="Walk-in" data-track><span class="label-text">Walk-in</span></label>
+          <label class="ri"><input type="checkbox" name="source" value="Site web" data-track><span class="label-text"><span class="word">Site</span><span class="word">web</span></span></label>
+          <label class="ri"><input type="checkbox" name="source" value="Réseaux sociaux" data-track><span class="label-text"><span class="word">Réseaux</span><span class="word">sociaux</span></span></label>
+          <label class="ri"><input type="checkbox" name="source" value="Référence" data-track><span class="label-text">Référence</span></label>
+          <label class="ri"><input type="checkbox" name="source" value="AutoHebdo / AutoTrader" data-track><span class="label-text"><span class="word">AutoHebdo</span><span class="word">/</span><span class="word">AutoTrader</span></span></label>
+          <label class="ri"><input type="checkbox" name="source" value="Kijiji / Marketplace" data-track><span class="label-text"><span class="word">Kijiji</span><span class="word">/</span><span class="word">Marketplace</span></span></label>
+          <label class="ri"><input type="checkbox" name="source" value="Client de retour" data-track><span class="label-text"><span class="word">Client</span><span class="word">de</span><span class="word">retour</span></span></label>
           <label class="ri" style="gap:6px;">
-            <input type="checkbox" name="source" value="Autre" data-track> Autre :
+            <input type="checkbox" name="source" value="Autre" data-track><span class="label-text">Autre :</span>
             <input type="text" name="source_autre" data-track style="height:18px; width:130px; font-size:9.5px; padding:1px 5px;">
           </label>
         </div>
@@ -947,9 +981,10 @@
       <div class="consent-block">
         <div class="consent-text">
           <input type="checkbox" id="consent" name="consent" value="1" data-track style="margin-top:2px;">
-          <label for="consent">
-            Le client consent à être contacté pour un suivi commercial, conformément à la
-            <i>Loi 25</i> sur la protection des renseignements personnels du Québec.
+          <label for="consent" class="consent-copy">
+            <span>Le</span><span>client</span><span>consent</span><span>à</span><span>être</span><span>contacté</span><span>pour</span><span>un</span><span>suivi</span><span>commercial,</span>
+            <span>conformément</span><span>à</span><span>la</span><span class="law">Loi</span><span class="law">25</span>
+            <span>sur</span><span>la</span><span>protection</span><span>des</span><span>renseignements</span><span>personnels</span><span>du</span><span>Québec.</span>
           </label>
         </div>
       </div>
@@ -1172,7 +1207,6 @@
         });
       });
       document.getElementById('btnPrint').addEventListener('click', requestPrint);
-      document.getElementById('btnDownloadPdf').addEventListener('click', downloadPdf);
       document.getElementById('btnReset').addEventListener('click', doReset);
       attachPrintModalListeners();
     }
@@ -1577,124 +1611,6 @@
       window.print();
     }
 
-    // ═══════════════════════════════════════════════════════════════
-    // GÉNÉRATION PDF (sans dialogue d'impression)
-    // ───────────────────────────────────────────────────────────────
-    // Utilise html2canvas + jsPDF en mode MANUEL :
-    //   1. html2canvas capture la sheet en image.
-    //   2. jsPDF place cette image sur UNE SEULE page Letter.
-    // On évite volontairement html2pdf parce que son algorithme de
-    // pagebreak peut splitter le rendu en 2 pages.
-    // ═══════════════════════════════════════════════════════════════
-    async function downloadPdf() {
-      // 1. Vérifier que la lib est chargée (CDN).
-      if (
-        typeof window.html2canvas === 'undefined' ||
-        !window.jspdf ||
-        typeof window.jspdf.jsPDF !== 'function'
-      ) {
-        alert('Génération PDF indisponible : la librairie n\'a pas pu être chargée. Vérifiez votre connexion internet.');
-        return;
-      }
-
-      const btn = document.getElementById('btnDownloadPdf');
-      const label = btn ? btn.querySelector('.btn-label') : null;
-      const originalLabel = label ? label.textContent : '';
-
-      try {
-        if (btn) btn.disabled = true;
-        if (label) label.textContent = 'Génération HD…';
-
-        // 2. Préparer la feuille : sauvegarder valeurs, attendre images,
-        //    forcer dimensions 8.5×11 in. Idem que pour window.print().
-        saveToStorage();
-        await waitForSheetImages();
-        preparePrintLayout();
-        await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
-
-        // 3. Construire un nom de fichier intelligent :
-        //    Fiche_Accueil_NOM_AAAA-MM-JJ.pdf
-        const today = new Date().toISOString().slice(0, 10);
-        const nameField = document.getElementById('nomFamille');
-        const clientName = (nameField && nameField.value || '').trim().replace(/\s+/g, '_');
-        const filename = clientName
-          ? `Fiche_Accueil_${clientName}_${today}.pdf`
-          : `Fiche_Accueil_${today}.pdf`;
-
-        // 4. Options html2canvas.
-        //
-        // ⚠️ PIÈGE CRITIQUE : `windowWidth` détermine la largeur du
-        //    viewport virtuel utilisée par html2canvas pour évaluer les
-        //    @media queries CSS. Si on met 816 (= la largeur de la sheet),
-        //    les règles `@media screen and (max-width: 900px)` se
-        //    déclenchent et forcent le layout responsive (champs empilés
-        //    verticalement, `.f { flex: 1 1 100% }`). Résultat : le contenu
-        //    capturé fait ~2× la hauteur attendue → split sur 2 pages PDF
-        //    avec la page 1 quasi-vide (offset jsPDF) et le formulaire
-        //    décalé sur la page 2.
-        //
-        // ✅ On met `windowWidth: 1280` (> tous les seuils max-width des
-        //    media queries du projet : 900, 540, 880) pour rendre la sheet
-        //    dans son layout DESKTOP, identique au rendu écran normal.
-        //
-        // ⚠️ On ajoute aussi `width: 816, height: 1056` qui FORCENT les
-        //    dimensions exactes du canvas (= 8.5×11 in à 96 dpi). Avec
-        //    `scale: 4`, le canvas réel devient 3264×4224 px : beaucoup
-        //    plus net pour les petits caractères et les traits fins.
-        //    Ensuite jsPDF place l'image sur UNE page via addImage().
-        const canvasOptions = {
-          scale: 4,                  // résolution HD pour texte/lignes très nets
-          useCORS: true,
-          backgroundColor: '#ffffff',
-          logging: false,
-          width:        816,         // largeur exacte du canvas (8.5in × 96dpi)
-          height:       1056,        // hauteur exacte du canvas (11in × 96dpi)
-          windowWidth:  1280,        // > 900 pour éviter les responsives screen
-          windowHeight: 1600,
-        };
-
-        // 5. Debug : log les dimensions réelles de la sheet juste avant capture.
-        // eslint-disable-next-line no-console
-        console.log('[PDF DEBUG] sheet avant capture :', {
-          offsetWidth:  sheet.offsetWidth,
-          offsetHeight: sheet.offsetHeight,
-          scrollWidth:  sheet.scrollWidth,
-          scrollHeight: sheet.scrollHeight,
-          inlineWidth:  sheet.style.width,
-          inlineHeight: sheet.style.height,
-          inlineZoom:   sheet.style.zoom,
-        });
-
-        // 6. Capturer la sheet en canvas.
-        const canvas = await window.html2canvas(sheet, canvasOptions);
-
-        // 7. Créer manuellement un PDF Letter portrait d'une seule page
-        //    et y placer l'image pleine page. Cette étape contourne
-        //    totalement l'algorithme de pagebreak de html2pdf.
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF({
-          unit: 'in',
-          format: 'letter',
-          orientation: 'portrait',
-          compress: false,
-        });
-        // PNG = sans perte. C'est plus lourd qu'un JPEG, mais les textes,
-        // cases et lignes restent beaucoup plus nets.
-        const imageData = canvas.toDataURL('image/png');
-        pdf.addImage(imageData, 'PNG', 0, 0, 8.5, 11);
-        pdf.save(filename);
-      } catch (err) {
-        // eslint-disable-next-line no-console
-        console.error('Erreur lors de la génération PDF :', err);
-        alert('Une erreur est survenue lors de la génération du PDF. Veuillez réessayer.');
-      } finally {
-        // 8. Toujours restaurer les styles d'écran, même en cas d'erreur.
-        restoreAfterPrint();
-        if (label) label.textContent = originalLabel;
-        if (btn) btn.disabled = false;
-      }
-    }
-
     // Le listener `beforeprint` couvre aussi le cas Ctrl+P natif
     // (qui ne passe pas par doPrint). preparePrintLayout est
     // idempotent grâce au flag `printSnapshot.prepared`.
@@ -1741,7 +1657,6 @@
         if (!(e.ctrlKey || e.metaKey)) return;
         const k = e.key.toLowerCase();
         if (k === 'p') { e.preventDefault(); requestPrint(); }
-        else if (k === 's') { e.preventDefault(); downloadPdf(); }
         else if (k === 'n') { e.preventDefault(); doReset(); }
       });
     }

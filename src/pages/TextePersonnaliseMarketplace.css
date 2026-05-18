@@ -537,18 +537,37 @@
 }
 
 .tpm-carte {
+  position: relative;
   display: flex;
   flex-direction: column;
-  background: var(--bg-page);
-  border: 1px solid var(--border);
+  background:
+    linear-gradient(180deg, rgba(16, 185, 129, 0.035), transparent 28%),
+    var(--bg-page);
+  border: 1.5px solid rgba(16, 185, 129, 0.28);
   border-radius: var(--radius-md);
   overflow: hidden;
   transition: var(--transition);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.85) inset,
+    0 8px 18px -18px rgba(15, 23, 42, 0.45);
+}
+
+.tpm-carte::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 4px;
+  background: linear-gradient(90deg, var(--vert-degrade-debut), var(--vert-degrade-fin));
+  opacity: 0.95;
+  z-index: 1;
 }
 
 .tpm-carte:hover {
-  border-color: var(--border-clair);
-  box-shadow: var(--ombre-md);
+  border-color: rgba(16, 185, 129, 0.5);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.9) inset,
+    0 14px 28px -22px rgba(16, 185, 129, 0.65),
+    var(--ombre-md);
   transform: translateY(-2px);
 }
 
@@ -556,9 +575,10 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 12px;
-  background: #fff;
-  border-bottom: 1px solid var(--border-clair);
+  padding: 12px 12px 10px;
+  background:
+    linear-gradient(180deg, rgba(16, 185, 129, 0.055), #fff 78%);
+  border-bottom: 1px solid rgba(16, 185, 129, 0.16);
 }
 
 .tpm-carte-numero {

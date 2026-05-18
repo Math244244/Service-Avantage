@@ -1,33 +1,27 @@
 import { useState } from "react";
 import "./PDFGaranties.css";
 
-/* Visuels par catégorie / dépliant — placés dans /public/images.
-   Le style général des cartes est inspiré du visuel « Autoshield » :
-   photo immersive, overlay sombre, glow coloré, badge premium. */
+/* Présentation classique : icônes, badges et cartes compactes faciles à scanner. */
 const categories = [
   {
     id: "automobile",
     titre: "Automobile",
     description: "Dépliants de garanties pour véhicules automobiles.",
     accent: "rouge",
-    image: "/images/photo-auto.jpg",
     documents: [
       {
         titre: "Dépliant AT-ATPlus",
         statut: "PDF disponible",
-        image: "/images/photo-auto.jpg",
         url: "/Dépliant PDF/Dépliant-Auto-AT-ATplus.pdf",
       },
       {
         titre: "Dépliant AVE",
         statut: "PDF disponible",
-        image: "/images/Tesla-Roadster.png",
         url: "/Dépliant PDF/Dépliant-Auto-AVE.pdf",
       },
       {
         titre: "Dépliant AVEX",
         statut: "PDF disponible",
-        image: "/images/photo-avex.jpg",
         url: "/Dépliant PDF/Dépliant-Auto- AVEX.pdf",
       },
     ],
@@ -37,12 +31,10 @@ const categories = [
     titre: "Loisir",
     description: "Dépliant de garanties pour véhicules de loisir.",
     accent: "orange",
-    image: "/images/photo-loisir.jpg",
     documents: [
       {
         titre: "Dépliant Loisir",
         statut: "PDF disponible",
-        image: "/images/photo-loisir.jpg",
         url: "/Dépliant PDF/Dépliant-Loisir.pdf",
       },
     ],
@@ -52,12 +44,10 @@ const categories = [
     titre: "VR et motorisé",
     description: "Dépliant de garanties pour VR et motorisés.",
     accent: "vert",
-    image: "/images/photo-vr.jpg",
     documents: [
       {
         titre: "Dépliant VR",
         statut: "PDF disponible",
-        image: "/images/photo-vr.jpg",
         url: "/Dépliant PDF/Dépliant VR.pdf",
       },
     ],
@@ -67,12 +57,10 @@ const categories = [
     titre: "Tracteur",
     description: "Dépliant de garanties pour tracteurs et pelles mécaniques.",
     accent: "bleu",
-    image: "/images/photo-atc.jpg",
     documents: [
       {
         titre: "Dépliant Tracteur",
         statut: "PDF disponible",
-        image: "/images/photo-atc.jpg",
         url: "/Dépliant PDF/Dépliant Tracteur-Pelle Mecanique.pdf",
       },
     ],
@@ -82,7 +70,6 @@ const categories = [
     titre: "Camion lourd",
     description: "Emplacement réservé aux garanties de camions lourds.",
     accent: "violet",
-    image: null,
     documents: [],
   },
   {
@@ -90,12 +77,10 @@ const categories = [
     titre: "Hasard routier",
     description: "Dépliant de protection Hasard routier.",
     accent: "rouge",
-    image: "/images/Autoshield.png",
     documents: [
       {
         titre: "Dépliant Hasard routier",
         statut: "PDF disponible",
-        image: "/images/Autoshield.png",
         url: "/Dépliant PDF/Dépliant-Hazard Routhier.pdf",
       },
     ],
@@ -122,6 +107,91 @@ function IconCamionLourd() {
       <circle cx="17.5" cy="18" r="2" />
     </svg>
   );
+}
+
+function IconAuto() {
+  return (
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 13l1.6-4.2A3 3 0 018.4 7h7.2a3 3 0 012.8 1.8L20 13" />
+      <path d="M3 13h18v5a1 1 0 01-1 1h-1.2a2 2 0 01-3.6 0H8.8a2 2 0 01-3.6 0H4a1 1 0 01-1-1v-5z" />
+      <path d="M6.5 13h11" />
+      <circle cx="7" cy="18" r="1.6" />
+      <circle cx="17" cy="18" r="1.6" />
+    </svg>
+  );
+}
+
+function IconMoto() {
+  return (
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="6" cy="17" r="3" />
+      <circle cx="18" cy="17" r="3" />
+      <path d="M9 17h3.2l2.3-5H17" />
+      <path d="M11 12l-2 5" />
+      <path d="M13 9h3l2 3" />
+      <path d="M7.5 10h3.5l2 2" />
+      <path d="M17 9h2" />
+    </svg>
+  );
+}
+
+function IconRoulotte() {
+  return (
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 8a3 3 0 013-3h9a3 3 0 013 3v7H4V8z" />
+      <path d="M19 15h2" />
+      <path d="M7 9h4" />
+      <path d="M14 9h2" />
+      <path d="M8 15v-3h3v3" />
+      <circle cx="14.5" cy="17" r="2" />
+      <path d="M4 15v2h8.5" />
+    </svg>
+  );
+}
+
+function IconTracteur() {
+  return (
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="7" cy="17" r="4" />
+      <circle cx="18" cy="18" r="2.4" />
+      <path d="M10.5 17H15l1.2-5H12l-1.5-4H8" />
+      <path d="M12 8h4.5l1.2 4" />
+      <path d="M4 13h4" />
+      <path d="M16 12h3" />
+      <path d="M7 17h.01" />
+    </svg>
+  );
+}
+
+function IconHasardRoutier() {
+  return (
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 3l7 3v5c0 4.4-2.7 8.4-7 10-4.3-1.6-7-5.6-7-10V6l7-3z" />
+      <path d="M12 7v4l-2 2" />
+      <path d="M12 11l2 2" />
+      <circle cx="12" cy="15.5" r="2.2" />
+      <path d="M8.2 8.8l7.6 7.6" />
+    </svg>
+  );
+}
+
+function iconeCategorie(id) {
+  switch (id) {
+    case "automobile":
+      return <IconAuto />;
+    case "loisir":
+      return <IconMoto />;
+    case "vr-motorise":
+      return <IconRoulotte />;
+    case "tracteur":
+      return <IconTracteur />;
+    case "camion-lourd":
+      return <IconCamionLourd />;
+    case "hasard-routier":
+      return <IconHasardRoutier />;
+    default:
+      return <IconDocument />;
+  }
 }
 
 function PDFGaranties() {
@@ -169,19 +239,9 @@ function PDFGaranties() {
                 aria-pressed={actif}
               >
                 <div className="pdf-card-media" aria-hidden="true">
-                  {categorie.image ? (
-                    <img
-                      src={categorie.image}
-                      alt=""
-                      loading="lazy"
-                      decoding="async"
-                    />
-                  ) : (
-                    <div className="pdf-card-media-fallback">
-                      <IconCamionLourd />
-                    </div>
-                  )}
-                  <span className="pdf-card-media-shade" />
+                  <span className="pdf-card-icon">
+                    {iconeCategorie(categorie.id)}
+                  </span>
                   <span className="pdf-card-badge-count">
                     {nb ? `${nb} PDF${nb > 1 ? "s" : ""}` : "À venir"}
                   </span>
@@ -203,8 +263,8 @@ function PDFGaranties() {
         </div>
       </section>
 
-      {/* DÉPLIANTS — retour au format compact d'origine : mini vignette
-          photo à gauche + titre + statut + badge « Ouvrir ». Ligne unique,
+      {/* DÉPLIANTS — retour au format compact d'origine : icône à gauche,
+          titre + statut + badge « Ouvrir ». Ligne unique,
           gain de hauteur, plus rapide à scanner. */}
       <section className={`pdf-section pdf-${categorieActive.accent}-section`}>
         <div className="pdf-section-header">
@@ -235,16 +295,7 @@ function PDFGaranties() {
                 className={`pdf-document-card pdf-${categorieActive.accent}`}
               >
                 <div className="pdf-document-vignette" aria-hidden="true">
-                  {document.image ? (
-                    <img
-                      src={document.image}
-                      alt=""
-                      loading="lazy"
-                      decoding="async"
-                    />
-                  ) : (
-                    <IconDocument />
-                  )}
+                  <IconDocument />
                 </div>
                 <div className="pdf-document-body">
                   <h3>{document.titre}</h3>

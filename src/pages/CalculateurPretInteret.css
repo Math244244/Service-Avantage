@@ -1297,56 +1297,13 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   IMPRESSION — Page propre, sans menu ni boutons
+   IMPRESSION — règles déplacées en fin de fichier
+   ─────────────────────────────────────────────────────────────────
+   La refonte complète de la mise en page papier vit dans le bloc
+   `@media print` situé tout en bas du fichier (après les overrides
+   du tableau de bord). Conserver une seule source évite les
+   conflits de spécificité observés en v1.
    ═══════════════════════════════════════════════════════════════ */
-@media print {
-  body, .app-layout, .app-main, .app-content { background: #fff !important; }
-  .app-header, .sidebar { display: none !important; }
-  .app-main { margin-left: 0 !important; }
-  .app-content { padding: 0 !important; max-width: 100% !important; }
-
-  .cpi-page { gap: 10px; }
-  .cpi-carte {
-    box-shadow: none !important;
-    border: 1px solid #ccc !important;
-    page-break-inside: avoid;
-  }
-  .cpi-carte-amortissement { page-break-before: auto; }
-  .cpi-actions { display: none !important; }
-
-  /* À l'impression : on cache les boutons Info des cartes et le bouton
-     Fermer du détail. Le panneau de détail, lui, est IMPRIMÉ s'il était
-     ouvert au moment du print → utile pour donner au client une fiche
-     détaillée pour le terme considéré. */
-  .cpi-terme-card-info-btn,
-  .cpi-terme-detail-fermer {
-    display: none !important;
-  }
-
-  /* Garder les couleurs (cartes rouges, fréquence active, tableau, détail). */
-  .cpi-terme-card,
-  .cpi-terme-card-active,
-  .cpi-terme-card-info-ouvert,
-  .cpi-freq-actif,
-  .cpi-tableau th,
-  .cpi-resultat-badge-taxes,
-  .cpi-terme-detail,
-  .cpi-avis-taux {
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-  .cpi-terme-card {
-    box-shadow: none !important;
-  }
-  .cpi-terme-detail {
-    box-shadow: none !important;
-    border-color: #ccc !important;
-  }
-
-  .cpi-tableau-wrap { max-height: none !important; overflow: visible !important; }
-  .cpi-tableau thead { position: static !important; }
-  .cpi-tableau tbody tr { page-break-inside: avoid; }
-}
 
 /* ═══════════════════════════════════════════════════════════════
    REFONTE TABLEAU DE BORD — pleine page, premium, orientée vente
@@ -2145,32 +2102,10 @@
   }
 }
 
-@media print {
-  .cpi-page {
-    height: auto !important;
-    min-height: 0 !important;
-    overflow: visible !important;
-    display: flex !important;
-  }
-
-  .cpi-resume-barre,
-  .cpi-resume-stats,
-  .cpi-dashboard,
-  .cpi-recommandation {
-    display: block !important;
-  }
-
-  .cpi-resume-stats,
-  .cpi-reco-stats,
-  .cpi-termes-cartes,
-  .cpi-terme-detail-grille {
-    display: grid !important;
-  }
-
-  .cpi-resume-reset,
-  .cpi-carte-conseil {
-    display: none !important;
-  }
+/* Éléments réservés à l'impression : invisibles à l'écran, révélés
+   uniquement dans la version papier (en-tête, synthèse, pied de page). */
+.cpi-print-only {
+  display: none !important;
 }
 
 /* Ajustement UX : moins de vide, champs plus évidents, résultats plus lisibles. */
@@ -2367,15 +2302,279 @@
 }
 
 .cpi-termes-cartes {
-  flex: 1 1 auto;
+  flex: 0 0 auto;
   gap: 14px;
-  align-content: stretch;
-  grid-auto-rows: 1fr;
+  align-content: start;
+  grid-auto-rows: minmax(132px, max-content);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CARTES DE TERMES — design ticket avec bandeau header centré
+   Hiérarchie : 1) bandeau "12 mois" centré, 2) prix centré,
+   3) fréquence, 4) pilule profil, 5) bouton Détail discret.
+   ═══════════════════════════════════════════════════════════════ */
+.cpi-terme-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 0 0 36px;
+  gap: 0;
+  background: #fff;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 16px;
+  color: var(--texte-principal);
+  text-align: center;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+  box-shadow: 0 12px 24px -22px rgba(17, 24, 39, 0.55);
+  min-height: 138px;
+  max-height: 172px;
+  height: auto;
+  justify-content: flex-start;
+}
+
+.cpi-terme-card:not(.cpi-terme-card-disabled):hover {
+  transform: translateY(-2px);
+  border-color: rgba(200, 16, 46, 0.32);
+  box-shadow: 0 18px 30px -22px rgba(200, 16, 46, 0.65);
+}
+
+.cpi-terme-card-active {
+  background: #fff;
+  border-color: var(--rouge-principal);
+  box-shadow:
+    0 0 0 2px rgba(200, 16, 46, 0.18),
+    0 18px 32px -22px rgba(200, 16, 46, 0.7);
+  transform: translateY(-2px);
+}
+
+/* ───── Bandeau header (titre centré + badge profil) ───── */
+.cpi-terme-card-bandeau {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 12px;
+  background: #f3f4f6;
+  border-bottom: 1px solid #e5e7eb;
+  color: var(--texte-principal);
+  width: 100%;
+  position: relative;
+}
+
+.cpi-terme-card-titre {
+  font-size: 13.5px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--texte-principal);
+  line-height: 1;
+}
+
+.cpi-terme-card-bandeau .cpi-terme-card-comparer {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  transform: translateY(-50%);
+  padding: 2px 7px;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  background: rgba(17, 24, 39, 0.07);
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  color: var(--texte-secondaire);
+  border-radius: 999px;
+}
+
+.cpi-terme-card-active .cpi-terme-card-bandeau {
+  background: linear-gradient(135deg, var(--rouge-principal), var(--rouge-tres-fonce));
+  border-bottom-color: transparent;
+}
+
+.cpi-terme-card-active .cpi-terme-card-titre {
+  color: #fff;
+}
+
+.cpi-terme-card-active .cpi-terme-card-bandeau .cpi-terme-card-comparer {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.28);
+  color: #fff;
+}
+
+/* ───── Corps centré (prix + freq + meta) ───── */
+.cpi-terme-card-corps {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 10px 12px 6px;
+  min-height: 0;
+}
+
+.cpi-terme-card-corps .cpi-terme-card-montant {
+  margin: 0;
+  font-size: clamp(22px, 1.85vw, 30px);
+  font-weight: 950;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+  color: var(--texte-principal);
+}
+
+.cpi-terme-card-corps .cpi-terme-card-freq {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--texte-secondaire);
+  margin: 0;
+}
+
+.cpi-terme-card-corps .cpi-terme-card-meta {
+  margin: 5px 0 0;
+  align-self: center;
+  padding: 3px 9px;
+  font-size: 9.5px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  color: var(--rouge-principal);
+  background: rgba(200, 16, 46, 0.08);
+  border-radius: 999px;
+  border: 1px solid rgba(200, 16, 46, 0.14);
+}
+
+.cpi-terme-card-active .cpi-terme-card-corps .cpi-terme-card-meta {
+  color: var(--rouge-principal);
+  background: rgba(200, 16, 46, 0.1);
+}
+
+/* ───── Bouton Détail centré-bas, plus discret ───── */
+.cpi-terme-card .cpi-terme-card-info-btn {
+  position: absolute;
+  left: 50%;
+  bottom: 8px;
+  right: auto;
+  transform: translateX(-50%);
+  padding: 3px 14px;
+  background: #f9fafb;
+  color: var(--texte-secondaire);
+  border: 1px solid #e5e7eb;
+  border-radius: 999px;
+  font-size: 8.5px;
+  font-weight: 900;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  opacity: 1;
+}
+
+.cpi-terme-card .cpi-terme-card-info-btn:hover:not(:disabled) {
+  background: #fff;
+  color: var(--rouge-principal);
+  border-color: rgba(200, 16, 46, 0.4);
+  transform: translateX(-50%) translateY(-1px);
+}
+
+.cpi-terme-card .cpi-terme-card-info-btn.est-ouvert {
+  background: var(--rouge-principal);
+  color: #fff;
+  border-color: var(--rouge-principal);
+}
+
+.cpi-terme-card-active .cpi-terme-card-info-btn {
+  background: rgba(200, 16, 46, 0.08);
+  color: var(--rouge-principal);
+  border-color: rgba(200, 16, 46, 0.2);
+}
+
+/* ───── Bouton Réinitialiser en vert sobre ───── */
+.cpi-resume-reset {
+  background: var(--vert-clair);
+  color: #047857;
+  border-color: #6ee7b7;
+}
+
+.cpi-resume-reset:hover {
+  background: #a7f3d0;
+  color: #065f46;
+  border-color: #34d399;
+  transform: translateY(-1px);
+  box-shadow: 0 12px 20px -16px rgba(16, 185, 129, 0.55);
+}
+
+.cpi-resume-reset:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.28);
+}
+
+/* ───── Champ de date de livraison ───── */
+.cpi-date-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #fff;
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  padding: 6px 12px;
+  min-height: 52px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.cpi-date-wrap:focus-within {
+  border-color: var(--rouge-principal);
+  box-shadow: 0 0 0 3px rgba(200, 16, 46, 0.12);
+}
+
+.cpi-date-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--texte-principal);
+  padding: 6px 0;
+  letter-spacing: -0.01em;
+  color-scheme: light;
+}
+
+.cpi-date-input::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.15s ease;
+}
+
+.cpi-date-input::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+.cpi-date-apercu {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--rouge-principal);
+  background: rgba(200, 16, 46, 0.08);
+  padding: 4px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+  text-transform: capitalize;
+}
+
+/* Colonne « Date » dans le tableau d'amortissement */
+.cpi-tableau .cpi-date-cell {
+  text-align: left;
+  font-weight: 700;
+  color: var(--texte-secondaire);
+  text-transform: capitalize;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .cpi-terme-card {
   min-height: 132px;
-  height: 100%;
+  max-height: 168px;
+  height: auto;
   padding: 14px 15px 40px;
   justify-content: flex-start;
   gap: 3px;
@@ -2467,5 +2666,794 @@
 
   .cpi-terme-card {
     min-height: 110px;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   FIX visuel : badges « POPULAIRE / RECOMMANDÉ / CONFORT… »
+   ─────────────────────────────────────────────────────────────────
+   Retirés du JSX, on neutralise toute règle résiduelle pour éviter
+   un retour involontaire si un autre layer redéfinit la classe.
+   ═══════════════════════════════════════════════════════════════ */
+.cpi-terme-card-comparer {
+  display: none !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   FIX visuel : Tableau d'amortissement ouvert
+   ─────────────────────────────────────────────────────────────────
+   Quand le conseiller clique sur « Tableau d'amortissement », la
+   carte Résultats arrêtait de mesurer sa taille naturelle (héritée
+   d'un `flex: 1 1 auto` + `align-self: stretch` utilisés pour
+   égaliser la hauteur des colonnes quand le tableau est masqué).
+   Résultat : un gros bloc blanc apparaissait entre les cartes de
+   termes et le tableau, masquant le tableau sous le pli.
+
+   Lorsque le tableau est ouvert (classe `--amorti`), on laisse
+   la carte Résultats prendre sa hauteur naturelle, on désactive le
+   `margin-top: auto` qui poussait les actions vers le bas, et on
+   borne la hauteur du tableau pour garder un aperçu lisible.
+   ═══════════════════════════════════════════════════════════════ */
+.cpi-zone-decision--amorti .cpi-carte-resultats {
+  flex: 0 0 auto !important;
+  align-self: auto !important;
+  height: auto !important;
+}
+
+.cpi-zone-decision--amorti .cpi-resultats {
+  flex: 0 0 auto !important;
+  min-height: 0 !important;
+}
+
+.cpi-zone-decision--amorti .cpi-actions {
+  margin-top: 12px !important;
+}
+
+.cpi-zone-decision--amorti .cpi-carte-amortissement {
+  flex: 0 0 auto !important;
+  min-height: 320px;
+  max-height: min(70vh, 620px);
+}
+
+.cpi-zone-decision--amorti .cpi-tableau-wrap {
+  max-height: min(60vh, 520px) !important;
+  overflow-y: auto !important;
+}
+
+/* Petite marge pour que l'auto-scroll ne colle pas le tableau sous
+   le bandeau global de l'application. */
+.cpi-carte-amortissement {
+  scroll-margin-top: 16px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DENSITÉ — Tout tient sur une seule vue, sans scroll global
+   ─────────────────────────────────────────────────────────────────
+   Cible : viewports ≥ 1100px (mode bureau). On compresse en hauteur
+   le bandeau, la barre résumé, les paddings de cartes et les champs
+   de saisie pour faire entrer Étape 1 + Étape 2 ET la zone résultat
+   dans une seule hauteur d'écran (calc 100vh − header − marges).
+   Aucune information n'est masquée : on densifie uniquement.
+   ═══════════════════════════════════════════════════════════════ */
+@media screen and (min-width: 1100px) {
+  .cpi-page {
+    min-height: calc(100vh - var(--header-height) - 40px);
+    gap: 8px;
+  }
+
+  /* ── Bandeau visuel plus discret ──────────────────────────── */
+  .cpi-bandeau {
+    height: clamp(70px, 8vh, 92px);
+    border-radius: 14px;
+  }
+
+  /* ── Barre résumé plus compacte ──────────────────────────── */
+  .cpi-resume-barre {
+    padding: 6px 12px;
+    gap: 8px;
+    border-radius: 12px;
+  }
+  .cpi-resume-stats {
+    gap: 8px;
+  }
+  .cpi-resume-stats span {
+    padding: 2px 10px;
+  }
+  .cpi-resume-stats small {
+    font-size: 9px;
+    letter-spacing: 0.4px;
+  }
+  .cpi-resume-stats strong {
+    margin-top: 1px;
+    font-size: clamp(14px, 1.15vw, 19px);
+  }
+  .cpi-resume-reset {
+    padding: 7px 13px;
+    font-size: 11.5px;
+    border-radius: 10px;
+  }
+
+  /* ── Dashboard : gap réduit ──────────────────────────────── */
+  .cpi-dashboard {
+    gap: 10px;
+  }
+  .cpi-colonne-saisie,
+  .cpi-zone-decision {
+    gap: 8px;
+  }
+
+  /* ── Cartes : padding réduit ─────────────────────────────── */
+  .cpi-carte {
+    padding: 12px 14px;
+    border-radius: 14px;
+  }
+
+  /* En-tête de carte : moins d'air vertical. */
+  .cpi-carte-entete {
+    margin-bottom: 6px;
+    gap: 4px;
+  }
+  .cpi-carte-entete h2 {
+    font-size: 16px;
+  }
+  .cpi-soustitre {
+    font-size: 11px;
+  }
+  .cpi-etape {
+    font-size: 9.5px;
+    padding: 3px 8px;
+  }
+
+  /* ── Étape 1 — Bulles montants ───────────────────────────── */
+  .cpi-bulles {
+    gap: 8px;
+  }
+  .cpi-bulle {
+    padding: 9px 12px;
+    gap: 4px;
+  }
+  .cpi-bulle-label,
+  .cpi-param-label {
+    font-size: 10px;
+  }
+  .cpi-bulle-input-wrap {
+    min-height: 40px;
+    padding: 2px 11px;
+  }
+  .cpi-bulle-input {
+    font-size: 15.5px;
+    padding: 6px 0;
+  }
+  .cpi-bulle-devise {
+    font-size: 15px;
+  }
+  .cpi-bulle-valeur {
+    font-size: 15px;
+  }
+  .cpi-bulle-valeur-grand {
+    font-size: clamp(22px, 1.9vw, 30px);
+  }
+
+  /* Tabs Détaillé / Rapide : plus bas. */
+  .cpi-mode-switch {
+    margin-bottom: 6px;
+  }
+  .cpi-mode-btn {
+    padding: 7px 10px;
+  }
+  .cpi-mode-btn-titre {
+    font-size: 12px;
+  }
+  .cpi-mode-btn-aide {
+    font-size: 9.5px;
+  }
+
+  /* ── Étape 2 — Paramètres ────────────────────────────────── */
+  .cpi-carte-parametres {
+    padding: 11px 14px;
+  }
+  .cpi-parametres {
+    gap: 9px;
+  }
+  .cpi-taux-wrap {
+    min-height: 42px;
+    padding: 2px 12px;
+  }
+  .cpi-taux-input {
+    font-size: 18px;
+    padding: 6px 0;
+  }
+  .cpi-taux-suffix {
+    font-size: 12px;
+  }
+  .cpi-freq-grille {
+    gap: 7px;
+  }
+  .cpi-freq-btn,
+  .cpi-freq-grille-horizontale .cpi-freq-btn {
+    min-height: 44px;
+    padding: 7px 10px;
+  }
+  .cpi-freq-titre {
+    font-size: 12.5px;
+  }
+  .cpi-freq-mention {
+    font-size: 9px;
+  }
+
+  /* Date de livraison : compactée mais toujours bien lisible. */
+  .cpi-date-wrap {
+    min-height: 40px;
+    padding: 2px 11px;
+  }
+  .cpi-date-input {
+    font-size: 14.5px;
+    padding: 6px 0;
+  }
+  .cpi-date-apercu {
+    font-size: 12px;
+    padding: 3px 9px;
+  }
+
+  /* ── Zone résultat — moins de respiration vide ───────────── */
+  .cpi-resultats {
+    gap: 10px;
+  }
+  .cpi-recommandation {
+    padding: 14px 16px;
+    gap: 14px;
+  }
+  .cpi-recommandation h3 {
+    font-size: 22px;
+  }
+  .cpi-recommandation strong {
+    font-size: clamp(34px, 3.6vw, 54px);
+  }
+  .cpi-recommandation small {
+    font-size: 12px;
+  }
+  .cpi-reco-stats {
+    gap: 7px;
+  }
+  .cpi-stat {
+    padding: 8px 10px;
+  }
+  .cpi-stat-titre {
+    font-size: 9px;
+  }
+  .cpi-stat-valeur {
+    font-size: 14.5px;
+  }
+  .cpi-stat-mention {
+    font-size: 9.5px;
+  }
+
+  .cpi-notice-terme {
+    padding: 6px 10px;
+    font-size: 11.5px;
+  }
+
+  /* Termes : grille un peu plus serrée pour éviter le débordement. */
+  .cpi-termes-cartes {
+    gap: 9px;
+    grid-auto-rows: minmax(118px, max-content);
+  }
+  .cpi-terme-card {
+    padding: 0 0 28px;
+  }
+
+  /* Actions : moins de hauteur sous le tableau de termes. */
+  .cpi-actions {
+    padding-top: 6px;
+  }
+  .cpi-btn {
+    padding: 8px 14px;
+    font-size: 12px;
+  }
+}
+
+/* Variante très haute densité pour les portables 13" / 1366×768
+   où la marge restante est plus mince — on rogne encore quelques
+   pixels sur les blocs les plus gourmands. */
+@media screen and (min-width: 1100px) and (max-height: 800px) {
+  .cpi-bandeau {
+    height: clamp(58px, 7vh, 78px);
+  }
+  .cpi-recommandation strong {
+    font-size: clamp(30px, 3.2vw, 46px);
+  }
+  .cpi-termes-cartes {
+    grid-auto-rows: minmax(108px, max-content);
+  }
+  .cpi-terme-card-montant {
+    font-size: clamp(18px, 1.6vw, 24px);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   IMPRESSION — Refonte complète
+   ─────────────────────────────────────────────────────────────────
+   Objectifs (cahier des charges client) :
+   1. Aucune information coupée entre deux pages.
+   2. Vrais débuts et fins de page : en-tête de marque + pied légal.
+   3. Espacements généreux mais maîtrisés (papier Letter portrait).
+   4. Tableau d'amortissement sur sa propre page, en-tête répété
+      sur chaque page imprimée pour rester lisible.
+   5. Couleurs préservées (taxes, rouge Avantage Plus, surlignage
+      du terme choisi) pour conserver la valeur perçue.
+   ═══════════════════════════════════════════════════════════════ */
+@media print {
+  /* ── 1. Format de page et marges papier ─────────────────────── */
+  @page {
+    size: Letter portrait;
+    margin: 14mm 12mm 14mm 12mm;
+  }
+  /* Une marge supérieure plus réduite sur la première page : on a déjà
+     l'en-tête imprimable, pas besoin d'un grand blanc en plus. */
+  @page :first {
+    margin-top: 10mm;
+  }
+
+  /* ── 2. Reset du chrome applicatif ──────────────────────────── */
+  html, body {
+    background: #fff !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  .app-layout,
+  .app-main,
+  .app-content {
+    background: #fff !important;
+  }
+  .app-header,
+  .sidebar {
+    display: none !important;
+  }
+  .app-main {
+    margin-left: 0 !important;
+  }
+  .app-content {
+    padding: 0 !important;
+    max-width: 100% !important;
+  }
+
+  /* ── 3. Conserver les couleurs sur tous les éléments ────────── */
+  *,
+  *::before,
+  *::after {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* ── 4. Visibilité écran / papier ──────────────────────────── */
+  .cpi-print-only {
+    display: block !important;
+  }
+  .cpi-no-print,
+  .cpi-resume-reset,
+  .cpi-actions,
+  .cpi-terme-card-info-btn,
+  .cpi-terme-detail-fermer,
+  .cpi-carte-conseil,
+  .cpi-mode-switch {
+    display: none !important;
+  }
+
+  /* ── 5. Structure générale de la page imprimée ─────────────── */
+  .cpi-page {
+    display: block !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    gap: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    font-size: 10pt;
+    color: #111827;
+  }
+
+  /* ── 6. En-tête imprimable (logo + titre + date) ────────────── */
+  .cpi-print-header {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12mm;
+    margin: 0 0 6mm;
+    padding: 0 0 4mm;
+    border-bottom: 2.5pt solid #c8102e;
+  }
+  .cpi-print-header-marque {
+    display: flex;
+    align-items: center;
+    gap: 4mm;
+  }
+  .cpi-print-header-logo {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 14mm;
+    height: 14mm;
+    border-radius: 3mm;
+    background: linear-gradient(135deg, #c8102e, #8b0000);
+    color: #fff;
+    font-weight: 900;
+    font-size: 14pt;
+    letter-spacing: 0.5pt;
+  }
+  .cpi-print-header-titres {
+    display: flex;
+    flex-direction: column;
+    gap: 1mm;
+  }
+  .cpi-print-header-titres strong {
+    font-size: 14pt;
+    color: #111827;
+    font-weight: 800;
+    letter-spacing: 0.2pt;
+  }
+  .cpi-print-header-titres span {
+    font-size: 9.5pt;
+    color: #4b5563;
+    text-transform: uppercase;
+    letter-spacing: 0.5pt;
+  }
+  .cpi-print-header-meta {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    gap: 1mm;
+  }
+  .cpi-print-header-meta-label {
+    font-size: 8pt;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.6pt;
+  }
+  .cpi-print-header-meta strong {
+    font-size: 11pt;
+    color: #111827;
+    font-weight: 700;
+  }
+
+  /* ── 7. Synthèse imprimée (4 chiffres clés) ────────────────── */
+  .cpi-print-synthese {
+    display: block !important;
+    margin: 0 0 6mm;
+    padding: 4mm 5mm 5mm;
+    border: 1pt solid #e5e7eb;
+    border-radius: 3mm;
+    background: linear-gradient(135deg, #fff5f6 0%, #ffffff 70%);
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  .cpi-print-synthese h3 {
+    margin: 0 0 3mm;
+    padding: 0;
+    font-size: 9pt;
+    font-weight: 800;
+    letter-spacing: 1.2pt;
+    text-transform: uppercase;
+    color: #c8102e;
+  }
+  .cpi-print-synthese dl {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4mm;
+    margin: 0;
+    padding: 0;
+  }
+  .cpi-print-synthese dl > div {
+    padding: 0 4mm;
+    border-left: 1pt solid #e5e7eb;
+  }
+  .cpi-print-synthese dl > div:first-child {
+    border-left: none;
+    padding-left: 0;
+  }
+  .cpi-print-synthese dt {
+    display: block;
+    margin: 0 0 1mm;
+    font-size: 8pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5pt;
+    color: #6b7280;
+  }
+  .cpi-print-synthese dd {
+    display: block;
+    margin: 0 0 1mm;
+    padding: 0;
+    font-size: 16pt;
+    font-weight: 800;
+    color: #111827;
+    line-height: 1.1;
+  }
+  .cpi-print-synthese dl > div > span {
+    display: block;
+    font-size: 8.5pt;
+    color: #4b5563;
+    line-height: 1.25;
+  }
+
+  /* ── 8. Dashboard : retour en flux pour l'impression ────────── */
+  .cpi-dashboard {
+    display: block !important;
+  }
+  .cpi-colonne-saisie {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 5mm;
+    margin: 0 0 6mm;
+  }
+  .cpi-zone-decision {
+    display: block !important;
+    gap: 0 !important;
+  }
+
+  /* ── 9. Cartes : padding compact, anti-coupure ──────────────── */
+  .cpi-carte {
+    box-shadow: none !important;
+    border: 1pt solid #d1d5db !important;
+    border-radius: 3mm;
+    padding: 4mm 5mm !important;
+    margin: 0 0 5mm;
+    background: #fff !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+  .cpi-carte-saisie,
+  .cpi-carte-parametres {
+    margin-bottom: 0;
+    height: 100%;
+  }
+  .cpi-carte-resultats {
+    flex: none !important;
+    align-self: auto !important;
+    height: auto !important;
+  }
+  .cpi-resultats {
+    flex: none !important;
+    gap: 4mm !important;
+  }
+
+  .cpi-carte-entete {
+    margin-bottom: 3mm !important;
+    gap: 2mm !important;
+  }
+  .cpi-carte-entete h2 {
+    font-size: 12pt !important;
+    margin: 0 !important;
+  }
+  .cpi-etape {
+    font-size: 7.5pt !important;
+    padding: 1mm 2.5mm !important;
+  }
+  .cpi-soustitre {
+    font-size: 8.5pt !important;
+    color: #4b5563 !important;
+  }
+
+  /* Champs de saisie : valeurs lisibles mais compactes. */
+  .cpi-bulles {
+    gap: 3mm !important;
+  }
+  .cpi-bulle {
+    padding: 3mm 4mm !important;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  .cpi-bulle-input-wrap,
+  .cpi-taux-wrap,
+  .cpi-date-wrap {
+    min-height: 0 !important;
+    padding: 1.5mm 3mm !important;
+  }
+  .cpi-bulle-input,
+  .cpi-taux-input,
+  .cpi-date-input {
+    font-size: 12pt !important;
+    padding: 1mm 0 !important;
+  }
+  .cpi-bulle-valeur,
+  .cpi-bulle-valeur-grand {
+    font-size: 14pt !important;
+  }
+
+  /* Fréquence : afficher les 3 boutons en ligne avec l'actif en rouge. */
+  .cpi-freq-grille,
+  .cpi-freq-grille-horizontale {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 2mm !important;
+  }
+  .cpi-freq-btn {
+    min-height: 0 !important;
+    padding: 2mm 2mm !important;
+    border: 1pt solid #d1d5db !important;
+  }
+  .cpi-freq-titre {
+    font-size: 10pt !important;
+  }
+  .cpi-freq-mention {
+    font-size: 7.5pt !important;
+  }
+
+  /* ── 10. Carte Résultat (recommandation rouge) ──────────────── */
+  .cpi-recommandation {
+    display: grid !important;
+    grid-template-columns: 1.05fr 1fr !important;
+    gap: 4mm !important;
+    padding: 4mm 5mm !important;
+    border-radius: 3mm !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+  .cpi-reco-contenu {
+    display: grid !important;
+    grid-template-columns: auto 1fr !important;
+    gap: 1mm 3mm !important;
+    align-items: center;
+  }
+  .cpi-reco-contenu h3 {
+    font-size: 14pt !important;
+    margin: 0 !important;
+  }
+  .cpi-reco-contenu strong {
+    font-size: 22pt !important;
+    grid-column: 1 / -1;
+    margin-top: 1mm;
+  }
+  .cpi-reco-contenu small {
+    grid-column: 1 / -1;
+    font-size: 9pt !important;
+  }
+  .cpi-reco-stats {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 2mm !important;
+  }
+
+  /* ── 11. Grille des termes : 4 colonnes compactes ──────────── */
+  .cpi-termes-cartes {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    grid-auto-rows: auto !important;
+    gap: 3mm !important;
+    flex: none !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+  .cpi-terme-card {
+    min-height: 0 !important;
+    max-height: none !important;
+    padding: 3mm 2mm !important;
+    border: 1pt solid #e5e7eb !important;
+    border-radius: 2.5mm !important;
+    box-shadow: none !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+  .cpi-terme-card-bandeau {
+    padding: 1.5mm 2mm !important;
+    margin-bottom: 2mm !important;
+  }
+  .cpi-terme-card-titre {
+    font-size: 10pt !important;
+  }
+  .cpi-terme-card-montant {
+    font-size: 14pt !important;
+    margin-top: 1mm !important;
+  }
+  .cpi-terme-card-freq {
+    font-size: 8pt !important;
+  }
+  .cpi-terme-card-meta {
+    font-size: 7.5pt !important;
+    margin-top: 1mm !important;
+  }
+
+  /* ── 12. Détail terme (si ouvert) ─────────────────────────── */
+  .cpi-terme-detail {
+    margin: 4mm 0 0 !important;
+    padding: 3mm 4mm !important;
+    border: 1pt solid #d1d5db !important;
+    border-radius: 2.5mm !important;
+    box-shadow: none !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+  .cpi-terme-detail-grille {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 3mm !important;
+  }
+
+  /* ── 13. Tableau d'amortissement : page dédiée + en-tête répété */
+  .cpi-carte-amortissement {
+    page-break-before: always !important;
+    break-before: page !important;
+    margin-top: 0 !important;
+    min-height: 0 !important;
+    max-height: none !important;
+  }
+  .cpi-tableau-wrap {
+    max-height: none !important;
+    overflow: visible !important;
+    border: none !important;
+    border-radius: 0 !important;
+  }
+  .cpi-tableau {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    font-size: 9pt !important;
+  }
+  .cpi-tableau thead {
+    display: table-header-group !important;
+  }
+  .cpi-tableau tfoot {
+    display: table-footer-group !important;
+  }
+  .cpi-tableau th {
+    background: #111827 !important;
+    color: #fff !important;
+    padding: 2mm 2.5mm !important;
+    font-size: 8pt !important;
+    border: none !important;
+  }
+  .cpi-tableau td {
+    padding: 1.5mm 2.5mm !important;
+    font-size: 9pt !important;
+    border-top: 0.5pt solid #e5e7eb !important;
+  }
+  .cpi-tableau tbody tr {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+  .cpi-tableau tfoot td {
+    background: #fff5f6 !important;
+    border-top: 1.2pt solid #c8102e !important;
+    font-weight: 800 !important;
+  }
+
+  /* ── 14. Pied de page imprimable ──────────────────────────── */
+  .cpi-print-footer {
+    display: flex !important;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8mm;
+    margin: 6mm 0 0;
+    padding: 3mm 0 0;
+    border-top: 1pt solid #d1d5db;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  .cpi-print-footer-bloc {
+    display: flex;
+    flex-direction: column;
+    gap: 1mm;
+    font-size: 8pt;
+    color: #4b5563;
+    line-height: 1.35;
+  }
+  .cpi-print-footer-bloc strong {
+    font-size: 9pt;
+    font-weight: 800;
+    color: #c8102e;
+    letter-spacing: 0.3pt;
+  }
+  .cpi-print-footer-bloc-droite {
+    text-align: right;
+    align-items: flex-end;
+  }
+
+  /* ── 15. Détails fins : éviter les veuves de coupure ──────── */
+  .cpi-resultats > * {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  .cpi-notice-terme,
+  .cpi-avis-taux {
+    page-break-inside: avoid;
+    break-inside: avoid;
   }
 }
