@@ -205,7 +205,7 @@ function PDFGaranties() {
       <section className="pdf-hero">
         <div className="pdf-hero-content">
           <span className="pdf-eyebrow">Bibliothèque PDF</span>
-          <h1>PDF des garanties</h1>
+          <h1>Dépliants PDF des garanties</h1>
           <p>Sélectionnez une famille pour ouvrir les dépliants.</p>
         </div>
         <div className="pdf-hero-stats" aria-hidden="true">

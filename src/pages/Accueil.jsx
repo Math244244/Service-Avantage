@@ -95,7 +95,7 @@ const outils = [
   },
   {
     to: "/pdf-garanties",
-    titre: "PDF des garanties",
+    titre: "Dépliants PDF des garanties",
     description:
       "Accédez aux dépliants de garanties par catégorie : automobile, loisir, VR, tracteur, camion lourd et hasard routier.",
     couleur: "rouge",

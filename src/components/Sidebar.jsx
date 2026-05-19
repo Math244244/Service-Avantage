@@ -73,7 +73,7 @@ const menuItems = [
   { to: "/formulaire-transfert-fi", label: "Fiche Transfert FNI", icon: <IconTransfert /> },
   { to: "/texte-personnalise-marketplace", label: "Texte personnalisé Marketplace", icon: <IconMarketplace /> },
   { to: "/formulaire-avantage-plus", label: "Formulaire Avantage Plus", icon: <IconFormulaire /> },
-  { to: "/pdf-garanties", label: "PDF des garanties", icon: <IconPDF /> },
+  { to: "/pdf-garanties", label: "Dépliants PDF des garanties", icon: <IconPDF /> },
 ];
 
 function Sidebar() {
